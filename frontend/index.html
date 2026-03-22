@@ -325,8 +325,12 @@
 
 </footer>
 
-  
-  <script src="./js/home.js"></script>
+  <!-- "defer" guarantees they execute in order AFTER HTML parses -->
+  <!-- "?v=2" forces browsers to clear old cached scripts -->
+  <!-- Paths changed to absolute '/js/' to prevent Netlify sub-directory routing issues -->
+  <script src="/js/config.js?v=2" defer></script>
+  <script src="/js/sync.js?v=2" defer></script>
+  <script src="/js/home.js?v=2" defer></script>
 
 </body>
 </html>

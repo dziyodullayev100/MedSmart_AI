@@ -3,45 +3,57 @@
 
 /**
  * ==========================================
- * 🚀 PRODUCTION API & ENVIRONMENT CONFIGURATION
+ * 🚀 MEDSMART API INTEGRATION MODULE
  * ==========================================
- * Barcha frontend API ulanishlari uchun maxsus yagona markaz
  */
 
-// 1. Environment Detection (Ishonaq ishlash muhitini aniqlash)
-const isLocalhost = 
-    window.location.hostname === 'localhost' || 
-    window.location.hostname === '127.0.0.1' || 
-    window.location.protocol === 'file:';
+const initSyncModule = () => {
+    // Hardcoded verification requested
+    console.log("SYNC LOADED");
+    alert("SYNC WORKING");
 
-// 2. Define Core Services (Asosiy va kelajakdagi xizmatlar)
-const SERVICES = {
-    // Asosiy Node.js Backend
-    BACKEND: {
-        LOCAL: 'http://localhost:5000/api',
-        PROD: 'https://medsmart-backend.onrender.com/api' // <- To'g'rilangan manzili
-    },
-    // Kelajakdagi Sun'iy Intelekt (AI) xizmati uchun tayyorgarlik
-    AI: {
-        LOCAL: 'http://localhost:8000/api',
-        PROD: 'https://medsmart-ai-service.onrender.com/api'
+    // 1. Environment Detection (Ishonaq ishlash muhitini aniqlash)
+    const isLocalhost = 
+        window.location.hostname === 'localhost' || 
+        window.location.hostname === '127.0.0.1' || 
+        window.location.protocol === 'file:';
+
+    // 2. Core Service Registry (Skelable microservislar ulanmasi)
+    const SERVICES = {
+        BACKEND: {
+            LOCAL: 'http://localhost:5000/api',
+            PROD: 'https://medsmart-backend.onrender.com/api' // Qat'iy manzil
+        },
+        AI: {
+            LOCAL: 'http://localhost:8000/api',
+            PROD: 'https://medsmart-ai-service.onrender.com/api'
+        }
+    };
+
+    // 3. Dynamic Assignment (Dinamik taqsimot)
+    const API_BASE_URL = isLocalhost ? SERVICES.BACKEND.LOCAL : SERVICES.BACKEND.PROD;
+    const AI_MODEL_URL = isLocalhost ? SERVICES.AI.LOCAL : SERVICES.AI.PROD;
+
+    // 🚨 4. Critical Defensive Check (Qat'iy himoya qatlami)
+    if (!API_BASE_URL) {
+        console.error('❌ CRITICAL ERROR: API_BASE_URL ulana olmadi. Sync moduli bekor qilindi.');
+        return; // Sessiyani portlab ketishdan avval o'chiradi
     }
+
+    // 5. Global Export (Yagona ishonchli manba sifatida ro'yxatdan o'tkazish)
+    window.API_BASE_URL = API_BASE_URL;
+    window.AI_MODEL_URL = AI_MODEL_URL;
+
+    // 6. Senior-Level Diagnostics (Yuqori darajadagi monitoring)
+    console.group('🌍 MedSmart Frontend Diagnostics');
+    console.log(`Environment: %c${isLocalhost ? 'LOCAL DEV' : 'PRODUCTION'}`, 'color: #00ff00; font-weight: bold;');
+    console.log(`API URL: %c${API_BASE_URL}`, 'color: #00ccff;');
+    console.log('✅ Sync muvaffaqiyatli ishga tushdi');
+    console.groupEnd();
 };
 
-// 3. Dynamic URL Assignment (Dinamik taqsimot)
-const API_BASE_URL = isLocalhost ? SERVICES.BACKEND.LOCAL : SERVICES.BACKEND.PROD;
-const AI_MODEL_URL = isLocalhost ? SERVICES.AI.LOCAL : SERVICES.AI.PROD;
-
-// 4. Global Registration (Barcha boshqa skriptlar ishlata olishi uchun ruxsat)
-window.API_BASE_URL = API_BASE_URL;
-window.AI_MODEL_URL = AI_MODEL_URL;
-
-// 5. Diagnostic Logging (Brauzer konsolida chiroyli dizayndagi loglar)
-console.group('🌍 MedSmart Environment Diagnostics');
-console.log(`State:  %c${isLocalhost ? 'LOCAL DEV' : 'PRODUCTION LIVE'}`, 'color: #00ff00; font-weight: bold;');
-console.log(`Core API URL:   %c${API_BASE_URL}`, 'color: #00ccff;');
-console.log(`AI Service URL: %c${AI_MODEL_URL}`, 'color: #00ccff;');
-console.groupEnd();
+// Modulni darhol ishga tushirish (IIFE o'rniga chaqiruv)
+initSyncModule();
 
 /**
  * Serverdan ma'lumotlarni yuklab olib LocalStorage'ga yozadi
@@ -51,9 +63,9 @@ async function syncDownload() {
         console.log("Sinxronizatsiya (Download) boshlandi...");
         const response = await fetch(`${API_BASE_URL}/sync/download`);
         if (!response.ok) throw new Error("Server bilan ulanishda xatolik");
-        
+
         const data = await response.json();
-        
+
         if (data.appointments && data.appointments.length > 0) {
             // Backend dan kelgan navbatlarni lokal formatga o'tkazish
             const formattedApts = data.appointments.map(apt => ({
@@ -69,7 +81,7 @@ async function syncDownload() {
             }));
             localStorage.setItem('navbatlar', JSON.stringify(formattedApts));
         }
-        
+
         if (data.doctors && data.doctors.length > 0) {
             const formattedDocs = data.doctors.map(d => ({
                 id: d.id,
@@ -96,7 +108,7 @@ async function syncDownload() {
 async function syncUpload() {
     try {
         console.log("Sinxronizatsiya (Upload) boshlandi...");
-        
+
         let navbatlar = JSON.parse(localStorage.getItem('navbatlar') || '[]');
         let shifokorlar = JSON.parse(localStorage.getItem('shifokorlar') || '[]');
         let bemorlar = JSON.parse(localStorage.getItem('barcha_bemorlar') || '[]');
@@ -139,7 +151,7 @@ async function syncUpload() {
         });
 
         if (!response.ok) throw new Error("Yuklashda xatolik yuz berdi");
-        
+
         console.log("Sinxronizatsiya (Upload) muvaffaqiyatli bajarildi!");
     } catch (err) {
         console.warn("Upload amalga oshmadi. Ma'lumot LocalStorage da saqlanib turibdi.", err);
