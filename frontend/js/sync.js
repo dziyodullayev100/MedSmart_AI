@@ -3,33 +3,45 @@
 
 /**
  * ==========================================
- * 🔧 API ENVIRONMENT CONFIGURATION
+ * 🚀 PRODUCTION API & ENVIRONMENT CONFIGURATION
  * ==========================================
+ * Barcha frontend API ulanishlari uchun maxsus yagona markaz
  */
 
-// 1. Production (Live) Backend URL
-// ALWAYS ensure the domain precisely matches your Render Dashboard. No trailing slashes.
-const PROD_API_URL = 'https://medsmart-backend.onrender.com/api';
-
-// 2. Development (Local) Backend URL
-const LOCAL_API_URL = 'http://localhost:5000/api';
-
-// 3. Environment Detection
-// Detects if the frontend is being viewed locally (Live Server or raw file)
+// 1. Environment Detection (Ishonaq ishlash muhitini aniqlash)
 const isLocalhost = 
     window.location.hostname === 'localhost' || 
     window.location.hostname === '127.0.0.1' || 
     window.location.protocol === 'file:';
 
-// 4. Final API URL Assignment
-const API_BASE_URL = isLocalhost ? LOCAL_API_URL : PROD_API_URL;
+// 2. Define Core Services (Asosiy va kelajakdagi xizmatlar)
+const SERVICES = {
+    // Asosiy Node.js Backend
+    BACKEND: {
+        LOCAL: 'http://localhost:5000/api',
+        PROD: 'https://medsmart-backend.onrender.com/api' // <- To'g'rilangan manzili
+    },
+    // Kelajakdagi Sun'iy Intelekt (AI) xizmati uchun tayyorgarlik
+    AI: {
+        LOCAL: 'http://localhost:8000/api',
+        PROD: 'https://medsmart-ai-service.onrender.com/api'
+    }
+};
 
-// Expose globally for other scripts to use
-window.API_BASE_URL = API_BASE_URL; 
+// 3. Dynamic URL Assignment (Dinamik taqsimot)
+const API_BASE_URL = isLocalhost ? SERVICES.BACKEND.LOCAL : SERVICES.BACKEND.PROD;
+const AI_MODEL_URL = isLocalhost ? SERVICES.AI.LOCAL : SERVICES.AI.PROD;
 
-// Debug log to quickly verify which URL is being used by the browser
-console.log(`🌍 Tarmoq holati: ${isLocalhost ? 'LOCAL' : 'PRODUCTION'}`);
-console.log(`🔗 Faol API URL: ${API_BASE_URL}`);
+// 4. Global Registration (Barcha boshqa skriptlar ishlata olishi uchun ruxsat)
+window.API_BASE_URL = API_BASE_URL;
+window.AI_MODEL_URL = AI_MODEL_URL;
+
+// 5. Diagnostic Logging (Brauzer konsolida chiroyli dizayndagi loglar)
+console.group('🌍 MedSmart Environment Diagnostics');
+console.log(`State:  %c${isLocalhost ? 'LOCAL DEV' : 'PRODUCTION LIVE'}`, 'color: #00ff00; font-weight: bold;');
+console.log(`Core API URL:   %c${API_BASE_URL}`, 'color: #00ccff;');
+console.log(`AI Service URL: %c${AI_MODEL_URL}`, 'color: #00ccff;');
+console.groupEnd();
 
 /**
  * Serverdan ma'lumotlarni yuklab olib LocalStorage'ga yozadi
