@@ -1,15 +1,35 @@
 // frontend/js/sync.js
 // MedSmart yagona API integratsiya va LocalStorage sinxronizatsiya moduli
 
-// Determine if running locally or in production
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:';
+/**
+ * ==========================================
+ * 🔧 API ENVIRONMENT CONFIGURATION
+ * ==========================================
+ */
 
-// Replace these URLs after you deploy the backend and AI service
-const PROD_API_URL = 'https://med-smart-backend.onrender.com/api';
+// 1. Production (Live) Backend URL
+// ALWAYS ensure the domain precisely matches your Render Dashboard. No trailing slashes.
+const PROD_API_URL = 'https://medsmart-backend.onrender.com/api';
+
+// 2. Development (Local) Backend URL
 const LOCAL_API_URL = 'http://localhost:5000/api';
 
+// 3. Environment Detection
+// Detects if the frontend is being viewed locally (Live Server or raw file)
+const isLocalhost = 
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1' || 
+    window.location.protocol === 'file:';
+
+// 4. Final API URL Assignment
 const API_BASE_URL = isLocalhost ? LOCAL_API_URL : PROD_API_URL;
-window.API_BASE_URL = API_BASE_URL; // Expose globally for other scripts like ai-widget.js
+
+// Expose globally for other scripts to use
+window.API_BASE_URL = API_BASE_URL; 
+
+// Debug log to quickly verify which URL is being used by the browser
+console.log(`🌍 Tarmoq holati: ${isLocalhost ? 'LOCAL' : 'PRODUCTION'}`);
+console.log(`🔗 Faol API URL: ${API_BASE_URL}`);
 
 /**
  * Serverdan ma'lumotlarni yuklab olib LocalStorage'ga yozadi
