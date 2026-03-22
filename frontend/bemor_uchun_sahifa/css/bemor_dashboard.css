@@ -1,0 +1,617 @@
+/* =================== DESKTOP SIDEBAR =================== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    background: linear-gradient(180deg, #43a047, #2e7d32);
+    color: white;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 30px 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header i {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.sidebar-header h5 {
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.sidebar-header small {
+    opacity: 0.8;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    color: white;
+    text-decoration: none;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+    min-height: 50px;
+}
+
+.menu-item:hover,
+.menu-item.active {
+    background: rgba(255,255,255,0.1);
+    border-left-color: #a5d6a7;
+    color: white;
+    text-decoration: none;
+}
+
+.menu-item i {
+    width: 20px;
+    margin-right: 15px;
+    font-size: 1.1rem;
+}
+
+/* =================== MOBILE HEADER (Tepadan chiqadigan) =================== */
+.mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: linear-gradient(180deg, #43a047, #2e7d32);
+    color: white;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.mobile-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 100%;
+}
+
+.mobile-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-logo i {
+    font-size: 1.8rem;
+}
+
+.mobile-logo h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.mobile-toggle {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.mobile-toggle:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* =================== MOBILE DROPDOWN MENU =================== */
+.mobile-dropdown {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: white;
+    z-index: 999;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    border-radius: 0 0 20px 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-dropdown.active {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.mobile-dropdown-header {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+.mobile-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.mobile-user-avatar {
+    width: 50px;
+    height: 50px;
+    background: #81c784;
+    color: #212529;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.mobile-user-details {
+    flex: 1;
+}
+
+.mobile-user-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.mobile-user-role {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.mobile-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 25px;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #f5f5f5;
+    transition: all 0.3s ease;
+    min-height: 50px;
+}
+
+.mobile-dropdown-item:hover {
+    background: #f8f9fa;
+    color: #43a047;
+    padding-left: 30px;
+}
+
+.mobile-dropdown-item i {
+    width: 25px;
+    margin-right: 15px;
+    color: #43a047;
+    font-size: 1.1rem;
+}
+
+.mobile-dropdown-item.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-left: 4px solid #43a047;
+}
+
+.mobile-dropdown-footer {
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.mobile-logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mobile-logout-btn:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+/* =================== MAIN CONTENT =================== */
+.main-content {
+    margin-left: 280px;
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    transition: margin-left 0.3s ease;
+}
+
+.content-header {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.user-panel {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #81c784;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.user-details .user-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-details .user-role {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.btn-logout {
+    background: #dc3545;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    min-width: 40px;
+    min-height: 40px;
+}
+
+.btn-logout:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+/* =================== STATISTIKA =================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    border-left: 4px solid #43a047;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-right: 15px;
+    color: white;
+    flex-shrink: 0;
+}
+
+/* =================== RESPONSIVE STYLES =================== */
+
+/* Desktop - 992px dan katta */
+@media (min-width: 992px) {
+    .mobile-header,
+    .mobile-dropdown {
+        display: none !important;
+    }
+    
+    .sidebar {
+        display: block;
+    }
+}
+
+/* Tablet - 768px dan 991px gacha */
+@media (max-width: 991px) {
+    .sidebar {
+        display: none; /* Desktop sidebarni yashirish */
+    }
+    
+    .mobile-header {
+        display: block; /* Mobile headerni ko'rsatish */
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding-top: 80px; /* Mobile header uchun joy */
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    
+    .content-header {
+        margin-top: 0;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Telefon - 576px dan kichik */
+@media (max-width: 576px) {
+    .mobile-header {
+        height: 60px;
+    }
+    
+    .mobile-header-content {
+        padding: 0 15px;
+    }
+    
+    .mobile-logo h5 {
+        font-size: 1rem;
+    }
+    
+    .mobile-logo i {
+        font-size: 1.5rem;
+    }
+    
+    .mobile-dropdown {
+        top: 60px;
+        border-radius: 0 0 15px 15px;
+    }
+    
+    .main-content {
+        padding: 15px;
+        padding-top: 70px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .content-header {
+        padding: 15px;
+    }
+    
+    .user-panel {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .mobile-user-profile {
+        padding: 15px;
+    }
+    
+    .mobile-dropdown-item {
+        padding: 14px 20px;
+    }
+}
+
+/* Kichik telefonlar - 360px gacha */
+@media (max-width: 360px) {
+    .mobile-logo h5 {
+        font-size: 0.9rem;
+    }
+    
+    .mobile-toggle {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3rem;
+    }
+    
+    .main-content {
+        padding: 12px;
+        padding-top: 65px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+    }
+    
+    .mobile-user-profile {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .mobile-user-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 1.4rem;
+    }
+}
+
+/* Yotiq telefonlar */
+@media (max-width: 767px) and (orientation: landscape) {
+    .mobile-dropdown.active {
+        max-height: 60vh;
+    }
+    
+    .mobile-dropdown-item {
+        padding: 12px 25px;
+        min-height: 45px;
+    }
+}
+
+/* Overlay qachonki dropdown ochiq bo'lsa */
+.dropdown-overlay {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 998;
+    display: none;
+    backdrop-filter: blur(3px);
+}
+
+.dropdown-overlay.active {
+    display: block;
+}
+
+@media (max-width: 576px) {
+    .dropdown-overlay {
+        top: 60px;
+    }
+}
+
+/* =================== ANIMATSIYALAR =================== */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mobile-dropdown.active .mobile-dropdown-item {
+    animation: slideDown 0.3s ease forwards;
+    opacity: 0;
+}
+
+.mobile-dropdown.active .mobile-dropdown-item:nth-child(1) { animation-delay: 0.1s; }
+.mobile-dropdown.active .mobile-dropdown-item:nth-child(2) { animation-delay: 0.15s; }
+.mobile-dropdown.active .mobile-dropdown-item:nth-child(3) { animation-delay: 0.2s; }
+.mobile-dropdown.active .mobile-dropdown-item:nth-child(4) { animation-delay: 0.25s; }
+.mobile-dropdown.active .mobile-dropdown-item:nth-child(5) { animation-delay: 0.3s; }
+.mobile-dropdown.active .mobile-dropdown-item:nth-child(6) { animation-delay: 0.35s; }
+
+/* Touch friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .menu-item:hover,
+    .mobile-dropdown-item:hover {
+        background: inherit;
+        padding-left: inherit;
+    }
+    
+    .menu-item:active,
+    .mobile-dropdown-item:active {
+        background: rgba(255,255,255,0.1);
+    }
+    
+    .stat-card:hover {
+        transform: none;
+    }
+    
+    .stat-card:active {
+        transform: scale(0.98);
+    }
+}
+
+/* =================== CONTENT SECTIONS =================== */
+.content-section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    overflow-x: auto;
+}
+
+/* Mobile uchun content section responsive */
+@media (max-width: 576px) {
+    .content-section {
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .sidebar,
+    .mobile-header,
+    .mobile-dropdown,
+    .dropdown-overlay,
+    .btn-logout,
+    .mobile-logout-btn {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 0;
+    }
+    
+    .content-header {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+      .logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;   /* Aylana shakl */
+  object-fit: cover;    /* Rasmni to‘liq joylashtirish */
+  border: 2px solid white; /* Dekorativ oq ramka (ixtiyoriy) */
+}

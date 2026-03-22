@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <script>
+        const adminUser = JSON.parse(localStorage.getItem('medsmart_user'));
+        if (!adminUser || adminUser.role !== 'admin') { window.location.href = 'admin_login.html'; }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - MedSmart Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --secondary: #334155;
+            --accent: #3b82f6;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-dark: #0f172a;
+            --text-gray: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ====== PREMIUM SIDEBAR ====== */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: var(--secondary);
+            color: white;
+            position: fixed;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 50px;
+            padding: 0 10px;
+        }
+
+        .brand-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white;
+            box-shadow: 0 8px 20px rgba(79,70,229,0.4);
+        }
+
+        .sidebar-brand h3 { font-size: 1.4rem; font-weight: 800; }
+
+        .nav-menu { list-style: none; padding: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 14px 20px; color: #94a3b8;
+            text-decoration: none; border-radius: 12px;
+            font-weight: 500; font-size: 0.95rem; transition: 0.3s;
+        }
+
+        .nav-item i { width: 22px; text-align: center; font-size: 1.1rem; }
+
+        .nav-item:hover { color: white; background: rgba(255,255,255,0.08); }
+        .nav-item.active {
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            color: white; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(79,70,229,0.3);
+        }
+
+        .logout-btn {
+            display: flex; align-items: center; gap: 15px;
+            padding: 14px 20px; color: #ef4444;
+            text-decoration: none; border-radius: 12px;
+            font-weight: 600; transition: 0.3s;
+            margin-top: auto;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.1); }
+
+        /* ====== MAIN CONTENT ====== */
+        .main-content {
+            margin-left: 280px;
+            padding: 40px;
+            width: calc(100% - 280px);
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; padding: 15px 25px; border-radius: 20px;
+            box-shadow: var(--shadow-md); margin-bottom: 35px;
+        }
+
+        .top-bar-left h2 { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); }
+        .top-bar-left p { color: var(--text-gray); font-size: 0.9rem; margin-top: 2px; }
+
+        .admin-info { display: flex; align-items: center; gap: 12px; }
+        .admin-info img { width: 45px; height: 45px; border-radius: 12px; border: 2px solid #e2e8f0; }
+        .admin-info-text { text-align: right; }
+        .admin-info-text strong { display: block; font-size: 0.95rem; }
+        .admin-info-text small { color: var(--text-gray); }
+
+        /* STATS CARDS */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid #f1f5f9;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 35px -5px rgba(0,0,0,0.08); }
+
+        .stat-card .icon-circle {
+            width: 50px; height: 50px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 18px; color: white; font-size: 1.3rem;
+        }
+
+        .stat-card h3 { font-size: 2rem; font-weight: 800; color: var(--text-dark); margin-bottom: 5px; }
+        .stat-card span { color: var(--text-gray); font-size: 0.9rem; font-weight: 500; }
+
+        /* ANALYTICS GRID */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid #f1f5f9;
+        }
+
+        .chart-card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .chart-card-header h5 { font-size: 1rem; font-weight: 700; }
+        .chart-card-header select {
+            border: none; background: #f1f5f9; padding: 6px 12px;
+            border-radius: 8px; font-size: 0.8rem; font-family: 'Outfit';
+            cursor: pointer; outline: none;
+        }
+
+        /* RECENT TABLE */
+        .recent-table {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid #f1f5f9;
+        }
+
+        .recent-table-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .recent-table-header h5 { font-size: 1rem; font-weight: 700; }
+
+        .recent-table table { width: 100%; border-collapse: collapse; }
+        .recent-table th {
+            text-align: left; color: var(--text-gray);
+            font-size: 0.8rem; font-weight: 600; padding: 12px 15px;
+            background: #f8fafc; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .recent-table th:first-child { border-radius: 10px 0 0 10px; }
+        .recent-table th:last-child { border-radius: 0 10px 10px 0; }
+        .recent-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 500; vertical-align: middle; }
+        .recent-table tr:last-child td { border-bottom: none; }
+        .recent-table tbody tr:hover { background: #fafafa; }
+
+        .status-pill { padding: 5px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; }
+        .status-success { background: #dcfce7; color: #166534; }
+        .status-warn { background: #fef9c3; color: #854d0e; }
+        .status-info { background: #dbeafe; color: #1d4ed8; }
+
+        .btn-batafsil {
+            border: none; background: #eff6ff; color: var(--accent);
+            padding: 7px 14px; border-radius: 8px; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; transition: 0.2s;
+            font-family: 'Outfit';
+        }
+        .btn-batafsil:hover { background: #dbeafe; }
+
+        /* QUICK ACTIONS */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .quick-btn {
+            background: white; border: 1px solid #e2e8f0;
+            border-radius: 16px; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            text-decoration: none; color: var(--text-dark); transition: 0.3s;
+            font-weight: 600; font-size: 0.9rem; text-align: center;
+        }
+        .quick-btn:hover { border-color: var(--primary); background: #f8f7ff; color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .quick-btn i { font-size: 1.5rem; }
+
+        @media (max-width: 1200px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .analytics-grid { grid-template-columns: 1fr; }
+            .quick-actions { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .sidebar span, .sidebar-brand h3 { display: none; }
+            .main-content { margin-left: 70px; width: calc(100% - 70px); }
+        }
+
+        /* NOTIFICATION STYLES */
+        .notif-wrapper { position: relative; margin-right: 20px; cursor: pointer; display: flex; align-items: center; }
+        .notif-icon { font-size: 1.4rem; color: #64748b; transition: 0.3s; }
+        .notif-wrapper:hover .notif-icon { color: var(--primary); }
+        .notif-badge { 
+            position: absolute; top: -5px; right: -6px; 
+            background: #ef4444; color: white; font-size: 0.65rem; 
+            font-weight: 700; padding: 2px 5px; border-radius: 50%;
+            border: 2px solid white; display: none; 
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .notif-dropdown {
+            position: absolute; top: 100%; right: 0; margin-top: 15px;
+            width: 320px; background: white; border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 1px solid #f1f5f9; opacity: 0; visibility: hidden;
+            transform: translateY(-10px); transition: all 0.3s ease; z-index: 1000;
+        }
+        .notif-dropdown.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .notif-header { 
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; border-bottom: 1px solid #f1f5f9;
+        }
+        .notif-header h5 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--text-dark); }
+        .mark-read-btn { font-size: 0.8rem; color: var(--primary); background: none; border: none; cursor: pointer; font-weight: 600; }
+        
+        .notif-body { max-height: 300px; overflow-y: auto; }
+        .notif-item { padding: 15px 20px; border-bottom: 1px solid #f8fafc; display: flex; gap: 12px; transition: 0.2s; }
+        .notif-item:hover { background: #f8fafc; }
+        .notif-item.unread { background: #eff6ff; }
+        .notif-icon-circle { 
+            width: 35px; height: 35px; border-radius: 50%; 
+            background: #dbeafe; color: #3b82f6; 
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .notif-text h6 { margin: 0 0 4px 0; font-size: 0.9rem; font-weight: 700; color: var(--text-dark); }
+        .notif-text p { margin: 0; font-size: 0.8rem; color: var(--text-gray); line-height: 1.4; }
+        .notif-time { font-size: 0.7rem; color: #94a3b8; display: block; margin-top: 5px; }
+        
+        .notif-empty { padding: 30px; text-align: center; color: #94a3b8; font-size: 0.9rem; }
+        .notif-empty i { font-size: 2rem; margin-bottom: 10px; color: #e2e8f0; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-heartbeat"></i></div>
+            <h3>MedSmart HQ</h3>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="bemorlar/bemorlar_royxati.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Bemorlar Boshqaruvi</span>
+            </a>
+            <a href="shifokorlar/shifokorlar_royxati.html" class="nav-item">
+                <i class="fas fa-user-md"></i>
+                <span>Shifokorlar</span>
+            </a>
+            <a href="navbatlar/navbatlar.html" class="nav-item">
+                <i class="fas fa-calendar-check"></i>
+                <span>Navbatlar</span>
+            </a>
+            <a href="xizmatlar/xizmatlar_royxati.html" class="nav-item">
+                <i class="fas fa-hand-holding-medical"></i>
+                <span>Xizmatlar</span>
+            </a>
+            <a href="tolovlar/tolovlar.html" class="nav-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Moliya & To'lovlar</span>
+            </a>
+            <a href="tizim_sozlamalari/tizim_sozlamalari.html" class="nav-item">
+                <i class="fas fa-sliders-h"></i>
+                <span>Sozlamalar</span>
+            </a>
+        </nav>
+
+        <a href="javascript:chiqish()" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Tizimdan chiqish</span>
+        </a>
+    </aside>
+
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <h2>Bosh Boshqaruv Paneli</h2>
+                <p id="currentDate">Yuklanmoqda...</p>
+            </div>
+            
+            <div style="display:flex; align-items:center;">
+                <!-- NOTIFICATION BELL -->
+                <div class="notif-wrapper" id="notifBell">
+                    <i class="fas fa-bell notif-icon"></i>
+                    <span class="notif-badge" id="notifBadge">0</span>
+                    
+                    <!-- DROPDOWN -->
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <h5>Bildirishnomalar</h5>
+                            <button class="mark-read-btn" onclick="markAllRead(event)">Barchasini o'qish</button>
+                        </div>
+                        <div class="notif-body" id="notifList">
+                            <!-- JS orqali to'ldiriladi -->
+                            <div class="notif-empty">
+                                <i class="fas fa-bell-slash"></i><br>Yangi xabarlar yo'q
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-info">
+                    <div class="admin-info-text">
+                        <strong id="adminName">Administrator</strong>
+                        <small>Bosh Admin</small>
+                    </div>
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Admin">
+                </div>
+            </div>
+        </header>
+
+        <!-- STATS -->
+        <div class="stats-row">
+            <div class="stat-card" onclick="location.href='bemorlar/bemorlar_royxati.html'">
+                <div class="icon-circle" style="background: linear-gradient(135deg,#3b82f6,#60a5fa)"><i class="fas fa-users"></i></div>
+                <h3 id="statTotalPatients">—</h3>
+                <span>Jami Bemorlar</span>
+            </div>
+            <div class="stat-card" onclick="location.href='navbatlar/navbatlar.html'">
+                <div class="icon-circle" style="background: linear-gradient(135deg,#10b981,#34d399)"><i class="fas fa-calendar-plus"></i></div>
+                <h3 id="statTodayAppts">—</h3>
+                <span>Bugungi Navbatlar</span>
+            </div>
+            <div class="stat-card" onclick="location.href='tolovlar/tolovlar.html'">
+                <div class="icon-circle" style="background: linear-gradient(135deg,#f59e0b,#fbbf24)"><i class="fas fa-wallet"></i></div>
+                <h3 id="statIncome">42.5M</h3>
+                <span>Oylik Daromad (UZS)</span>
+            </div>
+            <div class="stat-card" onclick="location.href='shifokorlar/shifokorlar_royxati.html'">
+                <div class="icon-circle" style="background: linear-gradient(135deg,#6366f1,#818cf8)"><i class="fas fa-user-md"></i></div>
+                <h3 id="statDoctors">—</h3>
+                <span>Faol Shifokorlar</span>
+            </div>
+        </div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="quick-actions">
+            <a href="bemorlar/bemor_qoshish.html" class="quick-btn">
+                <i class="fas fa-user-plus" style="color:#3b82f6;"></i>
+                Yangi Bemor
+            </a>
+            <a href="navbatlar/navbat_yozish.html" class="quick-btn">
+                <i class="fas fa-calendar-plus" style="color:#10b981;"></i>
+                Navbat Yozish
+            </a>
+            <a href="xizmatlar/xizmat_qoshish.html" class="quick-btn">
+                <i class="fas fa-plus-circle" style="color:#f59e0b;"></i>
+                Xizmat Qo'shish
+            </a>
+            <a href="tizim_sozlamalari/tizim_sozlamalari.html" class="quick-btn">
+                <i class="fas fa-cog" style="color:#6366f1;"></i>
+                Sozlamalar
+            </a>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="analytics-grid">
+            <div class="chart-card">
+                <div class="chart-card-header">
+                    <h5>Bemorlar Oqimi</h5>
+                    <select>
+                        <option>Oxirgi 7 kun</option>
+                        <option>Oxirgi 30 kun</option>
+                    </select>
+                </div>
+                <canvas id="patientChart" height="140"></canvas>
+            </div>
+
+            <div class="chart-card" style="background: var(--secondary); color: white;">
+                <div class="chart-card-header">
+                    <h5 style="color:white;">Xizmatlar Ulushi</h5>
+                </div>
+                <canvas id="serviceChart" height="240"></canvas>
+            </div>
+        </div>
+
+        <!-- RECENT TABLE -->
+        <div class="recent-table">
+            <div class="recent-table-header">
+                <h5>So'nggi Navbatlar</h5>
+                <a href="navbatlar/navbatlar.html" style="color:var(--primary);font-weight:600;font-size:0.9rem;text-decoration:none;">
+                    Barchasini ko'rish <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>BEMOR</th>
+                        <th>SHIFOKOR</th>
+                        <th>VAQT</th>
+                        <th>HOLAT</th>
+                        <th>AMAL</th>
+                    </tr>
+                </thead>
+                <tbody id="adminAptList">
+                    <!-- JS orqali yuklanaadi -->
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <script>
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAdminInfo();
+            setCurrentDate();
+            updateStats();
+            renderRecentAppointments();
+            initCharts();
+        });
+
+        function loadAdminInfo() {
+            const user = JSON.parse(localStorage.getItem('medsmart_user') || '{}');
+            if (user.fullName) {
+                document.getElementById('adminName').textContent = user.fullName;
+            }
+        }
+
+        function setCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('uz-UZ', options);
+        }
+
+        function updateStats() {
+            const bemorlar = JSON.parse(localStorage.getItem('bemorlar') || '[]');
+            const navbatlar = JSON.parse(localStorage.getItem('navbatlar') || '[]');
+            const shifokorlar = JSON.parse(localStorage.getItem('shifokorlar') || []);
+            const today = new Date().toISOString().split('T')[0];
+
+            document.getElementById('statTotalPatients').textContent = bemorlar.length || 1240;
+            document.getElementById('statTodayAppts').textContent = navbatlar.filter(a => a.sana === today).length || 42;
+            document.getElementById('statDoctors').textContent = shifokorlar.length || 33;
+        }
+
+        // ===== RECENT APPOINTMENTS =====
+        function renderRecentAppointments() {
+            const navbatlar = JSON.parse(localStorage.getItem('navbatlar') || '[]');
+            const tbody = document.getElementById('adminAptList');
+
+            // Demo data + real data
+            const demoData = [
+                { id: 1, bemor_fio: 'Azizov Bekzod', telefon: '+998 90 123 45 67', shifokor: 'Dr. Karimov', mutaxassis: 'Kardiolog', vaqt: '14:30', sana: 'Bugun', holati: 'completed' },
+                { id: 2, bemor_fio: 'Tursunova Malika', telefon: '+998 93 456 78 90', shifokor: 'Dr. Alimova', mutaxassis: 'Ginekolog', vaqt: '16:00', sana: 'Bugun', holati: 'upcoming' },
+                { id: 3, bemor_fio: 'Raxmanov Jasur', telefon: '+998 91 234 56 78', shifokor: 'Dr. Valiyev', mutaxassis: 'Terapevt', vaqt: '09:30', sana: 'Bugun', holati: 'upcoming' },
+            ];
+
+            const combined = [...navbatlar.slice(-3).reverse(), ...demoData].slice(0, 5);
+
+            tbody.innerHTML = combined.map(item => `
+                <tr>
+                    <td>
+                        <strong>${item.bemor_fio || item.bemor_fio}</strong><br>
+                        <small style="color:#94a3b8;">${item.telefon || ''}</small>
+                    </td>
+                    <td>
+                        ${item.shifokor}<br>
+                        <small style="color:#94a3b8;">${item.mutaxassis || item.xizmat || ''}</small>
+                    </td>
+                    <td>${item.vaqt || ''} | ${item.sana || ''}</td>
+                    <td>
+                        <span class="status-pill ${getStatusClass(item.holati)}">
+                            ${getStatusLabel(item.holati)}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-batafsil" onclick="location.href='navbatlar/navbatlar.html'">
+                            <i class="fas fa-eye me-1"></i> Batafsil
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusClass(status) {
+            if (status === 'completed' || status === 'yakunlandi') return 'status-success';
+            if (status === 'upcoming' || status === 'kutilmoqda') return 'status-warn';
+            return 'status-info';
+        }
+
+        function getStatusLabel(status) {
+            if (status === 'completed' || status === 'yakunlandi') return 'Yakunlangan';
+            if (status === 'upcoming' || status === 'kutilmoqda') return 'Kutilmoqda';
+            return 'Kelgusi';
+        }
+
+        // ===== CHARTS =====
+        function initCharts() {
+            const ctxP = document.getElementById('patientChart').getContext('2d');
+            new Chart(ctxP, {
+                type: 'line',
+                data: {
+                    labels: ['Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan', 'Yak'],
+                    datasets: [{
+                        label: 'Bemorlar',
+                        data: [65, 72, 80, 74, 88, 55, 42],
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#4f46e5',
+                        pointRadius: 5,
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            const ctxS = document.getElementById('serviceChart').getContext('2d');
+            new Chart(ctxS, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Terapiya', 'Kardiologiya', 'Stomatologiya', 'Ginekologiya', 'Boshqalar'],
+                    datasets: [{
+                        data: [28, 22, 20, 18, 12],
+                        backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ec4899', '#64748b'],
+                        borderWidth: 0,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'white', padding: 15, font: { family: 'Outfit', size: 12 } }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // ===== LOGOUT =====
+        function chiqish() {
+            if (confirm("Tizimdan chiqmoqchimisiz?")) {
+                localStorage.removeItem('medsmart_user');
+                localStorage.removeItem('foydalanuvchi');
+                window.location.href = '../admin_login.html';
+            }
+        }
+
+        // ===== NOTIFICATIONS (Bildirishnomalar) =====
+        function loadNotifications() {
+            const notifs = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+            const badge = document.getElementById('notifBadge');
+            const list = document.getElementById('notifList');
+            
+            const unreadCount = notifs.filter(n => !n.isRead).length;
+            
+            // Badgeni yangilash
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            // Ro'yxatni yangilash
+            if (notifs.length === 0) {
+                list.innerHTML = `
+                    <div class="notif-empty">
+                        <i class="fas fa-bell-slash d-block"></i>
+                        Hech qanday bildirishnoma yo'q
+                    </div>
+                `;
+                return;
+            }
+
+            // Eng oxirgi 10 tasini ko'rsatish
+            const recentNotifs = notifs.slice(0, 10);
+            list.innerHTML = recentNotifs.map(n => {
+                // Vaqtni formatlash (masalan 10:45)
+                const t = new Date(n.time);
+                const timeStr = `${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+                
+                return `
+                    <div class="notif-item ${!n.isRead ? 'unread' : ''}">
+                        <div class="notif-icon-circle">
+                            <i class="${n.type==='appointment' ? 'fas fa-calendar-check' : 'fas fa-info-circle'}"></i>
+                        </div>
+                        <div class="notif-text">
+                            <h6>${n.title}</h6>
+                            <p>${n.message}</p>
+                            <span class="notif-time">${timeStr}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleDropdown(e) {
+            e.stopPropagation(); // Event bubblingni to'xtatish
+            const drop = document.getElementById('notifDropdown');
+            drop.classList.toggle('show');
+            if (drop.classList.contains('show')) {
+                // Ochilganda o'qilgan qilish opsional (bu yerda barchasini birdan o'qilgan qilmaymiz)
+            }
+        }
+
+        function markAllRead(e) {
+            e.stopPropagation();
+            let notifs = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+            notifs = notifs.map(n => ({ ...n, isRead: true }));
+            localStorage.setItem('adminNotifications', JSON.stringify(notifs));
+            loadNotifications();
+            // Yopmaslik uchun event to'xtatilgan
+        }
+
+        // Window load
+        window.onload = function() {
+            // ... (barcha oldingi onload ishlari)
+            document.getElementById('notifBell').addEventListener('click', toggleDropdown);
+            
+            // Ekranning boshqa joyi bosilganda dropdown ni yopish
+            document.addEventListener('click', function(e) {
+                const drop = document.getElementById('notifDropdown');
+                const bell = document.getElementById('notifBell');
+                if (!bell.contains(e.target)) {
+                    drop.classList.remove('show');
+                }
+            });
+
+            // Avtomatik poller (Har 3 soniyada yangi xabar bormi tekshiradi)
+            setInterval(loadNotifications, 3000);
+            loadNotifications(); // ilk yuklash
+
+            // === SINXRONIZATSIYA (GIBRID API) ===
+            if (typeof syncDownload === 'function') {
+                syncDownload();
+            }
+        };
+
+    </script>
+    <script src="../js/sync.js"></script>
+</body>
+</html>

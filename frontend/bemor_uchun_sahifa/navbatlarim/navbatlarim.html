@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <script>
+        const bemorUser = JSON.parse(localStorage.getItem('medsmart_user'));
+        if (!bemorUser || bemorUser.role !== 'bemor') { window.location.href = '../bemor_login.html'; }
+    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mening Navbatlarim - MedSmart AI</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Bootstrap (for Modals) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --bg: #f5f7f6;
+      --card-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 260px; background: white; border-right: 1px solid #e2e8f0; position: fixed;
+      height: 100vh; display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 28px 24px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+    .logo-wrap {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      box-shadow: 0 8px 20px -4px rgba(16,185,129,0.35);
+    }
+    .logo-wrap i { color: white; font-size: 1.6rem; }
+    .sidebar-header h5 { font-weight: 700; color: var(--primary-dark); margin: 0 0 2px; font-size: 1.1rem; }
+    .sidebar-header small { color: var(--muted); font-size: 0.8rem; }
+    .sidebar-nav { padding: 16px 14px; flex: 1; overflow-y: auto; }
+    .nav-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 16px; border-radius: 12px; text-decoration: none;
+      color: var(--muted); font-weight: 500; transition: 0.25s;
+      margin-bottom: 4px; font-size: 0.95rem;
+    }
+    .nav-item i { width: 20px; text-align: center; font-size: 1rem; }
+    .nav-item:hover { background: #f0fdf4; color: var(--primary-dark); }
+    .nav-item.active { background: var(--primary); color: white; box-shadow: 0 8px 16px -4px rgba(16,185,129,0.3); }
+    .sidebar-footer { padding: 16px 14px; border-top: 1px solid #f1f5f9; }
+    .logout-btn {
+      width: 100%; padding: 12px; border-radius: 12px;
+      background: #fef2f2; color: #dc2626; border: none;
+      font-weight: 600; cursor: pointer; transition: 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .logout-btn:hover { background: #fee2e2; transform: translateY(-2px); }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { margin-left: 260px; flex: 1; padding: 40px; }
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+    .header-left h2 { font-weight: 700; font-size: 1.8rem; margin: 0; color: #1e293b; }
+    .header-left p { color: var(--muted); margin: 8px 0 0; font-size: 1rem; }
+    
+    .btn-new { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+    .btn-new:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(16,185,129,0.2); }
+
+    /* ── TABS ── */
+    .nav-tabs-custom { display: flex; gap: 30px; border-bottom: 1px solid #eef2f1; margin-bottom: 35px; }
+    .tab-link { padding: 12px 5px; color: var(--muted); font-weight: 600; text-decoration: none; border-bottom: 3px solid transparent; transition: 0.2s; cursor: pointer; font-size: 0.95rem; }
+    .tab-link:hover { color: var(--primary); }
+    .tab-link.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* ── APPOINTMENT CARD (PHOTO STYLE) ── */
+    .appointment-card {
+      background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px;
+      box-shadow: var(--card-shadow); border: 1px solid #f1f5f9;
+      display: flex; align-items: center; gap: 25px; transition: 0.25s;
+    }
+    .appointment-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
+    
+    .date-badge {
+      min-width: 80px; height: 80px; background: #f8fafc; border-radius: 15px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 1px solid #f1f5f9;
+    }
+    .date-badge .day { font-size: 1.4rem; font-weight: 700; color: var(--primary); line-height: 1; }
+    .date-badge .month { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+    .card-info { flex: 1; }
+    .card-title { font-weight: 700; font-size: 1.15rem; color: #1e293b; margin-bottom: 6px; }
+    .card-doctor { font-size: 0.95rem; color: var(--muted); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .card-doctor i { color: var(--primary); font-size: 0.85rem; }
+    
+    .card-meta { display: flex; align-items: center; gap: 20px; }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; color: #475569; font-weight: 500; }
+    .status-tag { padding: 5px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; }
+    .status-paid { background: #ecfdf5; color: #059669; }
+    .status-pending { background: #fff7ed; color: #c2410c; }
+    .status-completed { background: #f1f5f9; color: #475569; }
+    .status-cancelled { background: #fef2f2; color: #dc2626; }
+
+    .card-actions { display: flex; gap: 15px; align-items: center; }
+    .btn-action-outline { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; padding: 8px 18px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; transition: 0.2s; text-decoration: none; }
+    .btn-action-outline:hover { background: #f1f5f9; color: var(--text); }
+    .btn-action-red { color: #f87171; font-weight: 600; text-decoration: none; font-size: 0.85rem; padding: 5px 10px; }
+    .btn-action-red:hover { color: #ef4444; }
+    .btn-pay { background: var(--primary); color: white; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; transition: 0.2s; }
+    .btn-pay:hover { background: var(--primary-dark); }
+
+    /* FLOATING BUTTON */
+    .fab-btn { position: fixed; bottom: 40px; right: 40px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 10px 25px rgba(16,185,129,0.4); cursor: pointer; transition: 0.3s; border: none; }
+    .fab-btn:hover { transform: scale(1.1) rotate(90deg); }
+
+    /* MODAL */
+    .modal-content { border-radius: 24px; border: none; }
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-wrap">
+        <i class="fas fa-heartbeat"></i>
+      </div>
+      <h5>Med Smart</h5>
+      <small>Bemor Panel</small>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="../bemor_dashboard.html" class="nav-item">
+        <i class="fas fa-th-large"></i><span>Asosiy Panel</span>
+      </a>
+      <a href="#" class="nav-item active">
+        <i class="fas fa-calendar-check"></i><span>Mening Navbatlarim</span>
+      </a>
+      <a href="../xizmatlar/xizmatlar_bulimi.html" class="nav-item">
+        <i class="fas fa-stethoscope"></i><span>Xizmatlar</span>
+      </a>
+      <a href="../to'lov_tizimi/to'lov.html" class="nav-item">
+        <i class="fas fa-wallet"></i><span>To'lovlar</span>
+      </a>
+      <a href="../xabarlar/xabarlar.html" class="nav-item">
+        <i class="fas fa-envelope"></i><span>Xabarlar</span>
+      </a>
+      <a href="../sozlamalar/sozlamalar.html" class="nav-item">
+        <i class="fas fa-cog"></i><span>Sozlamalar</span>
+      </a>
+      <!-- AI BASHORAT SAHIFASI LINKI -->
+      <a href="../../ai_predictions.html" class="nav-item" style="margin-top:20px; background: #ecfdf5; color: #059669; border: 1px dashed #10b981;">
+        <i class="fas fa-magic"></i><span>AI Bashorat</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="chiqish()">
+        <i class="fas fa-sign-out-alt"></i> Tizimdan chiqish
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- HEADER -->
+    <div class="page-header">
+      <div class="header-left">
+        <h2>Mening Navbatlarim</h2>
+        <p id="bugunSana">Bugun: Chorshanba, 18-Mart</p>
+      </div>
+      <button class="btn-new" data-bs-toggle="modal" data-bs-target="#newAppointmentModal">
+        <i class="fas fa-plus"></i> Yangi Navbat
+      </button>
+    </div>
+
+    <!-- TABS -->
+    <div class="nav-tabs-custom">
+      <div class="tab-link active" onclick="switchTab('upcoming', this)">Kelgusi Navbatlar</div>
+      <div class="tab-link" onclick="switchTab('completed', this)">O'tgan Navbatlar</div>
+      <div class="tab-link" onclick="switchTab('cancelled', this)">Bekor Qilingan</div>
+    </div>
+
+    <!-- LISTS -->
+    <div id="appointmentsContainer">
+      <!-- JS dynamic cards -->
+      <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab-btn" data-bs-toggle="modal" data-bs-target="#newAppointmentModal"><i class="fas fa-plus"></i></button>
+  </main>
+
+  <!-- YANGI NAVBAT MODALI -->
+  <div class="modal fade" id="newAppointmentModal" tabindex="-1" aria-labelledby="newAppointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, #10b981, #059669); border-radius: 24px 24px 0 0; padding: 24px 30px;">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:14px; display:flex; align-items:center; justify-content:center;">
+              <i class="fas fa-calendar-check" style="color:white; font-size:1.4rem;"></i>
+            </div>
+            <div>
+              <h5 class="modal-title" id="newAppointmentModalLabel" style="color:white; font-weight:800; margin:0; font-size:1.3rem;">Yangi Navbat Olish</h5>
+              <small style="color:rgba(255,255,255,0.8);">Xizmat tanlang va vaqtni belgilang</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="newAppointmentForm">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="serviceType" class="form-label">Xizmat Turi</label>
+<select class="form-select" id="serviceType" required>
+  <!-- Dinamik tarzda JS orqali to'ldiriladi (populateServiceTypes) -->
+</select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="doctorSelect" class="form-label">Doktor</label>
+                <select class="form-select" id="doctorSelect" required>
+                  <option value="">Avval xizmat turini tanlang</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="appointmentDate" class="form-label">Sana</label>
+                <input type="date" class="form-control" id="appointmentDate" required min="">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="appointmentTime" class="form-label">Vaqt</label>
+                <select class="form-select" id="appointmentTime" required>
+                  <option value="">Tanlang...</option>
+                  <option value="09:00">09:00</option>
+                  <option value="10:00">10:00</option>
+                  <option value="11:00">11:00</option>
+                  <option value="12:00">12:00</option>
+                  <option value="14:00">14:00</option>
+                  <option value="15:00">15:00</option>
+                  <option value="16:00">16:00</option>
+                  <option value="17:00">17:00</option>
+                  <option value="18:00">18:00</option>
+                  <option value="19:00">19:00</option>
+                  <option value="20:00">20:00</option>
+                  <option value="21:00">21:00</option>
+                  <option value="22:00">22:00</option>
+                  <option value="23:00">23:00</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="appointmentReason" class="form-label">Sabab</label>
+              <textarea class="form-control" id="appointmentReason" rows="3" placeholder="Murojaat sababini yozing (Masalan: Bosh og'rig'i, uzi, tahlil topshirish...)"></textarea>
+            </div>
+            
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i>
+              <strong>Diqqat!</strong> Navbatni bekor qilish uchun kamida 24 soat oldin xabar berishingiz kerak.
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+          <button type="button" class="btn btn-primary" onclick="createAppointment()">Navbatni Tasdiqlash</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAFSILOTLAR MODALI -->
+  <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:28px; border:none; overflow:hidden;">
+        <div id="detailsModalContent">
+          <!-- JS da to'ldiriladi -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEKOR QILISH MODALI -->
+  <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content" style="border-radius:24px; border:none; padding:8px;">
+        <div class="modal-body" style="text-align:center; padding:32px 24px;">
+          <div style="width:64px; height:64px; background:#fef2f2; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+            <i class="fas fa-exclamation-triangle" style="color:#dc2626; font-size:1.8rem;"></i>
+          </div>
+          <h5 style="font-weight:800; color:#0f172a; margin-bottom:10px;">Navbatni bekor qilish</h5>
+          <p style="color:#64748b; font-size:0.95rem; margin-bottom:24px;">Bu navbatni bekor qilishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi.</p>
+          <input type="hidden" id="cancelAppointmentId">
+          <div style="display:flex; gap:12px;">
+            <button class="btn" style="flex:1; background:#f1f5f9; color:#64748b; border:none; padding:12px; border-radius:14px; font-weight:700;" data-bs-dismiss="modal">Yo'q</button>
+            <button class="btn" style="flex:1; background:#dc2626; color:white; border:none; padding:12px; border-radius:14px; font-weight:700;" onclick="confirmCancel()">Ha, bekor qiling</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="./navbatlarim.js"></script>
+<script>
+    // ============================
+    // GLOBAL O'ZGARUVCHILAR
+    // ============================
+    const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
+    
+    // Xizmatlar ma'lumotlari
+    let defaultXizmatlar = JSON.parse(localStorage.getItem('xizmatlar')) || [];
+    if(defaultXizmatlar.length === 0) {
+        defaultXizmatlar = [
+            { id: 1, nomi: "Umumiy shifokor qabuli", narx: 100000, mutaxassis: "Terapevt", davomiylik: "30 daq", seanslar: "1 seans", ikona: "fas fa-stethoscope", status: "faol" },
+            { id: 2, nomi: "Pediatr konsultatsiyasi", narx: 120000, mutaxassis: "Pediatr", davomiylik: "30 daq", seanslar: "1 seans", ikona: "fas fa-baby", status: "faol" },
+            { id: 3, nomi: "Ginekolog konsultatsiyasi", narx: 150000, mutaxassis: "Ginekolog", davomiylik: "40 daq", seanslar: "1 seans", ikona: "fas fa-female", status: "faol" },
+            { id: 4, nomi: "Kardiolog konsultatsiyasi", narx: 180000, mutaxassis: "Kardiolog", davomiylik: "30 daq", seanslar: "1 seans", ikona: "fas fa-heartbeat", status: "faol" }
+        ];
+        localStorage.setItem('xizmatlar', JSON.stringify(defaultXizmatlar));
+    }
+
+    // Shifokorlar ma'lumotlari (agar bo'sh bo'lsa)
+    let globalShifokorlar = JSON.parse(localStorage.getItem('shifokorlar')) || [];
+    if(globalShifokorlar.length === 0) {
+        globalShifokorlar = [
+            { id: 1, fio: "Dr. Alijon Valiyev", mutaxassislik: "Terapevt", tel: "+99890 111 11 11", ishVaqti: "Dushanba-Juma 09:00-18:00", tajriba: "15 yil", soha: "Umumiy kasalliklar", qoshimcha: "EKG diagnostikasi", status: "faol", rasm: null },
+            { id: 2, fio: "Dr. Dilshod Karimov", mutaxassislik: "Terapevt", tel: "+99891 222 22 22", ishVaqti: "Dushanba-Juma 09:00-17:00", tajriba: "10 yil", soha: "Ichki kasalliklar", qoshimcha: "Yuqori malakali terapevt", status: "faol", rasm: null },
+            { id: 3, fio: "Dr. Saida Islomova", mutaxassislik: "Terapevt", tel: "+99893 333 33 33", ishVaqti: "Dushanba-Juma 08:00-16:00", tajriba: "12 yil", soha: "Ayollarda jarayon", qoshimcha: "", status: "faol", rasm: null },
+            { id: 4, fio: "Dr. Dilnoza Karimova", mutaxassislik: "Pediatr", tel: "+99891 444 44 44", ishVaqti: "Dushanba-Shanba 09:00-17:00", tajriba: "10 yil", soha: "Bolalar salomatligi", qoshimcha: "Immunizatsiya", status: "faol", rasm: null },
+            { id: 5, fio: "Dr. Malika Xolmirzayeva", mutaxassislik: "Ginekolog", tel: "+99893 666 66 66", ishVaqti: "Dushanba-Juma 08:00-16:00", tajriba: "12 yil", soha: "Ayollar salomatligi", qoshimcha: "UTT", status: "faol", rasm: null },
+            { id: 6, fio: "Dr. Sharipov Jasur", mutaxassislik: "Kardiolog", tel: "+99890 777 77 77", ishVaqti: "Dushanba-Juma 09:00-18:00", tajriba: "20 yil", soha: "Yurak qon tomir kasalliklari", qoshimcha: "", status: "faol", rasm: null }
+        ];
+        localStorage.setItem('shifokorlar', JSON.stringify(globalShifokorlar));
+    }
+
+    // ============================
+    // DOM YUKLANGANDA
+    // ============================
+    document.addEventListener("DOMContentLoaded", () => {
+        // User ID saqlash agar mavjud bo'lmasa
+        if (!localStorage.getItem('userId')) {
+            localStorage.setItem('userId', userId);
+        }
+
+        // Joriy sanani ko'rsatish
+        const currDateEl = document.getElementById("currentDateTime");
+        if (currDateEl) {
+            currDateEl.textContent = new Date().toLocaleString('uz-UZ', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Foydalanuvchi nomini yuklash
+        const userNameEl = document.getElementById("userName");
+        if (userNameEl) {
+            const userName = localStorage.getItem('userName') || "Bemor Foydalanuvchi";
+            userNameEl.textContent = userName;
+        }
+        
+        // Minimal sana bugungi sana
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("appointmentDate").min = today;
+        
+        // Xizmat turlarini to'ldirish
+        populateServiceTypes();
+        
+        // Navbatlarni yuklash
+        loadAppointments();
+        
+        // Xizmat tanlanganda doktorlarni yuklash
+        document.getElementById("serviceType").addEventListener('change', loadDoctorsByService);
+        
+        // Modal ochilganda sana bugungi sanaga o'rnatiladi
+        document.getElementById('newAppointmentModal').addEventListener('show.bs.modal', function() {
+            document.getElementById('appointmentDate').value = today;
+        });
+        
+        // Xizmat tanlanganda ma'lumotlarni ko'rsatish
+        document.getElementById('serviceType').addEventListener('change', showServiceInfo);
+    });
+
+    // ============================
+    // ASOSIY FUNKSIYALAR
+    // ============================
+
+    // Chiqish funksiyasi
+    function chiqish() {
+        if (confirm('Tizimdan chiqishni xohlaysizmi?')) {
+            localStorage.clear();
+            window.location.href = '../../index.html';
+        }
+    }
+
+    // Xizmat turlarini HTML ga to'ldirish
+    function populateServiceTypes() {
+        const serviceSelect = document.getElementById('serviceType');
+        
+        // Asosiy bitta qator, boshqa qator ustma-ust bo'lmasligi uchun
+        serviceSelect.innerHTML = '<option value="">Tanlang...</option>';
+        
+        defaultXizmatlar.forEach(xizmat => {
+            // Agar status umuman berilmagan bo'lsa (eski versiya bazasi) avtomatik faol deb hisoblaymiz.
+            if (xizmat.status === 'faol' || !xizmat.status) {
+                serviceSelect.innerHTML += `<option value="${xizmat.id}">${xizmat.nomi}</option>`;
+            }
+        });
+    }
+
+    // Xizmat tanlanganda doktorlarni yuklash
+    function loadDoctorsByService() {
+        const serviceType = document.getElementById('serviceType').value;
+        const doctorSelect = document.getElementById('doctorSelect');
+        
+        // Tanlangan xizmatni topish
+        const selectedService = defaultXizmatlar.find(xizmat => String(xizmat.id) === String(serviceType));
+        
+        if (!selectedService) {
+            doctorSelect.innerHTML = '<option value="">Xizmat tanlang...</option>';
+            return;
+        }
+        
+        // Mutaxassislikka qarab doktorlarni olish
+        const doctors = getDoctorsBySpecialization(selectedService.mutaxassis);
+        
+        doctorSelect.innerHTML = '<option value="">Tanlang...</option>';
+        
+        doctors.forEach(doctor => {
+            doctorSelect.innerHTML += `<option value="${doctor.id}">${doctor.name} - ${doctor.specialization}</option>`;
+        });
+    }
+
+    // Xizmat tanlanganda ma'lumotlarni ko'rsatish
+    function showServiceInfo() {
+        const serviceType = document.getElementById('serviceType').value;
+        const selectedService = defaultXizmatlar.find(xizmat => String(xizmat.id) === String(serviceType));
+        
+        // Ma'lumotlarni ko'rsatish uchun div yaratish yoki mavjudini topish
+        let infoDiv = document.getElementById('serviceInfo');
+        if (!infoDiv) {
+            infoDiv = document.createElement('div');
+            infoDiv.id = 'serviceInfo';
+            document.getElementById('newAppointmentForm').insertBefore(infoDiv, document.querySelector('.alert'));
+        }
+        
+        if (selectedService) {
+            infoDiv.innerHTML = `
+                <div class="service-info-modal">
+                    <h6>Xizmat ma'lumotlari:</h6>
+                    <div class="service-info-item">
+                        <span class="service-info-label">Mutaxassis:</span>
+                        <span class="service-info-value">${selectedService.mutaxassis}</span>
+                    </div>
+                    <div class="service-info-item">
+                        <span class="service-info-label">Davomiylik:</span>
+                        <span class="service-info-value">${selectedService.davomiylik}</span>
+                    </div>
+                    <div class="service-info-item">
+                        <span class="service-info-label">Seanslar:</span>
+                        <span class="service-info-value">${selectedService.seanslar}</span>
+                    </div>
+                    <div class="service-info-item">
+                        <span class="service-info-label">Narx:</span>
+                        <span class="service-info-value">${selectedService.narx.toLocaleString()} so'm</span>
+                    </div>
+                </div>
+            `;
+            infoDiv.style.display = 'block';
+        } else {
+            infoDiv.style.display = 'none';
+        }
+    }
+
+    // Mutaxassislikka qarab doktorlarni olish
+    function getDoctorsBySpecialization(specialization) {
+        const shifokorlar = JSON.parse(localStorage.getItem('shifokorlar') || '[]');
+        
+        // Admin tomonidagi fio, mutaxassislik larni Bemor formati(name, specialization) ga o'tkazish
+        const allDoctors = shifokorlar.filter(doc => doc.status === 'faol').map(doc => ({
+            id: doc.id,
+            name: doc.fio,
+            specialization: doc.mutaxassislik || 'Umumiy mutaxassis',
+            experience: doc.tajriba || 'Ma\'lum emas',
+            rating: doc.rating || (Math.random() * (5.0 - 4.5) + 4.5).toFixed(1) // Admin panelda rating yo'qligi sababli mock
+        }));
+        
+        // Mutaxassislikka qarab filtr
+        return allDoctors.filter(doctor => 
+            doctor.specialization.toLowerCase().includes(specialization.toLowerCase()) ||
+            specialization.toLowerCase().includes(doctor.specialization.toLowerCase())
+        );
+    }
+
+    // Xona raqamlarini qaytarish
+    function getRoomNumber(serviceType) {
+        // Generates a mock room number based on ID
+        const id = parseInt(serviceType) || 1;
+        return (100 + (id % 40)) + '-' + String.fromCharCode(65 + (id % 3));
+    }
+
+    // ============================
+    // LOCALSTORAGE FUNKSIYALARI
+    // ============================
+
+    // LocalStorage'dan navbatlarni olish
+    function getAppointmentsFromStorage() {
+        try {
+            const navbatlarStr = localStorage.getItem('navbatlar');
+            const allAppointments = navbatlarStr ? JSON.parse(navbatlarStr) : [];
+            // Bemor faqat o'z navbatlarini oladi
+            const currentUserId = localStorage.getItem('userId') || userId;
+            return allAppointments.filter(app => app.patientId === currentUserId);
+        } catch (error) {
+            console.error('LocalStorage\'dan navbatlarni olishda xatolik:', error);
+            return [];
+        }
+    }
+
+    // LocalStorage'ga yagona navbatlar bazasiga saqlash
+    function saveAppointmentsToStorage(patientAppointments) {
+        try {
+            const navbatlarStr = localStorage.getItem('navbatlar');
+            let allAppointments = navbatlarStr ? JSON.parse(navbatlarStr) : [];
+            const currentUserId = localStorage.getItem('userId') || userId;
+            
+            // Boshqa bemorlarning navbatlarini saqlab qolamiz
+            allAppointments = allAppointments.filter(app => app.patientId !== currentUserId);
+            // Va joriy bemornikini qo'shamiz
+            allAppointments = [...allAppointments, ...patientAppointments];
+            
+            localStorage.setItem('navbatlar', JSON.stringify(allAppointments));
+            return true;
+        } catch (error) {
+            console.error('LocalStorage\'ga navbatlarni saqlashda xatolik:', error);
+            return false;
+        }
+    }
+
+    // ============================
+    // NAVBAT OPERATSIYALARI (YANGILANGAN)
+    // ============================
+
+    // Yangi navbat yaratish (YANGILANGAN - TO'LOVGA INTEGRATSIYA)
+    function createAppointment() {
+        const form = document.getElementById('newAppointmentForm');
+        
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        const serviceType = document.getElementById('serviceType').value;
+        const doctorSelect = document.getElementById('doctorSelect');
+        const doctorInfo = doctorSelect.options[doctorSelect.selectedIndex].text;
+        const date = document.getElementById('appointmentDate').value;
+        const time = document.getElementById('appointmentTime').value;
+        const reason = document.getElementById('appointmentReason').value;
+        
+        // Tanlangan xizmatni topish
+        const selectedService = defaultXizmatlar.find(xizmat => String(xizmat.id) === String(serviceType));
+        
+        if (!selectedService) {
+            alert('Iltimos, xizmat turini tanlang!');
+            return;
+        }
+        
+        // Sana Validatsiyasi (Backend logikasi simulyatsiyasi)
+        const selectedDateStr = new Date(date);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        if (selectedDateStr < today) {
+            alert("XATOLIK: O'tib ketgan sanaga navbat olish taqiqlanadi!");
+            return;
+        }
+        
+        // Doktor tanlanmagan bo'lsa
+        if (!doctorSelect.value) {
+            alert('Iltimos, doktorni tanlang!');
+            return;
+        }
+        
+        // Doktor ID va nomini ajratish
+        const doctorParts = doctorInfo.split(' - ');
+        const doctorFullName = doctorParts[0] || doctorInfo;
+        const specialization = doctorParts[1] || selectedService.mutaxassis;
+        
+        // Yangi navbat obyekti
+        const newAppointment = {
+            id: Date.now(),
+            doctor: doctorFullName,
+            specialization: specialization,
+            service: selectedService.nomi,
+            serviceType: serviceType,
+            serviceDetails: {
+                narx: selectedService.narx,
+                davomiylik: selectedService.davomiylik,
+                seanslar: selectedService.seanslar
+            },
+            date: date,
+            time: time,
+            room: getRoomNumber(serviceType),
+            status: 'upcoming',
+            reason: reason || 'Tafsilot kiritilmagan',
+            createdAt: new Date().toISOString(),
+            patientName: localStorage.getItem('userName') || 'Bemor Foydalanuvchi',
+            patientId: localStorage.getItem('userId') || userId,
+            paymentStatus: 'pending',
+            
+            // Admin Panel bilan sinxronizatsiya uchun qatorlar
+            bemor_fio: localStorage.getItem('userName') || 'Bemor Foydalanuvchi',
+            shifokor: doctorFullName,
+            xizmat: selectedService.nomi,
+            sana: date,
+            vaqt: time,
+            holati: 'upcoming'
+        };
+        
+        // LocalStorage'dan mavjud navbatlarni olish
+        let appointments = getAppointmentsFromStorage();
+        
+        // Yangi navbatni qo'shish
+        appointments.push(newAppointment);
+        
+        // LocalStorage'ga saqlash
+        if (saveAppointmentsToStorage(appointments)) {
+            // 1. To'lov ma'lumotlarini yaratish
+            const paymentData = {
+                appointmentId: newAppointment.id,
+                service: newAppointment.service,
+                doctor: newAppointment.doctor,
+                date: newAppointment.date,
+                time: newAppointment.time,
+                amount: newAppointment.serviceDetails.narx,
+                appointmentData: newAppointment
+            };
+            
+            // 2. To'lov ma'lumotlarini saqlash
+            localStorage.setItem('pendingAppointmentPayment', JSON.stringify(paymentData));
+            
+            // 2.5 Admin Bildirishnomalari
+            const adminNotifs = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+            adminNotifs.unshift({
+                id: Date.now(),
+                type: 'appointment',
+                title: 'Yangi navbat yozildi',
+                message: `${localStorage.getItem('userName') || 'Foydalanuvchi'} ${doctorFullName} (Xizmat: ${selectedService.nomi}) ga yozildi.`,
+                time: new Date().toISOString(),
+                isRead: false
+            });
+            localStorage.setItem('adminNotifications', JSON.stringify(adminNotifs));
+            
+            // === SINXRONIZATSIYA (GIBRID API) ===
+            if (typeof syncUpload === 'function') {
+                syncUpload();
+            }
+            
+            // 3. Xabar va yo'naltirish
+            alert(`
+                ✅ Navbat muvaffaqiyatli band qilindi!
+                
+                Xizmat: ${selectedService.nomi}
+                Narx: ${selectedService.narx.toLocaleString()} so'm
+                Sana: ${formatDate(date)} ${time}
+                Doktor: ${doctorFullName}
+                
+                To'lov qilish uchun to'lov sahifasiga yo'naltirilmoqdasiz...
+            `);
+            
+            // 4. Modalni yopish
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newAppointmentModal'));
+            modal.hide();
+            
+            // 5. Formani tozalash
+            form.reset();
+            
+            // 6. Ma'lumotlar panelini yashirish
+            const infoDiv = document.getElementById('serviceInfo');
+            if (infoDiv) infoDiv.style.display = 'none';
+            
+            // 7. Navbatlarni yangilash
+            loadAppointments();
+            
+            // 8. To'lov sahifasiga yo'naltirish (2 soniyadan keyin)
+            setTimeout(() => {
+                window.location.href = '../to\'lov_tizimi/to\'lov.html';
+            }, 2000);
+            
+        } else {
+            alert('Navbatni saqlashda xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.');
+        }
+    }
+
+    // Navbatni bekor qilish (YANGILANGAN - TO'LOVNI HAM BEKOR QILISH)
+    function cancelAppointment(appointmentId) {
+        if (confirm('Bu navbatni bekor qilishni xohlaysizmi? Bekor qilish uchun 24 soat oldin xabar berishingiz kerak.')) {
+            // LocalStorage'dan mavjud navbatlarni olish
+            let appointments = getAppointmentsFromStorage();
+            
+            // Navbatni topish va statusini o'zgartirish
+            appointments = appointments.map(appointment => {
+                if (appointment.id == appointmentId) {
+                    return { ...appointment, status: 'cancelled', holati: 'cancelled' };
+                }
+                return appointment;
+            });
+            
+            // LocalStorage'ga yangilangan ro'yxatni saqlash
+            if (saveAppointmentsToStorage(appointments)) {
+                // To'lovni ham bekor qilish
+                removePaymentForAppointment(appointmentId);
+                
+                alert('Navbat bekor qilindi va to\'lov ham bekor qilindi.');
+                loadAppointments(); // Ro'yxatni yangilash
+            } else {
+                alert('Navbatni bekor qilishda xatolik yuz berdi.');
+            }
+        }
+    }
+
+    // ============================
+    // NAVBATLARNI YUKLASH VA KO'RSATISH
+    // ============================
+
+    // LocalStorage'dan navbatlarni yuklash va ko'rsatish
+    function loadAppointments() {
+        const appointments = getAppointmentsFromStorage();
+        
+        if (appointments.length === 0) {
+            // Demo ma'lumotlarni yaratish (faqat birinchi marta)
+            createDemoAppointments();
+            return;
+        }
+        
+        // Tabga qarab filter qilish
+        const filtered = appointments.filter(app => {
+            if (currentTab === 'cancelled') return app.status === 'cancelled';
+            if (currentTab === 'completed') return app.status === 'completed';
+            return app.status === 'upcoming';
+        });
+        
+        // Navbatlarni ko'rsatish
+        renderAppointments(filtered);
+    }
+
+    // Demo ma'lumotlarni yaratish
+    function createDemoAppointments() {
+        const demoAppointments = [
+            {
+                id: 1,
+                doctor: "Dr. Aliyev Olim",
+                specialization: "Terapevt",
+                service: "Umumiy shifokor qabuli",
+                serviceType: "umumiy_shifokor",
+                serviceDetails: {
+                    narx: 100000,
+                    davomiylik: "30 daqiqa",
+                    seanslar: "1 seans"
+                },
+                date: getFutureDate(2),
+                time: "10:00",
+                room: "101-A",
+                status: "upcoming",
+                reason: "Qalqonsimon bez tekshiruvi",
+                createdAt: new Date().toISOString(),
+                patientName: localStorage.getItem('userName') || "Bemor Foydalanuvchi",
+                patientId: localStorage.getItem('userId') || userId,
+                paymentStatus: "pending",
+                bemor_fio: localStorage.getItem('userName') || "Bemor Foydalanuvchi",
+                shifokor: "Dr. Aliyev Olim",
+                xizmat: "Umumiy shifokor qabuli",
+                sana: getFutureDate(2),
+                vaqt: "10:00",
+                holati: "upcoming"
+            },
+            {
+                id: 2,
+                doctor: "Dr. Hasanova Zuhra",
+                specialization: "Ginekolog",
+                service: "Ginekolog konsultatsiyasi",
+                serviceType: "ginekolog",
+                serviceDetails: {
+                    narx: 150000,
+                    davomiylik: "40 daqiqa",
+                    seanslar: "1 seans"
+                },
+                date: getFutureDate(3),
+                time: "14:30",
+                room: "201-A",
+                status: "upcoming",
+                reason: "Davriy tekshiruv",
+                createdAt: new Date().toISOString(),
+                patientName: localStorage.getItem('userName') || "Bemor Foydalanuvchi",
+                patientId: localStorage.getItem('userId') || userId,
+                paymentStatus: "pending",
+                bemor_fio: localStorage.getItem('userName') || "Bemor Foydalanuvchi",
+                shifokor: "Dr. Hasanova Zuhra",
+                xizmat: "Ginekolog konsultatsiyasi",
+                sana: getFutureDate(3),
+                vaqt: "14:30",
+                holati: "upcoming"
+            },
+            {
+                id: 3,
+                doctor: "Dr. Xolmirzayeva Noila",
+                specialization: "Laboratoriya mutaxassisi",
+                service: "Qon tahlillari (umumiy)",
+                serviceType: "qon_tahlili",
+                serviceDetails: {
+                    narx: 80000,
+                    davomiylik: "15 daqiqa",
+                    seanslar: "1 seans"
+                },
+                date: getPastDate(5),
+                time: "09:00",
+                room: "LAB-1",
+                status: "completed",
+                diagnosis: "Qon tahlili natijalari normal",
+                createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+                patientName: localStorage.getItem('userName') || "Bemor Foydalanuvchi",
+                patientId: localStorage.getItem('userId') || userId,
+                paymentStatus: "paid",
+                bemor_fio: localStorage.getItem('userName') || "Bemor Foydalanuvchi",
+                shifokor: "Dr. Xolmirzayeva Noila",
+                xizmat: "Qon tahlillari (umumiy)",
+                sana: getPastDate(5),
+                vaqt: "09:00",
+                holati: "completed"
+            }
+        ];
+        
+        // Demo ma'lumotlarni saqlash
+        saveAppointmentsToStorage(demoAppointments);
+        
+        // Navbatlarni yuklash
+        loadAppointments();
+    }
+
+    // Kelajakdagi sana olish
+    function getFutureDate(days) {
+        const date = new Date();
+        date.setDate(date.getDate() + days);
+        return date.toISOString().split('T')[0];
+    }
+
+    // O'tgan sana olish
+    function getPastDate(days) {
+        const date = new Date();
+        date.setDate(date.getDate() - days);
+        return date.toISOString().split('T')[0];
+    }
+
+    // Global filter state
+    let currentTab = 'upcoming';
+
+    function switchTab(tab, el) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
+        el.classList.add('active');
+        loadAppointments();
+    }
+
+    function loadAppointments() {
+        const appointments = getAppointmentsFromStorage();
+        const filtered = appointments.filter(app => {
+            if (currentTab === 'cancelled') return app.status === 'cancelled';
+            if (currentTab === 'completed') return app.status === 'completed';
+            return app.status === 'upcoming';
+        });
+        
+        renderAppointments(filtered);
+    }
+
+    function renderAppointments(appointments) {
+        const container = document.getElementById('appointmentsContainer');
+        
+        if (appointments.length === 0) {
+            let emptyMsg = '';
+            if (currentTab === 'upcoming') {
+                emptyMsg = `<div class="empty-state py-5" style="text-align:center;">
+                    <div style="width:80px;height:80px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                        <i class="fas fa-calendar-plus" style="font-size:2rem;color:#10b981;"></i>
+                    </div>
+                    <h5 style="color:#1e293b;font-weight:700;">Kelgusi navbatlar yo'q</h5>
+                    <p style="color:#64748b;">Yangi navbat olish uchun yuqoridagi tugmani bosing</p>
+                </div>`;
+            } else if (currentTab === 'completed') {
+                emptyMsg = `<div class="empty-state py-5" style="text-align:center;">
+                    <div style="width:80px;height:80px;background:#f8fafc;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                        <i class="fas fa-clipboard-check" style="font-size:2rem;color:#94a3b8;"></i>
+                    </div>
+                    <h5 style="color:#64748b;font-weight:700;">O'tgan navbatlar yo'q</h5>
+                </div>`;
+            } else {
+                emptyMsg = `<div class="empty-state py-5" style="text-align:center;">
+                    <div style="width:80px;height:80px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                        <i class="fas fa-ban" style="font-size:2rem;color:#f87171;"></i>
+                    </div>
+                    <h5 style="color:#64748b;font-weight:700;">Bekor qilingan navbatlar yo'q</h5>
+                </div>`;
+            }
+            container.innerHTML = emptyMsg;
+            return;
+        }
+
+        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OKT", "NOY", "DEK"];
+        
+        let html = '';
+        appointments.forEach(app => {
+            const dateObj = new Date(app.date);
+            const day = dateObj.getDate();
+            const month = monthNames[dateObj.getMonth()];
+            
+            let payStatusClass = 'status-pending';
+            let payStatusText = "To'lov kutilmoqda";
+            if (app.paymentStatus === 'paid') { payStatusClass = 'status-paid'; payStatusText = "To'langan"; }
+            else if (app.status === 'cancelled') { payStatusClass = 'status-cancelled'; payStatusText = "Bekor qilingan"; }
+            else if (app.status === 'completed') { payStatusClass = 'status-completed'; payStatusText = "Yakunlangan"; }
+            
+            const payBtn = (app.paymentStatus !== 'paid' && app.status === 'upcoming') ? 
+                `<button class="btn-pay" onclick="openPaymentForAppointment(${app.id})"><i class="fas fa-credit-card me-1"></i>To'lash</button>` : '';
+
+            html += `
+                <div class="appointment-card">
+                    <div class="date-badge">
+                        <div class="day">${day}</div>
+                        <div class="month">${month}</div>
+                    </div>
+                    
+                    <div class="card-info">
+                        <div class="card-title">${app.service}</div>
+                        <div class="card-doctor"><i class="fas fa-user-md"></i> ${app.doctor} ${app.specialization ? `(${app.specialization})` : ''}</div>
+                        
+                        <div class="card-meta">
+                            <div class="meta-item"><i class="far fa-clock"></i> ${app.time}</div>
+                            ${app.room ? `<div class="meta-item"><i class="fas fa-door-open"></i> ${app.room}</div>` : ''}
+                            ${app.serviceDetails ? `<div class="meta-item"><i class="fas fa-money-bill-wave"></i> ${app.serviceDetails.narx ? app.serviceDetails.narx.toLocaleString()+" so'm" : ''}</div>` : ''}
+                            <div class="status-tag ${payStatusClass}">${payStatusText}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-actions">
+                        ${payBtn}
+                        <button class="btn-action-outline" onclick="viewAppointmentDetails(${app.id})"><i class="fas fa-info-circle me-1"></i>Tafsilot</button>
+                        ${app.status === 'upcoming' ? `<a href="#" class="btn-action-red" onclick="askCancelAppointment(${app.id}); return false;"><i class="fas fa-times me-1"></i>Bekor</a>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    // ============================
+    // TO'LOV INTEGRATSIYASI FUNKSIYALARI
+    // ============================
+
+    // Navbat uchun to'lov sahifasini ochish
+    function openPaymentForAppointment(appointmentId) {
+        const appointments = getAppointmentsFromStorage();
+        const appointment = appointments.find(app => app.id == appointmentId);
+        
+        if (!appointment) return;
+        
+        const paymentData = {
+            appointmentId: appointment.id,
+            service: appointment.service,
+            doctor: appointment.doctor,
+            date: appointment.date,
+            time: appointment.time,
+            amount: appointment.serviceDetails ? appointment.serviceDetails.narx : 0,
+            appointmentData: appointment
+        };
+        localStorage.setItem('pendingAppointmentPayment', JSON.stringify(paymentData));
+        window.location.href = '../to\'lov_tizimi/to\'lov.html';
+    }
+
+    // Navbat bekor qilinganda to'lovni o'chirish
+    function removePaymentForAppointment(appointmentId) {
+        const userId = localStorage.getItem('userId');
+        let payments = JSON.parse(localStorage.getItem('userPayments_' + userId)) || [];
+        
+        // To'lovni topish va o'chirish
+        payments = payments.filter(payment => payment.appointmentId !== appointmentId);
+        
+        // Yangilangan ro'yxatni saqlash
+        localStorage.setItem('userPayments_' + userId, JSON.stringify(payments));
+    }
+
+    // ============================
+    // YORDAMCHI FUNKSIYALAR
+    // ============================
+
+    // Sanani formatlash
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        return date.toLocaleDateString('uz-UZ', options);
+    }
+
+    // Vaqt hisoblagichlarini yangilash
+    function updateCountdowns() {
+        document.querySelectorAll('.countdown-timer').forEach(timer => {
+            const date = timer.getAttribute('data-date');
+            const time = timer.getAttribute('data-time');
+            const appointmentDateTime = new Date(`${date}T${time}`);
+            const now = new Date();
+            const diffMs = appointmentDateTime - now;
+            
+            if (diffMs <= 0) {
+                timer.querySelector('.countdown-text').textContent = 'Vaqt o\'tgan';
+                return;
+            }
+            
+            const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            let countdownText = '';
+            if (days > 0) {
+                countdownText += `${days} kun `;
+            }
+            if (hours > 0 || days > 0) {
+                countdownText += `${hours} soat `;
+            }
+            countdownText += `${minutes} daqiqa`;
+            
+            timer.querySelector('.countdown-text').textContent = countdownText;
+        });
+    }
+
+    // ============================
+    // TAFSILOTLAR MODAL (alert() o'rniga)
+    // ============================
+
+    function viewAppointmentDetails(appointmentId) {
+        const appointments = getAppointmentsFromStorage();
+        const app = appointments.find(a => a.id == appointmentId);
+        if (!app) return;
+
+        const statusMap = { upcoming: { text: 'Kutilmoqda', color: '#059669', bg: '#f0fdf4', icon: 'fa-clock' }, completed: { text: 'Yakunlangan', color: '#475569', bg: '#f1f5f9', icon: 'fa-check-circle' }, cancelled: { text: 'Bekor qilingan', color: '#dc2626', bg: '#fef2f2', icon: 'fa-times-circle' } };
+        const st = statusMap[app.status] || statusMap.upcoming;
+        const payText = app.paymentStatus === 'paid' ? "<span style='color:#059669;font-weight:700;'>✅ To'langan</span>" : "<span style='color:#f97316;font-weight:700;'>⏳ To'lov kutilmoqda</span>";
+        const narx = (app.serviceDetails && app.serviceDetails.narx) ? app.serviceDetails.narx.toLocaleString() + " so'm" : 'Belgilanmagan';
+
+        document.getElementById('detailsModalContent').innerHTML = `
+            <div style="background:linear-gradient(135deg,#10b981,#059669);padding:28px 30px;">
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <div style="width:52px;height:52px;background:rgba(255,255,255,0.2);border-radius:16px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-stethoscope" style="color:white;font-size:1.4rem;"></i>
+                    </div>
+                    <div>
+                        <h5 style="color:white;font-weight:800;margin:0;font-size:1.2rem;">${app.service}</h5>
+                        <small style="color:rgba(255,255,255,0.85);">${app.doctor}</small>
+                    </div>
+                    <button onclick="bootstrap.Modal.getInstance(document.getElementById('detailsModal')).hide()" style="margin-left:auto;background:rgba(255,255,255,0.2);border:none;border-radius:10px;width:36px;height:36px;color:white;cursor:pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div style="padding:28px 30px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                    <div style="background:#f8fafc;padding:16px;border-radius:16px;">
+                        <div style="color:#64748b;font-size:0.8rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;"><i class="far fa-calendar me-1"></i>Sana</div>
+                        <div style="font-weight:700;color:#1e293b;">${formatDate(app.date)}</div>
+                    </div>
+                    <div style="background:#f8fafc;padding:16px;border-radius:16px;">
+                        <div style="color:#64748b;font-size:0.8rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;"><i class="far fa-clock me-1"></i>Vaqt</div>
+                        <div style="font-weight:700;color:#1e293b;">${app.time}</div>
+                    </div>
+                    <div style="background:#f8fafc;padding:16px;border-radius:16px;">
+                        <div style="color:#64748b;font-size:0.8rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;"><i class="fas fa-door-open me-1"></i>Xona</div>
+                        <div style="font-weight:700;color:#1e293b;">${app.room || 'Belgilanmagan'}</div>
+                    </div>
+                    <div style="background:#f8fafc;padding:16px;border-radius:16px;">
+                        <div style="color:#64748b;font-size:0.8rem;font-weight:600;text-transform:uppercase;margin-bottom:6px;"><i class="fas fa-money-bill-wave me-1"></i>Narx</div>
+                        <div style="font-weight:700;color:#10b981;">${narx}</div>
+                    </div>
+                </div>
+                <div style="background:${st.bg};border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                    <i class="fas ${st.icon}" style="color:${st.color};"></i>
+                    <span style="font-weight:700;color:${st.color};">Holat: ${st.text}</span>
+                    <span style="margin-left:auto;">${payText}</span>
+                </div>
+                ${app.reason ? `<div style="background:#f8fafc;border-radius:14px;padding:14px 18px;margin-bottom:16px;"><div style="color:#64748b;font-size:0.8rem;font-weight:600;margin-bottom:6px;">SABAB</div><div style="font-weight:600;color:#1e293b;">${app.reason}</div></div>` : ''}
+                ${app.diagnosis ? `<div style="background:#f0fdf4;border-radius:14px;padding:14px 18px;margin-bottom:16px;"><div style="color:#059669;font-size:0.8rem;font-weight:600;margin-bottom:6px;">TASHXIS</div><div style="font-weight:600;color:#1e293b;">${app.diagnosis}</div></div>` : ''}
+                <button onclick="bootstrap.Modal.getInstance(document.getElementById('detailsModal')).hide()" style="width:100%;padding:14px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:16px;font-weight:700;cursor:pointer;font-family:inherit;">Yopish</button>
+            </div>
+        `;
+        
+        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+        modal.show();
+    }
+
+    // Bekor qilishni so'rash (modal orqali)
+    function askCancelAppointment(appointmentId) {
+        document.getElementById('cancelAppointmentId').value = appointmentId;
+        const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+        modal.show();
+    }
+
+    // Bekor qilishni tasdiqlash
+    function confirmCancel() {
+        const appointmentId = document.getElementById('cancelAppointmentId').value;
+        
+        let appointments = getAppointmentsFromStorage();
+        appointments = appointments.map(a => {
+            if (a.id == appointmentId) return { ...a, status: 'cancelled' };
+            return a;
+        });
+        
+        if (saveAppointmentsToStorage(appointments)) {
+            // To'lovni ham bekor qilish
+            const uid = localStorage.getItem('userId');
+            let payments = JSON.parse(localStorage.getItem('userPayments_' + uid) || '[]');
+            payments = payments.filter(p => p.appointmentId != appointmentId);
+            localStorage.setItem('userPayments_' + uid, JSON.stringify(payments));
+        }
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('cancelModal'));
+        modal.hide();
+        
+        loadAppointments();
+    }
+    // ============================
+    // SAHIFA YUKLANGANDA
+    // ============================
+    
+    function updateTodayInfo() {
+        const now = new Date();
+        const days = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+        const months = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'];
+        const el = document.getElementById('bugunSana');
+        if (el) el.textContent = `Bugun: ${days[now.getDay()]}, ${now.getDate()}-${months[now.getMonth()]}`;
+    }
+
+    // Sahifadagi asosiy logikalar bitta joyda (yuqoridagi DOMContentLoaded da chaqirilgan), shuning uchun faqat keragini chaqiramiz
+    document.addEventListener('DOMContentLoaded', function() {
+        updateTodayInfo();
+        // loadAppointments() allaqachon tepada ham bor. Bu redundant, lekin zarari yo'q.
+    });
+
+</script>
+<script src="../../js/sync.js"></script>
+<script src="../../js/ai-widget.js"></script>
+</body>
+</html>

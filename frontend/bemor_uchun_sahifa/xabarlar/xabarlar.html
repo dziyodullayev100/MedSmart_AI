@@ -1,0 +1,3139 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Med Smart - AI Tibbiy Yordamchi</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles/main.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --bg: #f8fafc;
+            --card-shadow: 0 10px 30px -5px rgba(0,0,0,0.06);
+            --text: #1e293b;
+            --muted: #64748b;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR - Standard Zumrad Design */
+        .sidebar {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 28px 24px;
+            text-align: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .logo-wrap {
+            width: 52px; height: 52px; border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+            box-shadow: 0 8px 20px -4px rgba(16,185,129,0.35);
+        }
+        .logo-wrap i { color: white; font-size: 1.6rem; }
+        .sidebar-header h5 { font-weight: 700; color: var(--primary-dark); margin: 0 0 2px; font-size: 1.1rem; }
+        .sidebar-header small { color: var(--muted); font-size: 0.8rem; }
+
+        .sidebar-nav { padding: 16px 14px; flex: 1; overflow-y: auto; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 13px 16px; border-radius: 12px; text-decoration: none;
+            color: var(--muted); font-weight: 500; transition: 0.25s;
+            margin-bottom: 4px; font-size: 0.95rem;
+        }
+        .nav-item i { width: 20px; text-align: center; font-size: 1rem; }
+        .nav-item:hover { background: #f0fdf4; color: var(--primary-dark); }
+        .nav-item.active { background: var(--primary); color: white; box-shadow: 0 8px 16px -4px rgba(16,185,129,0.3); }
+
+        .sidebar-footer { padding: 16px 14px; border-top: 1px solid #f1f5f9; }
+        .logout-btn {
+            width: 100%; padding: 12px; border-radius: 12px;
+            background: #fef2f2; color: #dc2626; border: none;
+            font-weight: 600; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .logout-btn:hover { background: #fee2e2; transform: translateY(-2px); }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16,185,129,0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            right: 20px;
+            background: #ff4081;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            overflow-x: hidden;
+        }
+
+        /* HEADER - Standard */
+        .content-header {
+            background: white;
+            color: var(--text);
+            padding: 25px 40px;
+            margin-bottom: 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .header-title h4 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #0f172a;
+        }
+        .header-title h4 i { color: var(--primary); }
+
+        .header-title p {
+            margin: 6px 0 0 0;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .user-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .btn-logout {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc2626;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #fee2e2;
+            transform: translateY(-2px);
+        }
+
+        /* AI MAIN CONTENT */
+        .ai-main-container {
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* AI Dashboard */
+        .ai-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .ai-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ai-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        .ai-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+
+        .ai-card h5 {
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .ai-card h5 i {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        /* Features List */
+        .features-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f0fdf4;
+            border-radius: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .feature-item:hover::before {
+            left: 100%;
+        }
+
+        .feature-item:hover {
+            background: #ecfdf5;
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .feature-item i {
+            color: var(--primary);
+            font-size: 1.4rem;
+            min-width: 30px;
+        }
+
+        .feature-item span {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.05rem;
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: linear-gradient(90deg, rgba(76, 175, 80, 0.1), rgba(139, 195, 74, 0.1));
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+        }
+
+        /* Statistics Chart */
+        .stats-chart {
+            height: 200px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        /* AI Chat Container - Advanced */
+        .ai-chat-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            height: 650px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .ai-chat-header {
+            background: linear-gradient(90deg, var(--primary-dark), #047857);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-chat-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+            background-size: cover;
+        }
+
+        .ai-header-left {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ai-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 3px solid rgba(255,255,255,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .ai-avatar.special {
+            background: linear-gradient(135deg, var(--primary), #047857);
+        }
+
+        .ai-info h4 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #34d399, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ai-info p {
+            margin: 8px 0 0 0;
+            opacity: 0.9;
+            font-size: 1rem;
+            color: #a7f3d0;
+        }
+
+        .ai-capabilities {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .capability-tag {
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+
+        .capability-tag:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+
+        /* Chat Messages Area */
+        .chat-messages {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            position: relative;
+        }
+
+        /* Message Styling */
+        .message {
+            max-width: 80%;
+            padding: 20px 25px;
+            border-radius: 25px;
+            position: relative;
+            line-height: 1.6;
+            animation: slideIn 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            word-wrap: break-word;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            backdrop-filter: blur(5px);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .ai-message {
+            background: rgba(255,255,255,0.95);
+            border: 1px solid #e2e8f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .user-message {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .message-time {
+            font-size: 0.85rem;
+            margin-top: 12px;
+            opacity: 0.7;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        /* AI Thinking Animation */
+        .ai-thinking {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 25px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            border: 1px solid rgba(140, 158, 255, 0.2);
+            align-self: flex-start;
+            max-width: 250px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            backdrop-filter: blur(5px);
+        }
+
+        .thinking-text {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .thinking-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .thinking-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .thinking-dot:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Advanced Chat Input */
+        .chat-input-container {
+            padding: 25px 30px;
+            background: rgba(255,255,255,0.95);
+            border-top: 1px solid rgba(238, 242, 255, 0.5);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            background: #f0fdf4;
+            border-radius: 20px;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .chat-input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 12px 35px rgba(16,185,129,0.15);
+            transform: translateY(-2px);
+        }
+
+        .input-actions {
+            display: flex;
+            gap: 12px;
+            padding: 0 15px;
+        }
+
+        .action-btn {
+            background: rgba(255,255,255,0.8);
+            border: 1px solid #e2e8f0;
+            color: var(--primary);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 12px;
+            transition: all 0.3s;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(16,185,129,0.3);
+        }
+
+        .action-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .message-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 15px 0;
+            font-size: 1.1rem;
+            outline: none;
+            resize: none;
+            max-height: 150px;
+            min-height: 60px;
+            font-family: inherit;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .message-input::placeholder {
+            color: #888;
+        }
+
+        .send-btn {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+            box-shadow: 0 8px 25px rgba(16,185,129,0.4);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 12px 30px rgba(16,185,129,0.5);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Quick Actions Panel */
+        .quick-actions {
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            padding: 30px;
+            margin-top: 35px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-actions h5 {
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .quick-actions h5 i {
+            color: var(--primary);
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .action-btn-large {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245, 247, 255, 0.9));
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.4s;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn-large::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .action-btn-large:hover::before {
+            left: 100%;
+        }
+
+        .action-btn-large:hover {
+            background: #ecfdf5;
+            border-color: var(--primary);
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(16,185,129,0.2);
+        }
+
+        .action-btn-large i {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s;
+        }
+
+        .action-btn-large:hover i {
+            transform: scale(1.2);
+        }
+
+        .action-btn-large span {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        /* Medical Analysis Tools */
+        .analysis-tools {
+            background: rgba(255,255,255,0.95);
+            border-radius: 25px;
+            padding: 30px;
+            margin-top: 35px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .analysis-tools h5 {
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .analysis-tools h5 i {
+            color: var(--primary);
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .tool-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245, 247, 255, 0.9));
+            border-radius: 20px;
+            padding: 25px;
+            border-left: 6px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(16,185,129,0.05), rgba(5,150,105,0.05));
+            opacity: 0;
+            transition: 0.4s;
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(16,185,129,0.15);
+        }
+
+        .tool-card h6 {
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-card h6 i {
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+
+        .tool-card p {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(245, 247, 255, 0.98));
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(20px);
+            animation: modalSlideIn 0.4s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h4 {
+            color: var(--primary-dark);
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            background: rgba(16,185,129,0.1);
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: block;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(16,185,129,0.3);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(16,185,129,0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--primary-dark), var(--primary));
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 100px;
+            }
+            
+            .sidebar-header h5,
+            .sidebar-header small,
+            .nav-item span {
+                display: none;
+            }
+            
+            .sidebar-header {
+                padding: 25px 15px;
+            }
+            
+            .nav-item {
+                justify-content: center;
+                padding: 13px;
+            }
+            
+            .nav-item i {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-left: 100px;
+            }
+            
+            .content-header {
+                padding: 20px 30px;
+            }
+            
+            .header-title h4 {
+                font-size: 1.6rem;
+            }
+            
+            .ai-dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+                padding: 20px;
+            }
+            
+            .user-info {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+            
+            .action-grid,
+            .tool-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .ai-chat-container {
+                height: 500px;
+            }
+            
+            .ai-capabilities {
+                display: none;
+            }
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification i {
+            font-size: 1.5rem;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .notification-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Voice Input Animation */
+        .voice-recording {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 1001;
+        }
+
+        .voice-animation {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2001;
+        }
+
+        .spinner {
+            width: 70px;
+            height: 70px;
+            border: 5px solid rgba(102, 126, 234, 0.2);
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Voice Recording Animation -->
+    <div class="voice-recording" id="voiceRecording">
+        <div class="voice-animation">
+            <i class="fas fa-microphone"></i>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div class="notification" id="notification">
+        <i class="fas fa-bell"></i>
+        <div class="notification-content">
+            <div class="notification-title" id="notificationTitle"></div>
+            <div class="notification-message" id="notificationMessage"></div>
+        </div>
+        <button class="notification-close" onclick="closeNotification()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- BMI Calculator Modal -->
+    <div class="modal-overlay" id="bmiModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4><i class="fas fa-weight"></i> BMI Kalkulyator</h4>
+                <button class="close-modal" onclick="closeModal('bmiModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label for="height">Bo'y (sm)</label>
+                <input type="number" id="height" class="form-control" placeholder="Misol: 175" min="50" max="250">
+            </div>
+            <div class="form-group">
+                <label for="weight">Vazn (kg)</label>
+                <input type="number" id="weight" class="form-control" placeholder="Misol: 70" min="20" max="200">
+            </div>
+            <div class="form-group" id="bmiResult" style="display: none;">
+                <div style="background: #f0f7ff; padding: 20px; border-radius: 15px; text-align: center;">
+                    <h5 style="margin: 0 0 10px 0; color: #1a237e;">Sizning BMI: <span id="bmiValue"></span></h5>
+                    <p style="margin: 0; color: #666; font-size: 1.1rem;" id="bmiCategory"></p>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="calculateBMI()">
+                Hisoblash
+            </button>
+        </div>
+    </div>
+
+    <!-- Calorie Calculator Modal -->
+    <div class="modal-overlay" id="calorieModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4><i class="fas fa-fire"></i> Kaloriya Kalkulyator</h4>
+                <button class="close-modal" onclick="closeModal('calorieModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label>Jins</label>
+                <select id="gender" class="form-control">
+                    <option value="male">Erkak</option>
+                    <option value="female">Ayol</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Yosh</label>
+                <input type="number" id="age" class="form-control" placeholder="Yoshingiz" min="1" max="120">
+            </div>
+            <div class="form-group">
+                <label>Bo'y (sm)</label>
+                <input type="number" id="calHeight" class="form-control" placeholder="Bo'yingiz" min="50" max="250">
+            </div>
+            <div class="form-group">
+                <label>Vazn (kg)</label>
+                <input type="number" id="calWeight" class="form-control" placeholder="Vazningiz" min="20" max="200">
+            </div>
+            <div class="form-group">
+                <label>Faollik darajasi</label>
+                <select id="activity" class="form-control">
+                    <option value="1.2">Kam faol (ofis ishi)</option>
+                    <option value="1.375">O'rtacha faol (haftada 1-3 marta)</option>
+                    <option value="1.55">Faol (haftada 3-5 marta)</option>
+                    <option value="1.725">Juda faol (haftada 6-7 marta)</option>
+                    <option value="1.9">Professional sportchi</option>
+                </select>
+            </div>
+            <div class="form-group" id="calorieResult" style="display: none;">
+                <div style="background: #f0f7ff; padding: 20px; border-radius: 15px; text-align: center;">
+                    <h5 style="margin: 0 0 10px 0; color: #1a237e;">Kunlik kaloriya ehtiyojingiz:</h5>
+                    <p style="margin: 0; color: #667eea; font-size: 1.5rem; font-weight: 700;" id="calorieValue"></p>
+                    <p style="margin: 10px 0 0 0; color: #666;" id="calorieDescription"></p>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="calculateCalories()">
+                Hisoblash
+            </button>
+        </div>
+    </div>
+
+    <!-- Medication Reminder Modal -->
+    <div class="modal-overlay" id="medicationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4><i class="fas fa-bell"></i> Dori Eslatkichi</h4>
+                <button class="close-modal" onclick="closeModal('medicationModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label>Dori nomi</label>
+                <input type="text" id="medName" class="form-control" placeholder="Misol: Paracetamol">
+            </div>
+            <div class="form-group">
+                <label>Dozasi</label>
+                <input type="text" id="medDose" class="form-control" placeholder="Misol: 500mg">
+            </div>
+            <div class="form-group">
+                <label>Qabul qilish vaqti</label>
+                <input type="time" id="medTime" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Takrorlanish</label>
+                <select id="medFrequency" class="form-control">
+                    <option value="daily">Har kuni</option>
+                    <option value="weekly">Haftada 1 marta</option>
+                    <option value="twice_daily">Kuniga 2 marta</option>
+                    <option value="thrice_daily">Kuniga 3 marta</option>
+                    <option value="weekly">Haftalik</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Boshlanish sanasi</label>
+                <input type="date" id="medStartDate" class="form-control">
+            </div>
+            <div id="activeReminders" style="margin-top: 30px;">
+                <h5 style="color: #1a237e; margin-bottom: 15px;">Faol eslatkichlar:</h5>
+                <div id="reminderList"></div>
+            </div>
+            <button class="btn-primary" onclick="addReminder()">
+                Eslatkich qo'shish
+            </button>
+        </div>
+    </div>
+
+    <!-- Profile Settings Modal -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4><i class="fas fa-user-cog"></i> Shaxsiy Profil</h4>
+                <button class="close-modal" onclick="closeModal('profileModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label>Ism</label>
+                <input type="text" id="profileName" class="form-control" value="Bemor Foydalanuvchi">
+            </div>
+            <div class="form-group">
+                <label>Yosh</label>
+                <input type="number" id="profileAge" class="form-control" placeholder="Yoshingiz">
+            </div>
+            <div class="form-group">
+                <label>Jins</label>
+                <select id="profileGender" class="form-control">
+                    <option value="">Tanlang</option>
+                    <option value="male">Erkak</option>
+                    <option value="female">Ayol</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Bo'y (sm)</label>
+                <input type="number" id="profileHeight" class="form-control" placeholder="Bo'yingiz">
+            </div>
+            <div class="form-group">
+                <label>Vazn (kg)</label>
+                <input type="number" id="profileWeight" class="form-control" placeholder="Vazningiz">
+            </div>
+            <div class="form-group">
+                <label>Mavjud kasalliklar (vergul bilan ajrating)</label>
+                <textarea id="profileConditions" class="form-control" placeholder="Misol: diabet, yurak, gipertoniya" rows="3"></textarea>
+            </div>
+            <button class="btn-primary" onclick="saveProfile()">
+                Saqlash
+            </button>
+        </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4><i class="fas fa-image"></i> Rasm Yuklash</h4>
+                <button class="close-modal" onclick="closeModal('imageModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label>Rasmni tanlang</label>
+                <input type="file" id="imageUpload" class="form-control" accept="image/*" onchange="previewImage(event)">
+                <div id="imagePreview" style="margin-top: 20px; display: none;">
+                    <img id="previewImage" style="max-width: 100%; border-radius: 10px; display: none;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Rasm haqida izoh</label>
+                <textarea id="imageDescription" class="form-control" placeholder="Rasmda nima ko'rinayapti?" rows="3"></textarea>
+            </div>
+            <button class="btn-primary" onclick="analyzeImage()">
+                AI ga Tahlil qilish
+            </button>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-wrap">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <h5>Med Smart</h5>
+            <small>Bemor Panel</small>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="../bemor_dashboard.html" class="nav-item">
+                <i class="fas fa-th-large"></i><span>Asosiy Panel</span>
+            </a>
+            <a href="../navbatlarim/navbatlarim.html" class="nav-item">
+                <i class="fas fa-calendar-check"></i><span>Mening Navbatlarim</span>
+            </a>
+            <a href="../xizmatlar/xizmatlar_bulimi.html" class="nav-item">
+                <i class="fas fa-stethoscope"></i><span>Xizmatlar</span>
+            </a>
+            <a href="../to'lov_tizimi/to'lov.html" class="nav-item">
+                <i class="fas fa-wallet"></i><span>To'lovlar</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <i class="fas fa-envelope"></i><span>Xabarlar</span>
+            </a>
+            <a href="../sozlamalar/sozlamalar.html" class="nav-item">
+                <i class="fas fa-cog"></i><span>Sozlamalar</span>
+            </a>
+            <!-- AI BASHORAT -->
+            <a href="../../ai_predictions.html" class="nav-item" style="margin-top:20px; background: #ecfdf5; color: #059669; border: 1px dashed #10b981;">
+                <i class="fas fa-magic"></i><span>AI Bashorat</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="chiqish()">
+                <i class="fas fa-sign-out-alt"></i> Tizimdan chiqish
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- HEADER -->
+        <div class="content-header">
+            <div class="header-title">
+                <h4><i class="fas fa-robot"></i> Med AI Yordamchi - Intelligent Tibbiy Assistent</h4>
+                <p class="mb-0">Sun'iy intellekt asosida tibbiy maslahat, tahlil va monitoring</p>
+            </div>
+            <div class="user-panel">
+                <div class="user-info" onclick="openModal('profileModal')">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Bemor Foydalanuvchi</div>
+                        <div class="user-role">
+                            <span class="status-indicator">
+                                <span class="status-dot"></span>
+                                AI Pro Foydalanuvchi
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-logout" onclick="chiqish()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- AI MAIN CONTENT -->
+        <div class="ai-main-container">
+            <!-- AI Dashboard -->
+            <div class="ai-dashboard">
+                <div class="ai-card">
+                    <h5><i class="fas fa-cogs"></i> AI Imkoniyatlari</h5>
+                    <div class="features-list">
+                        <div class="feature-item" onclick="showFeature('symptom')">
+                            <i class="fas fa-stethoscope"></i>
+                            <span>Simptomlar asosida tashxis</span>
+                        </div>
+                        <div class="feature-item" onclick="showFeature('medicine')">
+                            <i class="fas fa-pills"></i>
+                            <span>Dori vositalari ma'lumoti</span>
+                        </div>
+                        <div class="feature-item" onclick="showFeature('analysis')">
+                            <i class="fas fa-microscope"></i>
+                            <span>Laboratoriya tahlillarini tushuntirish</span>
+                        </div>
+                        <div class="feature-item" onclick="showFeature('diet')">
+                            <i class="fas fa-apple-alt"></i>
+                            <span>Dieta va parhez maslahatlari</span>
+                        </div>
+                        <div class="feature-item" onclick="showFeature('emergency')">
+                            <i class="fas fa-ambulance"></i>
+                            <span>Favqulodda holatlar bo'yicha ko'rsatmalar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <h5><i class="fas fa-chart-line"></i> AI Faollik Statistika</h5>
+                    <div class="stats-info">
+                        <canvas id="statsChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <h5><i class="fas fa-bolt"></i> Tezkor Harakatlar</h5>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button class="feature-item" onclick="quickAction('symptom_checker')">
+                            <i class="fas fa-search"></i>
+                            <span>Simptomlarni tekshirish</span>
+                        </button>
+                        <button class="feature-item" onclick="quickAction('medicine_search')">
+                            <i class="fas fa-search-plus"></i>
+                            <span>Dori qidirish</span>
+                        </button>
+                        <button class="feature-item" onclick="quickAction('first_aid')">
+                            <i class="fas fa-first-aid"></i>
+                            <span>Birinchi yordam ko'rsatmalari</span>
+                        </button>
+                        <button class="feature-item" onclick="openModal('profileModal')">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Profilni sozlash</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced AI Chat -->
+            <div class="ai-chat-container">
+                <div class="ai-chat-header">
+                    <div class="ai-header-left">
+                        <div class="ai-avatar special">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="ai-info">
+                            <h4>Med AI Pro Assistent</h4>
+                            <p>Deep Learning asosida ishlovchi tibbiy sun'iy intellekt</p>
+                        </div>
+                    </div>
+                    <div class="ai-capabilities">
+                        <span class="capability-tag">24/7 Yordam</span>
+                        <span class="capability-tag">Real vaqtda tahlil</span>
+                        <span class="capability-tag">Shifokorlar bazasi</span>
+                        <span class="capability-tag">Ovozli yordam</span>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Initial AI Message -->
+                    <div class="message ai-message">
+                        <div class="message-content">
+                            <strong>👋 Salom! Men Med Smart AI Pro Assistentman.</strong>
+                            <br><br>
+                            Men quyidagi imkoniyatlarga egaman:
+                            <br>
+                            • <strong>Simptom tahlili:</strong> 5000+ simptomlar bazasi
+                            • <strong>Dori ma'lumoti:</strong> 10,000+ dori vositalari haqida
+                            • <strong>Laboratoriya tahlili:</strong> Barcha tibbiy tahlillarni tushuntirish
+                            • <strong>Dieta maslahati:</strong> Shaxsiylashtirilgan parhez rejalari
+                            • <strong>Favqulodda yordam:</strong> Tezkor chora-tadbirlar
+                            <br><br>
+                            <em>Sizning qanday muammoingiz bor?</em>
+                        </div>
+                        <div class="message-time" id="currentTime"></div>
+                    </div>
+                </div>
+
+                <!-- Advanced Chat Input -->
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <div class="input-actions">
+                            <button class="action-btn" id="symptomBtn" onclick="toggleSymptomMode()" title="Simptom rejimi">
+                                <i class="fas fa-stethoscope"></i>
+                            </button>
+                            <button class="action-btn" onclick="openModal('imageModal')" title="Rasm yuklash">
+                                <i class="fas fa-image"></i>
+                            </button>
+                            <button class="action-btn" id="voiceBtn" onclick="toggleVoiceInput()" title="Ovozli kirish">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button class="action-btn" onclick="clearChat()" title="Suhbatni tozalash">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <textarea 
+                            class="message-input" 
+                            id="messageInput" 
+                            placeholder="Savolingizni yozing yoki AI ga simptomlaringizni tavsiflang..."
+                            rows="1"
+                            onkeydown="handleInputKeydown(event)"
+                        ></textarea>
+                        <button class="send-btn" onclick="sendMessage()" title="Xabarni yuborish">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Medical Analysis Tools -->
+            <div class="analysis-tools">
+                <h5><i class="fas fa-tools"></i> Tibbiy Tahlil Vositalari</h5>
+                <div class="tool-grid">
+                    <div class="tool-card" onclick="openModal('bmiModal')">
+                        <h6><i class="fas fa-weight"></i> BMI Kalkulyator</h6>
+                        <p>Vazn va bo'yingiz asosida tana massasi indeksini hisoblang va sog'lom vazn oralig'ini aniqlang</p>
+                    </div>
+                    <div class="tool-card" onclick="openModal('calorieModal')">
+                        <h6><i class="fas fa-fire"></i> Kaloriya Kalkulyator</h6>
+                        <p>Yosh, jins, bo'y va faollik darajangiz asosida kunlik kaloriya ehtiyojingizni aniqlang</p>
+                    </div>
+                    <div class="tool-card" onclick="openModal('medicationModal')">
+                        <h6><i class="fas fa-bell"></i> Dori Eslatkichi</h6>
+                        <p>Dori qabul qilish vaqtini eslatish tizimi. Ovozli va matnli eslatmalar qo'shing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============== GLOBAL VARIABLES ==============
+        const aiKnowledgeBase = {
+            symptoms: {
+                "bosh ogrigi": {
+                    description: "Bosh og'rig'i turlicha sabablarga bog'liq: stress, migren, sinusit, yoki qon bosimi.",
+                    severity: "medium",
+                    recommendations: [
+                        "Dam oling va suv iching",
+                        "Qorong'u va tinch xonada dam oling",
+                        "Paracetamol yoki ibuprofen ishlating",
+                        "Agar og'riq 3 kundan ortiq davom etsa, shifokorga murojaat qiling"
+                    ],
+                    emergency: "Agar og'riq keskin va quyidagi belgilar bilan birga bo'lsa, darhol tez yordam chaqiring: qusish, ko'rlik, nutq qiyinchiligi, falaj"
+                },
+                "isitma": {
+                    description: "Isitma 38°C dan yuqori bo'lsa, bu infeksiya yoki yallig'lanish belgisi bo'lishi mumkin.",
+                    severity: "medium",
+                    recommendations: [
+                        "Haroratni har 4 soatda o'lchang",
+                        "Ko'p suyuqlik iching",
+                        "Yengil ovqatlang",
+                        "Sovuq kompress qo'llang",
+                        "Paracetamol yoki ibuprofen ishlating"
+                    ],
+                    emergency: "Agar isitma 40°C dan yuqori bo'lsa, 3 kundan ortiq davom etsa yoki boshqa jiddiy simptomlar bilan birga bo'lsa, darhol shifokorga murojaat qiling"
+                },
+                "yurak ogrigi": {
+                    description: "Yurak sohasidagi og'riq jiddiy bo'lishi mumkin. Bu angina yoki yurak xurujining belgisi bo'lishi mumkin.",
+                    severity: "high",
+                    recommendations: [
+                        "Darhol dam oling",
+                        "Tinimsiz og'riq bo'lsa, o'zingiz harakatlanmang",
+                        "Nitroglitserin bor bo'lsa, shifokor ko'rsatmasiga binoan ishlating"
+                    ],
+                    emergency: "Agar og'riq 15 daqiqadan ortiq davom etsa, nafas qisilishi, terlash yoki ko'ngil aynishi bo'lsa, darhol tez yordam chaqiring (103)"
+                },
+                "qusish": {
+                    description: "Qusish ko'pincha oshqozon infeksiyasi yoki oziqlanish muammolari bilan bog'liq.",
+                    severity: "medium",
+                    recommendations: [
+                        "Kichik miqdorda, tez-tez suyuqlik iching",
+                        "Yengil ovqatlar iste'mol qiling (to'yiq, banan, guruch)",
+                        "Dori ishlatmang, agar 24 soatdan ortiq davom etsa, shifokorga murojaat qiling"
+                    ],
+                    emergency: "Agar qusishda qon bo'lsa, og'ir suvsizlanish belgilari ko'rinsa (charchoq, kam siyish) yoki bolalarda 12 soatdan ortiq davom etsa, darhol shifokorga murojaat qiling"
+                },
+                "charchoq": {
+                    description: "Doimiy charchoq anemiya, gormonal muammolar, depressiya yoki yurak-qon tomir kasalliklari belgisi bo'lishi mumkin.",
+                    severity: "low",
+                    recommendations: [
+                        "Yaxshi uxlang (7-9 soat)",
+                        "Muntazam jismoniy mashq qiling",
+                        "Balanslangan ovqatlaning",
+                        "Stressni boshqarish texnikalarini o'rganing",
+                        "Qon testlari uchun shifokorga murojaat qiling"
+                    ],
+                    emergency: "Charchoq o'z-o'zidan favqulodda holat emas, lekin boshqa jiddiy simptomlar bilan birga bo'lsa, shifokorga murojaat qiling"
+                }
+            },
+            
+            medicines: {
+                "paracetamol": {
+                    description: "Og'riq qoldiruvchi va isitma pasaytiruvchi dori.",
+                    dosage: "Kattalar: 500-1000mg, har 4-6 soatda, kuniga 4000mg dan oshmasligi kerak.",
+                    warnings: [
+                        "Jigar kasalligi bo'lsa, shifokorga maslahatlashing",
+                        "Spirtli ichimliklar bilan birga iste'mol qilmang",
+                        "Uzoq muddatli iste'moldan saqlaning"
+                    ],
+                    interactions: "Varifarin bilan birga iste'mol qilinganda ehtiyot bo'ling."
+                },
+                "ibuprofen": {
+                    description: "Yallig'lanishga qarshi dori (NSAID).",
+                    dosage: "Kattalar: 200-400mg, har 4-6 soatda, kuniga 1200mg dan oshmasligi kerak.",
+                    warnings: [
+                        "Oshqozon muammolari bo'lsa, ovqat bilan iste'mol qiling",
+                        "Uzoq muddatli iste'moldan saqlaning",
+                        "Bujg'un bo'lishi mumkin"
+                    ],
+                    interactions: "Aspirin, antikoagulyantlar va boshqa NSAIDlar bilan birga iste'mol qilinganda ehtiyot bo'ling."
+                },
+                "amoksitsillin": {
+                    description: "Antibiotik, bakterial infeksiyalarni davolash uchun.",
+                    dosage: "Shifokor ko'rsatmasi bo'yicha, odatda 250-500mg, kuniga 3 marta.",
+                    warnings: [
+                        "Faqat shifokor ko'rsatmasi bilan ishlating",
+                        "To'liq kursni tamomlang",
+                        "Allergiya bo'lsa, ishlatmang"
+                    ],
+                    interactions: "Antikoagulyantlar va probenesid bilan o'zaro ta'siri bor."
+                },
+                "vitamin c": {
+                    description: "Immunitetni mustahkamlovchi vitamin.",
+                    dosage: "Kunlik 65-90mg, maksimal 2000mg.",
+                    warnings: [
+                        "Ortiqcha doza diareya va oshqozon og'rig'iga sabab bo'lishi mumkin",
+                        "Buyrak toshlari bo'lsa, ehtiyot bo'ling"
+                    ],
+                    interactions: "Kemoterapiya dorilari va antikoagulyantlar bilan o'zaro ta'siri bor."
+                }
+            },
+            
+            emergencies: {
+                "yurak urishi toxtashi": {
+                    steps: [
+                        "1. Tez yordam chaqiring (103)",
+                        "2. Qattiq tekis yotqizing",
+                        "3. CPR boshlang: 30 marta ko'krak qafasini bosish, 2 marta sun'iy nafas",
+                        "4. AED mavjud bo'lsa, foydalaning"
+                    ],
+                    dont: [
+                        "Bemorni harakatlantirmang",
+                        "CPR to'xtatmang, toki yordam kelguncha",
+                        "AED ko'rsatmalariga qat'iy rioya qiling"
+                    ]
+                },
+                "qon ketishi": {
+                    steps: [
+                        "1. Tozalagan mato yoki bandaj bilan bosib turing",
+                        "2. Qo'ni yoki oyoqni yurak darajasidan yuqori ko'taring",
+                        "3. 15 daqiqa davomida bosib turing",
+                        "4. Agar qon to'xtamasa, kasalxonaga boring"
+                    ],
+                    dont: [
+                        "Kichik jarohatlarni bog'lamang",
+                        "Jarohatni tozalamang, agar jiddiy bo'lsa",
+                        "Turniketni faqat o'qotish yoki amputatsiyada ishlating"
+                    ]
+                },
+                "sindirilish": {
+                    steps: [
+                        "1. Harakatlantirmang",
+                        "2. Muz yoki sovuq kompress qo'llang",
+                        "3. Shinalash qiling",
+                        "4. Tez yordam chaqiring"
+                    ],
+                    dont: [
+                        "Sindirilgan joyni to'g'rilashga harakat qilmang",
+                        "Bemorni o'zi yurishga majburlamang",
+                        "Issiq kompress qo'llamang"
+                    ]
+                },
+                "yondirilgan": {
+                    steps: [
+                        "1. Sovuq suv osti saqlang (15-20 daqiqa)",
+                        "2. Steril bandaj bilan o'rang",
+                        "3. Katta yonishlar uchun tez yordam chaqiring",
+                        "4. Yog' yoki moy surmang"
+                    ],
+                    dont: [
+                        "Muz to'g'ridan-to'g'ri teriga qo'ymang",
+                        "Pufakchalarni yormang",
+                        "Uy vositalarini surmang"
+                    ]
+                }
+            },
+            
+            tests: {
+                "qon bosimi": {
+                    normal: "120/80 mmHg",
+                    stages: {
+                        "Normal": "120/80 dan past",
+                        "Yuqori normal": "120-129/80-84",
+                        "1-bosqich gipertoniya": "130-139/85-89",
+                        "2-bosqich gipertoniya": "140/90 yoki yuqori",
+                        "Gipertonik krizis": "180/120 yoki yuqori"
+                    },
+                    recommendations: "Har kuni bir xil vaqtda o'lchang, o'lchashdan oldin 5 daqiqa dam oling, spirtli ichimliklar va nikotindan saqlaning."
+                },
+                "qand": {
+                    normal: "Och qoringa: 4.0-5.6 mmol/L",
+                    stages: {
+                        "Normal": "Och qoringa: 4.0-5.6 mmol/L",
+                        "Prediabet": "Och qoringa: 5.7-6.9 mmol/L",
+                        "Diabet": "Och qoringa: 7.0 mmol/L dan yuqori",
+                        "Ovqatdan keyin normal": "7.8 mmol/L dan past"
+                    },
+                    recommendations: "Qon glukoza darajasini muntazam monitoring qiling, balanslangan ovqatlaning, muntazam jismoniy mashq qiling."
+                },
+                "gemoglobin": {
+                    normal: "Erkaklar: 130-170 g/L, Ayollar: 120-150 g/L",
+                    interpretation: {
+                        "Past": "Anemiya belgisi (temir yetishmasligi, B12 vitamini yetishmasligi)",
+                        "Yuqori": "Polisitemiya, suvsizlanish, o'pka kasalliklari"
+                    },
+                    recommendations: "Temirga boy ovqatlar iste'mol qiling (go'sht, baliq, loviya), C vitamini bilan birga iste'mol qiling, shifokor tavsiyasiga binoan vitaminlar oling."
+                },
+                "xolesterin": {
+                    normal: "Umumiy: 5.0 mmol/L dan past",
+                    components: {
+                        "LDL (yomon)": "3.0 mmol/L dan past",
+                        "HDL (yaxshi)": "1.0 mmol/L dan yuqori",
+                        "Triglitseridlar": "1.7 mmol/L dan past"
+                    },
+                    recommendations: "Yog'li ovqatlarni kamaytiring, ko'p tolali ovqatlar iste'mol qiling, muntazam jismoniy mashq qiling, vaznni boshqaring."
+                }
+            },
+            
+            diets: {
+                "diabet": {
+                    description: "Qandli diabet uchun parhez",
+                    foods: {
+                        "Iste'mol qiling": "Kompleks uglevodlar (yashil sabzavotlar, to'liq donli mahsulotlar), kam yog'li protein (tovuq, baliq), sog'lom yog'lar (yong'oq, avocado)",
+                        "Cheklang": "Oddiy uglevodlar (sheker, oq non), qandli ichimliklar, qayta ishlangan ovqatlar",
+                        "Saqlaning": "Trans yog'lar, qovurilgan ovqatlar, alkogol"
+                    },
+                    recommendations: [
+                        "Kichik porsiyalarda, tez-tez ovqatlaning",
+                        "Karbonatlar va proteinlarni birga iste'mol qiling",
+                        "Ovqatdan oldin va keyin qon qandini o'lchang",
+                        "Kuniga 8-10 stakan suv iching"
+                    ]
+                },
+                "yurak": {
+                    description: "Yurak-qon tomir salomatligi uchun parhez",
+                    foods: {
+                        "Iste'mol qiling": "Omega-3 ga boy baliqlar (losos, sardina), yong'oq, donlar, sabzavotlar, mevalar",
+                        "Cheklang": "Tuz, qayta ishlangan go'sht, qandli ovqatlar",
+                        "Saqlaning": "Trans yog'lar, spirtli ichimliklar, gazlangan ichimliklar"
+                    },
+                    recommendations: [
+                        "Kuniga 5-6 grammdan kam tuz iste'mol qiling",
+                        "Kuniga 25-30 gramm tola iste'mol qiling",
+                        "Kolesterolni kuniga 200mg dan kam iste'mol qiling",
+                        "Antioxidantga boy ovqatlar iste'mol qiling"
+                    ]
+                },
+                "oshqozon": {
+                    description: "Oshqozon-ichak kasalliklari uchun parhez",
+                    foods: {
+                        "Iste'mol qiling": "Yengil ovqatlar (to'yiq, banan, guruch), pishirilgan sabzavotlar, kam yog'li sut mahsulotlari",
+                        "Cheklang": "Achchiq taomlar, kofein, spirtli ichimliklar",
+                        "Saqlaning": "Qovurilgan ovqatlar, turli xil souslar, qayta ishlangan ovqatlar"
+                    },
+                    recommendations: [
+                        "Kichik porsiyalarda, tez-tez ovqatlaning",
+                        "Ovqatdan keyin darhol yotmang",
+                        "Yengil kechki ovqatlang (yatishdan 3 soat oldin)",
+                        "Ovqatni yaxshi chaynang"
+                    ]
+                },
+                "vazn yo'qotish": {
+                    description: "Sog'lom vazn yo'qotish uchun parhez",
+                    foods: {
+                        "Iste'mol qiling": "Ko'p tolali sabzavotlar, to'liq donli mahsulotlar, kam yog'li protein, suv",
+                        "Cheklang": "Qandli ovqatlar, oq non, qayta ishlangan ovqatlar",
+                        "Saqlaning": "Gazlangan ichimliklar, spirtli ichimliklar, fast-fud"
+                    },
+                    recommendations: [
+                        "Kaloriya kamaytiring (kuniga 500-750 kaloriya kamroq)",
+                        "Protein ko'paytiring (vazn har kg uchun 1.2-1.6 gramm)",
+                        "Muntazam mashq qiling (haftada 150 daqiqa)",
+                        "Kuniga 8 soat uxlang"
+                    ]
+                }
+            }
+        };
+
+        // Advanced AI Class
+        class AdvancedAI {
+            constructor() {
+                this.context = [];
+                this.userProfile = this.loadProfile();
+                this.conversationHistory = this.loadConversationHistory();
+                this.reminders = this.loadReminders();
+                this.medicalHistory = this.loadMedicalHistory();
+                this.isSymptomMode = false;
+            }
+
+            loadProfile() {
+                return {
+                    name: localStorage.getItem('userName') || 'Bemor Foydalanuvchi',
+                    age: localStorage.getItem('userAge') || null,
+                    gender: localStorage.getItem('userGender') || null,
+                    height: localStorage.getItem('userHeight') || null,
+                    weight: localStorage.getItem('userWeight') || null,
+                    conditions: JSON.parse(localStorage.getItem('userConditions') || '[]'),
+                    bloodType: localStorage.getItem('bloodType') || null,
+                    allergies: JSON.parse(localStorage.getItem('userAllergies') || '[]')
+                };
+            }
+
+            loadConversationHistory() {
+                return JSON.parse(localStorage.getItem('conversationHistory') || '[]');
+            }
+
+            saveConversationHistory() {
+                if (this.conversationHistory.length > 50) {
+                    this.conversationHistory = this.conversationHistory.slice(-50);
+                }
+                localStorage.setItem('conversationHistory', JSON.stringify(this.conversationHistory));
+            }
+
+            loadReminders() {
+                return JSON.parse(localStorage.getItem('medicationReminders') || '[]');
+            }
+
+            saveReminders() {
+                localStorage.setItem('medicationReminders', JSON.stringify(this.reminders));
+            }
+
+            loadMedicalHistory() {
+                return JSON.parse(localStorage.getItem('medicalHistory') || '[]');
+            }
+
+            saveMedicalHistory() {
+                localStorage.setItem('medicalHistory', JSON.stringify(this.medicalHistory));
+            }
+
+            updateProfile(profile) {
+                this.userProfile = { ...this.userProfile, ...profile };
+                Object.keys(profile).forEach(key => {
+                    if (key === 'conditions' || key === 'allergies') {
+                        localStorage.setItem(`user${key.charAt(0).toUpperCase() + key.slice(1)}`, JSON.stringify(profile[key]));
+                    } else {
+                        localStorage.setItem(`user${key.charAt(0).toUpperCase() + key.slice(1)}`, profile[key]);
+                    }
+                });
+            }
+
+            generateResponse(userInput) {
+                const input = userInput.toLowerCase();
+                let response = "";
+                
+                // Store context
+                const contextEntry = {
+                    user: userInput,
+                    time: new Date().toISOString(),
+                    timestamp: Date.now()
+                };
+                
+                this.context.push(contextEntry);
+                if (this.context.length > 10) this.context.shift();
+
+                // Analyze input
+                const analysis = this.analyzeInput(input);
+                
+                if (analysis.intent === 'symptom_check') {
+                    response = this.handleSymptomCheck(input, analysis.symptoms);
+                } else if (analysis.intent === 'medicine_query') {
+                    response = this.handleMedicineQuery(input, analysis.medicines);
+                } else if (analysis.intent === 'test_result') {
+                    response = this.handleTestResultQuery(input, analysis.tests);
+                } else if (analysis.intent === 'diet_advice') {
+                    response = this.handleDietQuery(input, analysis.diets);
+                } else if (analysis.intent === 'emergency') {
+                    response = this.handleEmergencyQuery(input, analysis.emergencies);
+                } else if (analysis.intent === 'calculation') {
+                    response = this.handleCalculationQuery(input);
+                } else if (analysis.intent === 'greeting') {
+                    response = this.handleGreeting();
+                } else if (analysis.intent === 'profile_update') {
+                    response = this.handleProfileUpdate(input);
+                } else {
+                    response = this.generalResponse(input);
+                }
+
+                // Add personalized context
+                if (this.userProfile.age && this.userProfile.gender) {
+                    response = this.personalizeResponse(response);
+                }
+
+                // Add disclaimer
+                response += "\n\n⚠️ **ESLATMA:** Bu AI tomonidan berilgan umumiy ma'lumot. Har qanday tibbiy masalada shifokor bilan maslahatlashing.";
+
+                // Store in history
+                this.conversationHistory.push({
+                    input: userInput,
+                    response: response,
+                    timestamp: new Date().toISOString()
+                });
+                this.saveConversationHistory();
+
+                return response;
+            }
+
+            analyzeInput(input) {
+                const analysis = {
+                    intent: 'general',
+                    symptoms: [],
+                    medicines: [],
+                    tests: [],
+                    diets: [],
+                    emergencies: [],
+                    severity: 'low'
+                };
+
+                // Check for symptoms
+                Object.keys(aiKnowledgeBase.symptoms).forEach(symptom => {
+                    if (input.includes(symptom)) {
+                        analysis.symptoms.push(symptom);
+                        analysis.intent = 'symptom_check';
+                        if (aiKnowledgeBase.symptoms[symptom].severity === 'high') {
+                            analysis.severity = 'high';
+                        }
+                    }
+                });
+
+                // Check for medicines
+                Object.keys(aiKnowledgeBase.medicines).forEach(medicine => {
+                    if (input.includes(medicine)) {
+                        analysis.medicines.push(medicine);
+                        analysis.intent = 'medicine_query';
+                    }
+                });
+
+                // Check for test types
+                Object.keys(aiKnowledgeBase.tests).forEach(test => {
+                    if (input.includes(test)) {
+                        analysis.tests.push(test);
+                        analysis.intent = 'test_result';
+                    }
+                });
+
+                // Check for diet types
+                Object.keys(aiKnowledgeBase.diets).forEach(diet => {
+                    if (input.includes(diet)) {
+                        analysis.diets.push(diet);
+                        analysis.intent = 'diet_advice';
+                    }
+                });
+
+                // Check for emergencies
+                Object.keys(aiKnowledgeBase.emergencies).forEach(emergency => {
+                    if (input.includes(emergency)) {
+                        analysis.emergencies.push(emergency);
+                        analysis.intent = 'emergency';
+                        analysis.severity = 'high';
+                    }
+                });
+
+                // Check for calculations
+                if (input.includes('hisobla') || input.includes('kalkulyator') || 
+                    input.includes('bmi') || input.includes('kaloriya')) {
+                    analysis.intent = 'calculation';
+                }
+
+                // Check for greetings
+                if (input.includes('salom') || input.includes('hello') || 
+                    input.includes('hi') || input.includes('assalom')) {
+                    analysis.intent = 'greeting';
+                }
+
+                // Check for profile updates
+                if (input.includes('yosim') || input.includes('ismim') || 
+                    input.includes('vaznim') || input.includes("bo'yim")) {
+                    analysis.intent = 'profile_update';
+                }
+
+                return analysis;
+            }
+
+            handleSymptomCheck(input, symptoms) {
+                if (symptoms.length === 0) {
+                    return "Simptomlaringizni batafsilroq tavsiflang. Misol: 'Boshim og'riyapti va isitma bor'";
+                }
+
+                let response = "🔍 **Simptomlar tahlili:**\n\n";
+                
+                symptoms.forEach(symptom => {
+                    const symptomData = aiKnowledgeBase.symptoms[symptom];
+                    response += `• **${symptom}:** ${symptomData.description}\n`;
+                    
+                    response += `\n  **Tavsiyalar:**\n`;
+                    symptomData.recommendations.forEach(rec => {
+                        response += `  ✓ ${rec}\n`;
+                    });
+                    
+                    if (symptomData.severity === 'high') {
+                        response += `\n  ⚠️ **FAVQULODDA:** ${symptomData.emergency}\n`;
+                    }
+                    
+                    response += "\n";
+                });
+
+                if (this.isSymptomMode) {
+                    response += "\n📝 **Simptom rejimi:** Yana qanday simptomlar bor? Yoki 'tugatish' deb yozing.";
+                } else {
+                    response += "\nℹ️ **Qo'shimcha ma'lumot:** Simptomlarni to'liqroq tahlil qilish uchun 'Simptom rejimi' ni yoqing.";
+                }
+
+                return response;
+            }
+
+            handleMedicineQuery(input, medicines) {
+                if (medicines.length === 0) {
+                    return "Qaysi dori haqida ma'lumot kerak? Misol: 'paracetamol haqida ma'lumot bering'";
+                }
+
+                let response = "💊 **Dori ma'lumoti:**\n\n";
+                
+                medicines.forEach(medicine => {
+                    const medData = aiKnowledgeBase.medicines[medicine];
+                    response += `**${medicine.toUpperCase()}**\n`;
+                    response += `📋 Tavsif: ${medData.description}\n`;
+                    response += `📏 Dozasi: ${medData.dosage}\n`;
+                    
+                    if (medData.warnings.length > 0) {
+                        response += `⚠️ Ogohlantirishlar:\n`;
+                        medData.warnings.forEach(warning => {
+                            response += `  • ${warning}\n`;
+                        });
+                    }
+                    
+                    if (medData.interactions) {
+                        response += `🔗 O'zaro ta'siri: ${medData.interactions}\n`;
+                    }
+                    
+                    response += "\n";
+                });
+
+                return response + "💡 **Eslatma:** Har qanday dorini shifokor ko'rsatmasi bilan ishlating.";
+            }
+
+            handleTestResultQuery(input, tests) {
+                if (tests.length === 0) {
+                    return "Qaysi tahlil natijalari haqida ma'lumot kerak? Misol: 'qon bosimi normal qiymatlari'";
+                }
+
+                let response = "📊 **Tahlil natijalari tushuntirishi:**\n\n";
+                
+                tests.forEach(test => {
+                    const testData = aiKnowledgeBase.tests[test];
+                    response += `**${test.toUpperCase()}**\n`;
+                    response += `📈 Normal qiymat: ${testData.normal}\n`;
+                    
+                    if (testData.stages) {
+                        response += `📋 Bosqichlar:\n`;
+                        Object.entries(testData.stages).forEach(([stage, range]) => {
+                            response += `  • ${stage}: ${range}\n`;
+                        });
+                    }
+                    
+                    if (testData.recommendations) {
+                        response += `💡 Tavsiyalar: ${testData.recommendations}\n`;
+                    }
+                    
+                    response += "\n";
+                });
+
+                return response;
+            }
+
+            handleDietQuery(input, diets) {
+                if (diets.length === 0) {
+                    return "Qaysi kasallik uchun dieta maslahati kerak? Misol: 'diabet uchun dieta'";
+                }
+
+                let response = "🥗 **Dieta maslahatlari:**\n\n";
+                
+                diets.forEach(diet => {
+                    const dietData = aiKnowledgeBase.diets[diet];
+                    response += `**${diet.toUpperCase()} PARHEZI**\n`;
+                    response += `📋 ${dietData.description}\n\n`;
+                    
+                    response += `✅ **Iste'mol qiling:**\n`;
+                    Object.entries(dietData.foods["Iste'mol qiling"]).forEach(([category, foods]) => {
+                        response += `  ${foods}\n`;
+                    });
+                    
+                    response += `\n⚠️ **Cheklang:**\n`;
+                    Object.entries(dietData.foods["Cheklang"]).forEach(([category, foods]) => {
+                        response += `  ${foods}\n`;
+                    });
+                    
+                    response += `\n❌ **Saqlaning:**\n`;
+                    Object.entries(dietData.foods["Saqlaning"]).forEach(([category, foods]) => {
+                        response += `  ${foods}\n`;
+                    });
+                    
+                    if (dietData.recommendations) {
+                        response += `\n💡 **Qo'shimcha tavsiyalar:**\n`;
+                        dietData.recommendations.forEach(rec => {
+                            response += `  • ${rec}\n`;
+                        });
+                    }
+                    
+                    response += "\n";
+                });
+
+                return response;
+            }
+
+            handleEmergencyQuery(input, emergencies) {
+                if (emergencies.length === 0) {
+                    return "Qanday favqulodda holat haqida ma'lumot kerak? Misol: 'yurak urishi to'xtaganda nima qilish kerak?'";
+                }
+
+                let response = "🚨 **FAVQULODDA YORDAM KO'RSATMALARI:**\n\n";
+                
+                emergencies.forEach(emergency => {
+                    const emergencyData = aiKnowledgeBase.emergencies[emergency];
+                    response += `**${emergency.toUpperCase()}**\n`;
+                    
+                    response += `✅ **Nima qilish kerak:**\n`;
+                    emergencyData.steps.forEach(step => {
+                        response += `  ${step}\n`;
+                    });
+                    
+                    if (emergencyData.dont) {
+                        response += `\n❌ **Nima qilmaslik kerak:**\n`;
+                        emergencyData.dont.forEach(dont => {
+                            response += `  ${dont}\n`;
+                        });
+                    }
+                    
+                    response += "\n";
+                });
+
+                return response + "📞 **Tez yordam: 103** - Favqulodda holatlarda darhol chaqiring!";
+            }
+
+            handleCalculationQuery(input) {
+                if (input.includes('bmi')) {
+                    return "BMI hisoblash uchun 'BMI Kalkulyator' vositasidan foydalaning. Bo'y va vazningizni kiriting.";
+                } else if (input.includes('kaloriya')) {
+                    return "Kaloriya ehtiyojini hisoblash uchun 'Kaloriya Kalkulyator' vositasidan foydalaning. Yosh, jins, bo'y, vazn va faollik darajangizni kiriting.";
+                } else {
+                    return "Qaysi hisoblash kerak? BMI, kaloriya, homiladorlik davri yoki dori eslatkichlarini hisoblash mumkin.";
+                }
+            }
+
+            handleGreeting() {
+                const greetings = [
+                    "Salom! Med AI yordamchisiman. Sizga qanday yordam bera olaman?",
+                    "Assalomu alaykum! Tibbiy masalalar bo'yicha yordam bera olaman.",
+                    "Salom! Men sizning tibbiy yordamchingizman. Savolingiz bo'lsa, yozing.",
+                    "Xush kelibsiz! AI tibbiy yordamchi sifatida xizmat qilaman."
+                ];
+                return greetings[Math.floor(Math.random() * greetings.length)];
+            }
+
+            handleProfileUpdate(input) {
+                // Extract profile information from input
+                const updates = {};
+                
+                if (input.includes('yosim')) {
+                    const ageMatch = input.match(/\d+/);
+                    if (ageMatch) updates.age = ageMatch[0];
+                }
+                
+                if (input.includes('vaznim')) {
+                    const weightMatch = input.match(/\d+/);
+                    if (weightMatch) updates.weight = weightMatch[0];
+                }
+                
+                if (input.includes("bo'yim")) {
+                    const heightMatch = input.match(/\d+/);
+                    if (heightMatch) updates.height = heightMatch[0];
+                }
+                
+                if (Object.keys(updates).length > 0) {
+                    this.updateProfile(updates);
+                    return `✅ Profil ma'lumotlaringiz yangilandi: ${JSON.stringify(updates)}`;
+                }
+                
+                return "Profil ma'lumotlaringizni yangilash uchun 'Profil sozlamalari' ni oching yoki ma'lumotlaringizni yozing. Misol: 'yosim 30, vaznim 70kg'";
+            }
+
+            generalResponse(input) {
+                const responses = [
+                    "Tushunishim uchun savolingizni batafsilroq yozishingiz mumkinmi?",
+                    "Bu haqda aniq ma'lumot bera olishim uchun qo'shimcha tafsilot bera olasizmi?",
+                    "Tibbiy masalada aniq tavsif muhim. Simptomlaringizni vaqtini, joyini va kuchayish darajasini aytishingiz mumkinmi?",
+                    "Shifokorlarimiz bilan bevosita bog'lanishni xohlaysizmi yoki avval AI yordamidan foydalanmoqchimisiz?",
+                    "Kasalik tarixingiz haqida ma'lumot bera olasizmi? Bu tashxis qo'yishda yordam beradi."
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+
+            personalizeResponse(response) {
+                let personalized = response;
+                
+                if (this.userProfile.age && this.userProfile.gender) {
+                    const age = parseInt(this.userProfile.age);
+                    const gender = this.userProfile.gender;
+                    
+                    if (response.includes('dozasi')) {
+                        if (age < 18) {
+                            personalized = personalized.replace(/Kattalar:/g, "Bolalar uchun:");
+                        } else if (age > 65) {
+                            personalized = personalized.replace(/Kattalar:/g, "Katta yoshdagilar uchun:");
+                        }
+                    }
+                    
+                    if (gender === 'female' && response.includes('dieta')) {
+                        personalized += "\n\n👩 **Ayollar uchun eslatma:** Temir va folat ehtiyojlaringizga e'tibor bering.";
+                    }
+                }
+                
+                return personalized;
+            }
+
+            addReminder(name, dose, time, frequency, startDate) {
+                const reminder = {
+                    id: Date.now(),
+                    name: name,
+                    dose: dose,
+                    time: time,
+                    frequency: frequency,
+                    startDate: startDate,
+                    active: true,
+                    lastTaken: null,
+                    nextAlert: this.calculateNextAlert(time, frequency)
+                };
+                
+                this.reminders.push(reminder);
+                this.saveReminders();
+                this.startReminderNotifications();
+                
+                return reminder;
+            }
+
+            calculateNextAlert(time, frequency) {
+                const now = new Date();
+                const [hours, minutes] = time.split(':').map(Number);
+                const next = new Date();
+                next.setHours(hours, minutes, 0, 0);
+                
+                if (next <= now) {
+                    next.setDate(next.getDate() + 1);
+                }
+                
+                return next;
+            }
+
+            startReminderNotifications() {
+                // Check reminders every minute
+                setInterval(() => {
+                    const now = new Date();
+                    this.reminders.forEach(reminder => {
+                        if (reminder.active && reminder.nextAlert <= now) {
+                            showNotification("Dori vaqti!", `${reminder.name} (${reminder.dose}) qabul qilish vaqti!`);
+                            
+                            // Schedule next alert
+                            reminder.nextAlert = this.calculateNextAlert(reminder.time, reminder.frequency);
+                            this.saveReminders();
+                        }
+                    });
+                }, 60000); // Check every minute
+            }
+
+            calculateBMI(height, weight) {
+                const heightM = height / 100;
+                const bmi = weight / (heightM * heightM);
+                return bmi.toFixed(1);
+            }
+
+            interpretBMI(bmi) {
+                if (bmi < 18.5) return "Past vazn";
+                if (bmi < 25) return "Normal vazn";
+                if (bmi < 30) return "Ortiqcha vazn";
+                return "Semizlik";
+            }
+
+            calculateCalories(gender, age, height, weight, activity) {
+                // Harris-Benedict formula
+                let bmr;
+                if (gender === 'male') {
+                    bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
+                } else {
+                    bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+                }
+                
+                const tdee = bmr * activity;
+                return Math.round(tdee);
+            }
+
+            calculatePregnancy(lastPeriod) {
+                const lastPeriodDate = new Date(lastPeriod);
+                const dueDate = new Date(lastPeriodDate);
+                dueDate.setDate(dueDate.getDate() + 280); // 40 weeks
+                
+                const today = new Date();
+                const weeksPregnant = Math.floor((today - lastPeriodDate) / (7 * 24 * 60 * 60 * 1000));
+                
+                return {
+                    weeks: weeksPregnant,
+                    dueDate: dueDate.toLocaleDateString('uz-UZ'),
+                    trimester: weeksPregnant < 13 ? "1" : weeksPregnant < 27 ? "2" : "3"
+                };
+            }
+        }
+
+        // ============== GLOBAL AI INSTANCE ==============
+        const aiAssistant = new AdvancedAI();
+
+        // ============== DOM ELEMENTS ==============
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const notification = document.getElementById('notification');
+        const voiceRecording = document.getElementById('voiceRecording');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const statsChartElement = document.getElementById('statsChart');
+        const reminderList = document.getElementById('reminderList');
+
+        // ============== CHART.JS INITIALIZATION ==============
+        let statsChart;
+        function initChart() {
+            const ctx = statsChartElement.getContext('2d');
+            const data = {
+                labels: ['Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba', 'Yakshanba'],
+                datasets: [{
+                    label: 'AI Suhbatlar',
+                    data: [7, 12, 8, 15, 10, 5, 9],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Foydalanuvchi Faolligi',
+                    data: [5, 8, 6, 10, 7, 3, 6],
+                    borderColor: '#764ba2',
+                    backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            };
+
+            statsChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#1a237e',
+                                font: {
+                                    size: 12,
+                                    weight: '600'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(140, 158, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#666'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(140, 158, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#666'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============== NOTIFICATION SYSTEM ==============
+        function showNotification(title, message) {
+            document.getElementById('notificationTitle').textContent = title;
+            document.getElementById('notificationMessage').textContent = message;
+            notification.classList.add('show');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+            
+            // Play notification sound
+            playNotificationSound();
+        }
+
+        function closeNotification() {
+            notification.classList.remove('show');
+        }
+
+        function playNotificationSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.log("Audio not supported");
+            }
+        }
+
+        // ============== VOICE INPUT ==============
+        let isRecording = false;
+        let recognition = null;
+
+        function toggleVoiceInput() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            
+            if (!isRecording) {
+                startVoiceRecording();
+                voiceBtn.classList.add('active');
+                voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            } else {
+                stopVoiceRecording();
+                voiceBtn.classList.remove('active');
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            }
+            
+            isRecording = !isRecording;
+        }
+
+        function startVoiceRecording() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.lang = 'uz-UZ';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                
+                recognition.onstart = function() {
+                    voiceRecording.style.display = 'block';
+                    showNotification("Ovozli kirish", "Endi gapiring...");
+                };
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    messageInput.value = transcript;
+                    autoResizeTextarea();
+                    
+                    showNotification("Ovozli kirish", "Matn muvaffaqiyatli qabul qilindi");
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error("Voice recognition error:", event.error);
+                    showNotification("Xatolik", "Ovozni taniy olmadim. Iltimos, qayta urinib ko'ring.");
+                };
+                
+                recognition.onend = function() {
+                    voiceRecording.style.display = 'none';
+                    stopVoiceRecording();
+                };
+                
+                recognition.start();
+            } else {
+                showNotification("Xatolik", "Brauzeringiz ovozli kirishni qo'llab-quvvatlamaydi");
+            }
+        }
+
+        function stopVoiceRecording() {
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+            voiceRecording.style.display = 'none';
+        }
+
+        // ============== SYMPTOM MODE ==============
+        let isSymptomMode = false;
+        const symptomBtn = document.getElementById('symptomBtn');
+
+        function toggleSymptomMode() {
+            isSymptomMode = !isSymptomMode;
+            aiAssistant.isSymptomMode = isSymptomMode;
+            
+            if (isSymptomMode) {
+                symptomBtn.classList.add('active');
+                showNotification("Simptom rejimi", "Endi siz simptom rejimidasiz. Barcha simptomlaringizni tavsiflang. Tugatish uchun 'tugatish' deb yozing.");
+                messageInput.placeholder = "Simptomlaringizni tavsiflang...";
+            } else {
+                symptomBtn.classList.remove('active');
+                showNotification("Simptom rejimi", "Simptom rejimi o'chirildi");
+                messageInput.placeholder = "Savolingizni yozing yoki AI ga simptomlaringizni tavsiflang...";
+            }
+        }
+
+        // ============== MODAL FUNCTIONS ==============
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Load data if needed
+            if (modalId === 'medicationModal') {
+                loadReminders();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+
+        // ============== BMI CALCULATOR ==============
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            if (!height || !weight || height < 50 || height > 250 || weight < 20 || weight > 200) {
+                showNotification("Xatolik", "Iltimos, to'g'ri qiymatlar kiriting");
+                return;
+            }
+            
+            const bmi = aiAssistant.calculateBMI(height, weight);
+            const category = aiAssistant.interpretBMI(bmi);
+            
+            document.getElementById('bmiValue').textContent = bmi;
+            document.getElementById('bmiCategory').textContent = category;
+            document.getElementById('bmiResult').style.display = 'block';
+            
+            // Save to user profile
+            aiAssistant.updateProfile({ height: height, weight: weight });
+            
+            // Add to chat
+            addMessage(`BMI hisoblash natijasi: ${bmi} (${category})`, 'ai');
+        }
+
+        // ============== CALORIE CALCULATOR ==============
+        function calculateCalories() {
+            const gender = document.getElementById('gender').value;
+            const age = parseInt(document.getElementById('age').value);
+            const height = parseFloat(document.getElementById('calHeight').value);
+            const weight = parseFloat(document.getElementById('calWeight').value);
+            const activity = parseFloat(document.getElementById('activity').value);
+            
+            if (!age || !height || !weight) {
+                showNotification("Xatolik", "Iltimos, barcha maydonlarni to'ldiring");
+                return;
+            }
+            
+            const calories = aiAssistant.calculateCalories(gender, age, height, weight, activity);
+            let description = "";
+            
+            if (calories < 1800) {
+                description = "Past kaloriya ehtiyoji. Vazn yo'qotish uchun mos.";
+            } else if (calories < 2500) {
+                description = "O'rtacha kaloriya ehtiyoji. Vazn saqlash uchun mos.";
+            } else {
+                description = "Yuqori kaloriya ehtiyoji. Vazn olish uchun mos.";
+            }
+            
+            document.getElementById('calorieValue').textContent = `${calories} kaloriya`;
+            document.getElementById('calorieDescription').textContent = description;
+            document.getElementById('calorieResult').style.display = 'block';
+            
+            // Save to user profile
+            aiAssistant.updateProfile({ 
+                age: age, 
+                gender: gender, 
+                height: height, 
+                weight: weight 
+            });
+            
+            // Add to chat
+            addMessage(`Kaloriya ehtiyoji: ${calories} kaloriya/kun. ${description}`, 'ai');
+        }
+
+        // ============== MEDICATION REMINDER ==============
+        function loadReminders() {
+            reminderList.innerHTML = '';
+            
+            if (aiAssistant.reminders.length === 0) {
+                reminderList.innerHTML = '<p style="color: #666; text-align: center;">Hozircha eslatkichlar yo\'q</p>';
+                return;
+            }
+            
+            aiAssistant.reminders.forEach(reminder => {
+                const reminderDiv = document.createElement('div');
+                reminderDiv.className = 'tool-card';
+                reminderDiv.style.marginBottom = '10px';
+                reminderDiv.innerHTML = `
+                    <h6><i class="fas fa-pills"></i> ${reminder.name}</h6>
+                    <p>${reminder.dose} • ${reminder.time} • ${getFrequencyText(reminder.frequency)}</p>
+                    <button onclick="removeReminder(${reminder.id})" style="background: #ff4081; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">
+                        <i class="fas fa-trash"></i> O'chirish
+                    </button>
+                `;
+                reminderList.appendChild(reminderDiv);
+            });
+        }
+
+        function getFrequencyText(frequency) {
+            const frequencies = {
+                'daily': 'Har kuni',
+                'twice_daily': 'Kuniga 2 marta',
+                'thrice_daily': 'Kuniga 3 marta',
+                'weekly': 'Haftada 1 marta'
+            };
+            return frequencies[frequency] || frequency;
+        }
+
+        function addReminder() {
+            const name = document.getElementById('medName').value;
+            const dose = document.getElementById('medDose').value;
+            const time = document.getElementById('medTime').value;
+            const frequency = document.getElementById('medFrequency').value;
+            const startDate = document.getElementById('medStartDate').value;
+            
+            if (!name || !dose || !time || !startDate) {
+                showNotification("Xatolik", "Iltimos, barcha maydonlarni to'ldiring");
+                return;
+            }
+            
+            const reminder = aiAssistant.addReminder(name, dose, time, frequency, startDate);
+            
+            // Clear form
+            document.getElementById('medName').value = '';
+            document.getElementById('medDose').value = '';
+            document.getElementById('medTime').value = '';
+            document.getElementById('medStartDate').value = '';
+            
+            showNotification("Muvaffaqiyat", "Dori eslatkichi qo'shildi");
+            loadReminders();
+            
+            // Add to chat
+            addMessage(`✅ Yangi dori eslatkichi qo'shildi: ${name} (${dose}) - ${time}`, 'ai');
+        }
+
+        function removeReminder(id) {
+            aiAssistant.reminders = aiAssistant.reminders.filter(r => r.id !== id);
+            aiAssistant.saveReminders();
+            loadReminders();
+            showNotification("Muvaffaqiyat", "Eslatkich o'chirildi");
+        }
+
+        // ============== PROFILE MANAGEMENT ==============
+        function saveProfile() {
+            const name = document.getElementById('profileName').value;
+            const age = document.getElementById('profileAge').value;
+            const gender = document.getElementById('profileGender').value;
+            const height = document.getElementById('profileHeight').value;
+            const weight = document.getElementById('profileWeight').value;
+            const conditions = document.getElementById('profileConditions').value
+                .split(',')
+                .map(c => c.trim())
+                .filter(c => c.length > 0);
+            
+            const profile = {
+                name: name,
+                age: age,
+                gender: gender,
+                height: height,
+                weight: weight,
+                conditions: conditions
+            };
+            
+            aiAssistant.updateProfile(profile);
+            document.getElementById('userName').textContent = name;
+            closeModal('profileModal');
+            showNotification("Muvaffaqiyat", "Profil ma'lumotlari saqlandi");
+            
+            // Add to chat
+            addMessage(`✅ Profil ma'lumotlaringiz yangilandi. Endi men sizga shaxsiylashtirilgan maslahat bera olaman.`, 'ai');
+        }
+
+        // ============== IMAGE ANALYSIS ==============
+        function previewImage(event) {
+            const input = event.target;
+            const preview = document.getElementById('previewImage');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function analyzeImage() {
+            const fileInput = document.getElementById('imageUpload');
+            const description = document.getElementById('imageDescription').value;
+            
+            if (!fileInput.files[0]) {
+                showNotification("Xatolik", "Iltimos, rasm tanlang");
+                return;
+            }
+            
+            showLoading();
+            
+            // Simulate AI image analysis
+            setTimeout(() => {
+                hideLoading();
+                
+                const file = fileInput.files[0];
+                const analysis = simulateImageAnalysis(file, description);
+                
+                closeModal('imageModal');
+                
+                // Add analysis to chat
+                addMessage(`🖼️ **Rasm tahlili:**\n\n${analysis}`, 'ai');
+                
+                showNotification("Tahlil yakunlandi", "Rasm tahlili chatga qo'shildi");
+            }, 2000);
+        }
+
+        function simulateImageAnalysis(file, description) {
+            const responses = [
+                `Rasmda ${description} ko'rinayapti. Bu normal teri holati bo'lishi mumkin. Agar bezovtalik bo'lsa, dermatolog bilan maslahatlashing.`,
+                `Tasvirlangan holat o'z-o'zidan yechilishi mumkin. Kuzatib boring va agar yomonlashsa, shifokorga murojaat qiling.`,
+                `Bu turdagi o'zgarishlar ko'pincha zararsiz. Biroq, agar og'riq, qichishish yoki o'sish kuzatsangiz, tekshirtirishingiz kerak.`,
+                `Rasmda ko'rinayotgan holat vaqtinchalik bo'lishi mumkin. 2-3 kun kuzatib, agar takrorlansa, mutaxassisga murojaat qiling.`
+            ];
+            
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+
+        // ============== CHAT FUNCTIONS ==============
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            
+            // Update current time in welcome message
+            const currentTimeElements = document.querySelectorAll('#currentTime');
+            currentTimeElements.forEach(el => {
+                el.textContent = now.toLocaleDateString('uz-UZ', options) + ' ' + 
+                                now.toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'});
+            });
+        }
+
+        function autoResizeTextarea() {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 150) + 'px';
+        }
+
+        function handleInputKeydown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Check for symptom mode termination
+            if (isSymptomMode && (message.toLowerCase().includes('tugatish') || 
+                message.toLowerCase().includes('stop') || 
+                message.toLowerCase().includes('tugat'))) {
+                toggleSymptomMode();
+                addMessage("Simptom rejimi tugatildi. Sizning simptomlaringiz tahlil qilindi.", 'ai');
+                messageInput.value = '';
+                autoResizeTextarea();
+                return;
+            }
+
+            // Add user message
+            addMessage(message, 'user');
+            messageInput.value = '';
+            autoResizeTextarea();
+
+            // Show thinking animation
+            showThinking();
+
+            // Simulate AI processing
+            const delay = Math.min(2500, message.length * 40 + 600);
+            
+            setTimeout(() => {
+                removeThinking();
+                const response = aiAssistant.generateResponse(message);
+                addMessage(response, 'ai');
+                
+                // Update chart
+                updateChart();
+                
+                // Scroll to bottom
+                scrollToBottom();
+            }, delay);
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const time = new Date().toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'});
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">${formatMessage(text)}</div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function formatMessage(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>')
+                .replace(/⚠️/g, '⚠️')
+                .replace(/💊/g, '💊')
+                .replace(/🔍/g, '🔍')
+                .replace(/📊/g, '📊')
+                .replace(/🥗/g, '🥗')
+                .replace(/🚨/g, '🚨')
+                .replace(/✅/g, '✅')
+                .replace(/❌/g, '❌')
+                .replace(/ℹ️/g, 'ℹ️')
+                .replace(/👩/g, '👩')
+                .replace(/🤰/g, '🤰')
+                .replace(/🖼️/g, '🖼️')
+                .replace(/👋/g, '👋');
+        }
+
+        function showThinking() {
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'ai-thinking';
+            thinkingDiv.id = 'thinkingIndicator';
+            thinkingDiv.innerHTML = `
+                <div class="thinking-text">AI fikrlayapti...</div>
+                <div class="thinking-dots">
+                    <div class="thinking-dot"></div>
+                    <div class="thinking-dot"></div>
+                    <div class="thinking-dot"></div>
+                </div>
+            `;
+            chatMessages.appendChild(thinkingDiv);
+            scrollToBottom();
+        }
+
+        function removeThinking() {
+            const thinkingIndicator = document.getElementById('thinkingIndicator');
+            if (thinkingIndicator) {
+                thinkingIndicator.remove();
+            }
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function clearChat() {
+            if (confirm("Barcha suhbat xabarlarini o'chirishni xohlaysizmi?")) {
+                chatMessages.innerHTML = '';
+                addMessage("Suhbat tozalandi. Yangi savol bering!", 'ai');
+            }
+        }
+
+        function askAI(question) {
+            messageInput.value = question;
+            sendMessage();
+        }
+
+        function showFeature(feature) {
+            const features = {
+                symptom: "Simptom tahlili - Belgilaringizni kiriting, AI mumkin bo'lgan sabablarni aniqlaydi. Simptom rejimini yoqish uchun stetoskop tugmasini bosing.",
+                medicine: "Dori ma'lumoti - 10,000+ dori vositalari haqida to'liq ma'lumot: dozalar, ogohlantirishlar, o'zaro ta'sirlar.",
+                analysis: "Tahlil tushuntirish - Laboratoriya natijalarini tushuntirib beradi. Qon bosimi, qand, gemoglobin va boshqa tahlillar.",
+                diet: "Dieta maslahati - Kasalligingizga mos parhez rejasi. Ovqatlar ro'yxati va ovqatlanish rejasi.",
+                emergency: "Favqulodda yordam - Tezkor chora-tadbirlar ko'rsatmalari. Yurak xuruji, qon ketish, sindirish va boshqa favqulodda holatlar."
+            };
+            
+            if (features[feature]) {
+                addMessage(features[feature], 'ai');
+            }
+        }
+
+        function quickAction(action) {
+            const actions = {
+                symptom_checker: "Simptomlaringizni kiriting. Misol: 'Boshim og'riyapti, isitma bor, charchoq'",
+                medicine_search: "Qaysi dori haqida ma'lumot kerak? Dori nomini yozing.",
+                first_aid: "Favqulodda holat turini tanlang yoki tavsiflang."
+            };
+            
+            if (actions[action]) {
+                messageInput.value = actions[action];
+                messageInput.focus();
+            }
+        }
+
+        function openTool(tool) {
+            switch(tool) {
+                case 'bmi_calculator':
+                    openModal('bmiModal');
+                    break;
+                case 'calorie_calculator':
+                    openModal('calorieModal');
+                    break;
+                case 'medication_reminder':
+                    openModal('medicationModal');
+                    break;
+                default:
+                    alert(`"${tool}" vositasi ochilmoqda...`);
+            }
+        }
+
+        // ============== LOADING FUNCTIONS ==============
+        function showLoading() {
+            loadingSpinner.style.display = 'block';
+        }
+
+        function hideLoading() {
+            loadingSpinner.style.display = 'none';
+        }
+
+        // ============== CHART UPDATE ==============
+        function updateChart() {
+            // Simulate data update
+            if (statsChart) {
+                statsChart.data.datasets[0].data = statsChart.data.datasets[0].data.map(value => 
+                    Math.min(value + Math.random() * 3 - 1, 20)
+                );
+                statsChart.data.datasets[1].data = statsChart.data.datasets[1].data.map(value => 
+                    Math.min(value + Math.random() * 2 - 0.5, 15)
+                );
+                statsChart.update();
+            }
+        }
+
+        // ============== INITIALIZATION ==============
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize datetime
+            updateDateTime();
+            setInterval(updateDateTime, 60000);
+            
+            // Initialize chart
+            initChart();
+            
+            // Load user profile
+            const userName = aiAssistant.userProfile.name;
+            document.getElementById('userName').textContent = userName;
+            
+            // Setup textarea autoresize
+            messageInput.addEventListener('input', autoResizeTextarea);
+            
+            // Start reminder notifications
+            aiAssistant.startReminderNotifications();
+            
+            // Welcome effects
+            setTimeout(() => {
+                document.querySelector('.ai-avatar').style.transform = 'scale(1.1)';
+                document.querySelector('.ai-avatar').style.transition = 'transform 0.5s ease';
+            }, 1000);
+            
+            // Interactive effects
+            document.querySelectorAll('.feature-item, .action-btn-large, .tool-card').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Welcome notification
+            setTimeout(() => {
+                showNotification("Xush kelibsiz!", "Med AI yordamchi sizga xizmat qilishga tayyor!");
+            }, 2000);
+        });
+
+        // ============== LOGOUT FUNCTION ==============
+        function chiqish() {
+            if (confirm("AI yordamchidan chiqishni xohlaysizmi?")) {
+                // Save conversation before leaving
+                aiAssistant.saveConversationHistory();
+                window.location.href = "../../index.html";
+            }
+        }
+
+        // ============== KEYBOARD SHORTCUTS ==============
+        document.addEventListener('keydown', function(event) {
+            // Ctrl + / to focus input
+            if (event.ctrlKey && event.key === '/') {
+                event.preventDefault();
+                messageInput.focus();
+            }
+            
+            // Escape to close modals
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay').forEach(modal => {
+                    if (modal.style.display === 'flex') {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+            
+            // Ctrl + Enter to send message
+            if (event.ctrlKey && event.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+<script src="../../js/ai-widget.js"></script>
+</body>
+</html>

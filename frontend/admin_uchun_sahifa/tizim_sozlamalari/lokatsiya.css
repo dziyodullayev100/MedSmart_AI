@@ -1,0 +1,303 @@
+/* Xarita konteyneri */
+#mapContainer {
+  width: 100%;
+  height: 500px;
+  border: 2px solid #6c5ce7;
+  border-radius: 10px;
+  margin-top: 15px;
+  overflow: hidden;
+}
+
+.map-container {
+  width: 100%;
+  height: 400px;
+  border: 2px solid #6c5ce7;
+  border-radius: 10px;
+  margin-top: 15px;
+  overflow: hidden;
+}
+
+/* Xarita ustidagi boshqaruv elementlari */
+.map-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.map-btn {
+  background: #6c5ce7;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.map-btn:hover {
+  background: #5b4bd8;
+  transform: translateY(-2px);
+}
+
+/* Banner */
+.banner {
+  background: linear-gradient(135deg, #6c5ce7, #5b4bd8);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+/* Koordinatalar ko'rinishi */
+.coordinates {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+  border: 1px solid #eaeaea;
+  font-family: monospace;
+}
+
+/* Label fade animatsiyasi */
+.fade {
+  transition: opacity 0.6s ease;
+}
+.fade-out {
+  opacity: 0;
+}
+.fade-in {
+  opacity: 1;
+}
+
+/* Marker bounce animatsiyasi */
+.leaflet-marker-icon.bounce {
+  animation: bounce 0.6s;
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-15px) scale(1.1); }
+  60% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-7px) scale(1.05); }
+}
+
+/* Leaflet map responsiv o'zgartirishlar */
+.leaflet-container {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+}
+
+.leaflet-control-zoom {
+  margin: 15px !important;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 1200px) {
+  #mapContainer {
+    height: 450px;
+  }
+  
+  .map-container {
+    height: 350px;
+  }
+}
+
+@media (max-width: 992px) {
+  #mapContainer {
+    height: 400px;
+  }
+  
+  .map-container {
+    height: 300px;
+  }
+  
+  .map-controls {
+    justify-content: center;
+  }
+}
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+  #mapContainer {
+    height: 350px;
+    border-width: 1px;
+    border-radius: 8px;
+  }
+  
+  .map-container {
+    height: 250px;
+    border-width: 1px;
+    border-radius: 8px;
+  }
+  
+  .banner {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+  
+  .map-btn {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+  }
+  
+  .map-controls {
+    gap: 8px;
+  }
+  
+  /* Leaflet mobil optimizatsiyasi */
+  .leaflet-control-zoom {
+    transform: scale(0.9);
+    margin: 10px !important;
+  }
+  
+  .leaflet-control-attribution {
+    font-size: 10px !important;
+  }
+}
+
+/* Mobile (576px) */
+@media (max-width: 576px) {
+  #mapContainer {
+    height: 300px;
+    margin-top: 10px;
+  }
+  
+  .map-container {
+    height: 200px;
+    margin-top: 10px;
+  }
+  
+  .banner {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+  
+  .map-controls {
+    flex-direction: column;
+  }
+  
+  .map-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+  
+  .coordinates {
+    font-size: 0.85rem;
+    padding: 8px;
+    overflow-x: auto;
+  }
+  
+  /* Kichik ekranlar uchun leaflet optimizatsiyasi */
+  .leaflet-control-zoom {
+    transform: scale(0.8);
+    margin: 5px !important;
+  }
+  
+  .leaflet-control-zoom a {
+    width: 30px !important;
+    height: 30px !important;
+    line-height: 30px !important;
+  }
+}
+
+/* Small Mobile (480px) */
+@media (max-width: 480px) {
+  #mapContainer {
+    height: 250px;
+  }
+  
+  .map-container {
+    height: 180px;
+  }
+  
+  .banner {
+    font-size: 0.85rem;
+    padding: 8px;
+  }
+  
+  .coordinates {
+    font-size: 0.8rem;
+  }
+  
+  /* Juda kichik ekranlar uchun */
+  .leaflet-control-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}
+
+/* Landscape Orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  #mapContainer {
+    height: 250px;
+  }
+  
+  .map-container {
+    height: 200px;
+  }
+  
+  .map-controls {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+  
+  .map-btn {
+    flex: none;
+    min-width: auto;
+    padding: 6px 12px;
+  }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .map-btn {
+    border-width: 0.5px;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .map-btn:hover {
+    transform: none;
+  }
+  
+  .map-btn:active {
+    background: #5b4bd8;
+    transform: scale(0.98);
+  }
+  
+  /* Katta barmoq uchun kattaroq boshqaruv elementlari */
+  .leaflet-control-zoom a {
+    width: 44px !important;
+    height: 44px !important;
+    line-height: 44px !important;
+    font-size: 20px !important;
+  }
+  
+  .leaflet-bar a {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+/* Katta ekranlar uchun */
+@media (min-width: 1400px) {
+  #mapContainer {
+    height: 600px;
+  }
+  
+  .map-container {
+    height: 500px;
+  }
+}

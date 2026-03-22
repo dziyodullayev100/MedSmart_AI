@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>MED SMART</title>
+  <link rel="icon" type="image/png" href="./rasmlar/logo.png">
+  <link rel="stylesheet" href="./css/home.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <!-- Chap logo -->
+    <div class="header-left">
+      <img src="./rasmlar/logo.jpg" alt="Logo" class="logo">
+      <span class="brand"><span class="brand-med">MED</span> <span class="brand-smart">SMART</span></span>
+    </div>
+
+    <!-- Markaziy menyu -->
+    <div class="header-center">
+      <nav>
+        <ul class="menu">
+          <li><a href="#doctors">Shifokorlar</a></li>
+          <li><a href="#services">Xizmatlar</a></li>
+          <li><a href="#clinic">Klinika</a></li>
+          <li><a href="#address">Manzil</a></li>
+          <li><a href="#contact">Aloqa</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Mobile menu toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- O‘ng profil qismi -->
+<!-- Header tugmalar -->
+<div class="buttons">
+  <button class="btn" onclick="window.location.href='./bemor_uchun_sahifa/bemor_login.html'">Foydalanuvchi</button>
+  <button class="btn" onclick="window.location.href='./admin_uchun_sahifa/admin_login.html'">Admin</button>
+</div>
+
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <nav>
+      <ul class="menu">
+        <li><a href="#doctors" onclick="toggleMobileMenu()">Shifokorlar</a></li>
+        <li><a href="#services" onclick="toggleMobileMenu()">Xizmatlar</a></li>
+        <li><a href="#clinic" onclick="toggleMobileMenu()">Klinika</a></li>
+        <li><a href="#address" onclick="toggleMobileMenu()">Manzil</a></li>
+        <li><a href="#contact" onclick="toggleMobileMenu()">Aloqa</a></li>
+      </ul>
+    </nav>
+  </div>
+
+<main class="main-content">
+
+  <!-- Hero section with video background -->
+  <section class="hero">
+    <video autoplay muted loop class="hero-video">
+      <source src="./rasmlar/fon.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay">
+      <img src="./rasmlar/logo.jpg" alt="Klinika logotipi" class="hero-logo">
+
+      <h1>MED SMART Klinikasi</h1>
+      <p>Sog‘lom hayot uchun aqlli tanlov</p>
+    </div>
+  </section>
+
+<section id="doctors" class="doctors">
+  <h2>Shifokorlarimiz</h2>
+  <div class="doctor-grid">
+
+    <div class="doctor-card">
+      <img src="./rasmlar/m1.jpg" alt="Dr. Jalolov">
+      <div class="doctor-info">
+        <h3>Dr. Jalolov</h3>
+        <p>Terapevt</p>
+        <span>10 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/w1.jpg" alt="Dr. Karimova">
+      <div class="doctor-info">
+        <h3>Dr. Karimova</h3>
+        <p>Pediatr</p>
+        <span>8 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/m2.jpg" alt="Dr. Rustamov">
+      <div class="doctor-info">
+        <h3>Dr. Rustamov</h3>
+        <p>Stomatolog</p>
+        <span>12 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/w2.jpg" alt="Dr. Ismoilova">
+      <div class="doctor-info">
+        <h3>Dr. Ismoilova</h3>
+        <p>Kardiolog</p>
+        <span>15 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/m3.jpg" alt="Dr. Qodirov">
+      <div class="doctor-info">
+        <h3>Dr. Qodirov</h3>
+        <p>LOR</p>
+        <span>9 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/w3.jpg" alt="Dr. Tursunova">
+      <div class="doctor-info">
+        <h3>Dr. Tursunova</h3>
+        <p>Ginekolog</p>
+        <span>11 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/m4.jpg" alt="Dr. Obidov">
+      <div class="doctor-info">
+        <h3>Dr. Obidov</h3>
+        <p>Urolog</p>
+        <span>7 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/w4.jpg" alt="Dr. Shirinova">
+      <div class="doctor-info">
+        <h3>Dr. Shirinova</h3>
+        <p>Stomatolog</p>
+        <span>8 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/m5.jpg" alt="Dr. Nurboyev">
+      <div class="doctor-info">
+        <h3>Dr. Nurboyev</h3>
+        <p>Nevrologik</p>
+        <span>17 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/w5.jpg" alt="Dr. Toirovna">
+      <div class="doctor-info">
+        <h3>Dr. Toirovna</h3>
+        <p>Oftalmologik</p>
+        <span>5 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/m6.jpg" alt="Dr. Haydarov">
+      <div class="doctor-info">
+        <h3>Dr. Haydarov</h3>
+        <p>Urolog</p>
+        <span>7 yil tajriba</span>
+      </div>
+    </div>
+
+    <div class="doctor-card">
+      <img src="./rasmlar/w6.jpg" alt="Dr. Hasanovna">
+      <div class="doctor-info">
+        <h3>Dr. Hasanovna</h3>
+        <p>Dermatolog</p>
+        <span>13 yil tajriba</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+  <!-- Services box -->
+<section id="services" class="services">
+  <h2>Xizmatlarimiz</h2>
+  <div class="service-grid" id="mainServiceGrid">
+    <!-- Dinamik tarzda JS orqali to'ldiriladi -->
+  </div>
+
+<!-- Batafsil tugma -->
+<div class="more-btn">
+  <button id="openModal">Batafsil</button>
+</div>
+
+<!-- Modal oyna -->
+<div id="servicesModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Barcha xizmatlar</h2>
+    <div class="modal-grid" id="mainModalGrid">
+      <!-- Dinamik tarzda JS orqali to'ldiriladi -->
+    </div>
+
+  </div>
+</div>
+
+</section>
+
+<!-- Statik banner -->
+<section id="clinic" class="promo-banner">
+  <h2>Xususiy Klinikamiz Haqida</h2>
+  <p>Bizning klinika zamonaviy jihozlar bilan ta’minlangan va bemorlar uchun qulay sharoitlar yaratgan.</p>
+</section>
+
+<!-- Slayder 1: Shifoxona rasmlari -->
+<div class="slider" id="slider1">
+  <div class="slides">
+    <img src="./rasmlar/clinic1.jpg" alt="Shifoxona tashqi ko‘rinishi">
+    <img src="./rasmlar/clinic2.webp" alt="Shifoxona binosi">
+    <img src="./rasmlar/clinic3.png" alt="Shifoxona fasadi">
+  </div>
+</div>
+
+<!-- Slayder 2: Jihozlangan xonalar -->
+<div class="slider" id="slider2">
+  <div class="slides">
+    <img src="./rasmlar/room1.jpg" alt="Jihozlangan xona">
+    <img src="./rasmlar/room2.jpg" alt="Operatsiya xonasi">
+    <img src="./rasmlar/room3.jpg" alt="Diagnostika xonasi">
+  </div>
+</div>
+
+
+</main>
+
+  <footer class="footer">
+  <!-- Yuqori kontayner -->
+  <div class="footer-top">
+    
+    <!-- Box-1: Ish vaqti -->
+    <div class="footer-box work-time">
+      <h3>Ish vaqti</h3>
+      <ul class="work-days">
+        <li>Dushanba: 09:00 - 23:00</li>
+        <li>Seshanba: 09:00 - 23:00</li>
+        <li>Chorshanba: 09:00 - 23:00</li>
+        <li>Payshanba: 09:00 - 23:00</li>
+        <li>Juma: 09:00 - 23:00</li>
+        <li>Shanba: 09:00 - 23:00</li>
+        <li>Yakshanba: Dam olish</li>
+      </ul>
+    </div>
+
+    <!-- Box-2: Manzil va xarita -->
+<div id="address" class="footer-box address">
+  <h3>Klinika manzili</h3>
+  <p class="address-line">Samarqand viloyati, Kattaqo‘rg‘on shahar</p>
+
+  <div class="map-wrap" aria-label="Klinika joylashuvi xaritasi">
+    <!-- Google Maps Embed -->
+    <iframe
+      class="map-frame"
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3038.123456789!2d66.250000!3d39.900000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3f3f3f3f3f3f3f%3A0x123456789abcdef!2sKattaqo‘rg‘on%2C%20Samarqand!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+      title="Kattaqo‘rg‘on shahar — klinika manzili"
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      allowfullscreen>
+    </iframe>
+
+    <!-- Overlay: brand pin + CTA -->
+    <div class="map-overlay">
+      <div class="pin">
+        <span class="pin-dot"></span>
+        <span class="pin-pulse"></span>
+      </div>
+      <div class="map-cta">
+        <strong>Kattaqo‘rg‘on klinika</strong>
+        <span class="cta-sub">Yo‘nalishni ko‘rish</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fallback link -->
+  <a class="map-fallback" href="https://maps.google.com/?q=Samarqand+Kattaqo‘rg‘on" target="_blank" rel="noopener">
+    Xarita alohida oynada ochilsin
+  </a>
+  </div>
+  </div>
+
+
+
+  <!-- Footer 2-kontayner -->
+<div class="footer-bottom">
+  
+<!-- 1-qism: Biz bilan bog‘lanish -->
+<div id="contact" class="footer-part contact">
+  <h3>Biz bilan bog‘lanish</h3>
+  <p>📞 Telefon: <a href="tel:+998901234567">+998 94 360 09 28</a></p>
+  <p>✉️ Email: <a href="mailto:info@medsmart.uz">info@medsmart.uz</a></p>
+</div>
+
+
+  <!-- 2-qism: Monitor ichida MED SMART yozuvi -->
+  <div class="footer-part monitor">
+    <div class="screen">
+      <span class="screen-text">MED SMART</span>
+    </div>
+  </div>
+
+  <!-- 3-qism: Ijtimoiy tarmoqlar -->
+  <div class="footer-part social">
+    <a href="#" class="social-btn telegram">Telegram</a>
+    <a href="#" class="social-btn youtube">YouTube</a>
+    <a href="#" class="social-btn instagram">Instagram</a>
+    <a href="#" class="social-btn facebook">Facebook</a>
+  </div>
+
+</div>
+
+</footer>
+
+  
+  <script src="./js/home.js"></script>
+
+</body>
+</html>

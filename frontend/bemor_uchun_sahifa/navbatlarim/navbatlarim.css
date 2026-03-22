@@ -1,0 +1,611 @@
+/* Navbatlar bo'limi uchun maxsus CSS */
+
+.content-body {
+    padding: 20px;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    border: none;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    padding: 15px 20px;
+}
+
+.appointments-list {
+    display: grid;
+    gap: 15px;
+}
+
+.appointment-item {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    border-left: 5px solid #007bff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.appointment-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.appointment-item.past {
+    border-left-color: #6c757d;
+    opacity: 0.8;
+}
+
+.appointment-item.cancelled {
+    border-left-color: #dc3545;
+    background-color: #fff5f5;
+}
+
+.appointment-item.completed {
+    border-left-color: #28a745;
+    background-color: #f8fff9;
+}
+
+.appointment-info {
+    flex: 1;
+    min-width: 250px;
+}
+
+.appointment-info h6 {
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    line-height: 1.3;
+}
+
+.appointment-info .doctor-name {
+    color: #007bff;
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+.appointment-info .service-type {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.appointment-time {
+    text-align: right;
+    min-width: 180px;
+    margin-left: 20px;
+}
+
+.appointment-date {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.appointment-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+.status-upcoming {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.appointment-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-width: 120px;
+}
+
+.btn-cancel {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.btn-cancel:hover {
+    background-color: #f5c6cb;
+    transform: translateY(-2px);
+}
+
+.btn-details {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.btn-details:hover {
+    background-color: #bee5eb;
+    transform: translateY(-2px);
+}
+
+.time-badge {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 8px;
+}
+
+.countdown-timer {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+    display: block;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #dee2e6;
+}
+
+/* Modal styling */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+}
+
+.form-select, .form-control {
+    border-radius: 8px;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Xizmat tafsilotlari uchun stillar */
+.service-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.service-details .badge {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 12px;
+}
+
+/* Narx ko'rsatgichi */
+.price-badge {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+/* Modal ichidagi xizmat ma'lumotlari */
+.service-info-modal {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid #007bff;
+}
+
+.service-info-modal h6 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.service-info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+
+.service-info-item:last-child {
+    border-bottom: none;
+}
+
+.service-info-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.service-info-value {
+    font-weight: 600;
+    color: #007bff;
+}
+
+/* RESPONSIVE STYLES */
+
+/* Tablet (991px gacha) */
+@media (max-width: 991px) {
+    .content-body {
+        padding: 15px;
+    }
+    
+    .appointment-item {
+        padding: 18px;
+    }
+    
+    .appointment-info {
+        min-width: 200px;
+    }
+    
+    .appointment-time {
+        min-width: 150px;
+        margin-left: 15px;
+    }
+    
+    .btn-action {
+        min-width: 110px;
+        padding: 7px 14px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Kichik tablet va yotiq telefonlar (768px gacha) */
+@media (max-width: 768px) {
+    .appointment-item {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 15px;
+    }
+    
+    .appointment-info {
+        min-width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .appointment-time {
+        text-align: left;
+        min-width: 100%;
+        margin-left: 0;
+        margin-bottom: 15px;
+    }
+    
+    .time-badge {
+        margin-bottom: 10px;
+    }
+    
+    .appointment-actions {
+        justify-content: stretch;
+        gap: 8px;
+    }
+    
+    .btn-action {
+        flex: 1;
+        min-width: calc(50% - 4px);
+    }
+    
+    .service-info-modal {
+        padding: 15px;
+    }
+    
+    .service-info-item {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .service-info-value {
+        text-align: right;
+    }
+}
+
+/* Telefonlar (576px gacha) */
+@media (max-width: 576px) {
+    .content-body {
+        padding: 12px;
+    }
+    
+    .card-header {
+        padding: 12px 15px;
+    }
+    
+    .appointment-item {
+        padding: 12px;
+        border-radius: 6px;
+    }
+    
+    .appointment-info h6 {
+        font-size: 1rem;
+        margin-bottom: 6px;
+    }
+    
+    .appointment-info .doctor-name {
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+    
+    .appointment-info .service-type {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+    }
+    
+    .time-badge {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+    
+    .appointment-date {
+        font-size: 0.85rem;
+    }
+    
+    .appointment-status {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+    }
+    
+    .appointment-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-action {
+        width: 100%;
+        min-width: 100%;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .service-details {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .service-details .badge {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 5px;
+    }
+    
+    .price-badge {
+        width: 100%;
+        text-align: center;
+        padding: 6px;
+        font-size: 0.8rem;
+    }
+    
+    .empty-state {
+        padding: 30px 15px;
+    }
+    
+    .empty-state i {
+        font-size: 36px;
+    }
+}
+
+/* Kichik telefonlar (360px gacha) */
+@media (max-width: 360px) {
+    .content-body {
+        padding: 10px;
+    }
+    
+    .appointment-item {
+        padding: 10px;
+    }
+    
+    .appointment-info h6 {
+        font-size: 0.95rem;
+    }
+    
+    .time-badge {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+    
+    .btn-action {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+    
+    .appointment-info .service-type {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+    }
+    
+    .service-info-modal {
+        padding: 12px;
+    }
+    
+    .service-info-item {
+        font-size: 0.9rem;
+    }
+}
+
+/* Yotiq telefonlar uchun (landscape) */
+@media (max-width: 767px) and (orientation: landscape) {
+    .appointment-item {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    
+    .appointment-info {
+        min-width: 60%;
+    }
+    
+    .appointment-time {
+        min-width: 35%;
+        margin-left: 10px;
+    }
+    
+    .appointment-actions {
+        width: 100%;
+        flex-direction: row;
+        margin-top: 10px;
+    }
+    
+    .btn-action {
+        flex: 1;
+        min-width: auto;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn-action:hover {
+        transform: none;
+    }
+    
+    .appointment-item:hover {
+        transform: none;
+    }
+    
+    .btn-action:active {
+        transform: scale(0.98);
+    }
+    
+    .appointment-item:active {
+        transform: scale(0.99);
+    }
+    
+    .btn-action {
+        min-height: 44px; /* Better touch target */
+    }
+    
+    .service-details .badge {
+        padding: 8px 12px; /* Better touch target */
+    }
+}
+
+/* Katta ekranlar uchun (1200px+) */
+@media (min-width: 1200px) {
+    .appointments-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .appointment-item {
+        padding: 25px;
+    }
+    
+    .appointment-info {
+        min-width: 300px;
+    }
+    
+    .appointment-time {
+        min-width: 220px;
+    }
+    
+    .btn-action {
+        min-width: 140px;
+        padding: 10px 20px;
+    }
+}
+
+/* Modal responsivligi */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 10px;
+    }
+    
+    .modal-header, .modal-footer {
+        padding: 15px;
+    }
+    
+    .modal-body {
+        padding: 20px 15px;
+    }
+}
+
+/* Form elementlarining responsivligi */
+@media (max-width: 576px) {
+    .form-select, .form-control {
+        padding: 10px 12px;
+        font-size: 16px; /* Prevent iOS zoom */
+    }
+    
+    .modal-dialog {
+        margin: 10px;
+    }
+}
+
+/* Print uchun stillar */
+@media print {
+    .appointment-item {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        page-break-inside: avoid;
+    }
+    
+    .btn-action {
+        display: none;
+    }
+    
+    .empty-state {
+        display: none;
+    }
+}
+
+      .logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;   /* Aylana shakl */
+  object-fit: cover;    /* Rasmni to‘liq joylashtirish */
+  border: 2px solid white; /* Dekorativ oq ramka (ixtiyoriy) */
+}

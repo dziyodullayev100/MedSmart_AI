@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <script>
+        const adminUser = JSON.parse(localStorage.getItem('medsmart_user'));
+        if (!adminUser || adminUser.role !== 'admin') { window.location.href = '../admin_login.html'; }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Med Smart - Yangi Xizmat Qo'shish</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --secondary: #334155;
+            --bg-color: #f8fafc;
+        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg-color); margin: 0; display: flex; min-height: 100vh; }
+
+        /* STANDARD SIDEBAR */
+        .sidebar {
+            width: 280px; background: var(--secondary); color: white;
+            display: flex; flex-direction: column; position: fixed;
+            height: 100vh; padding: 30px 20px; z-index: 1000;
+        }
+        .sidebar-brand { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; padding: 0 10px; }
+        .brand-icon {
+            width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white; box-shadow: 0 8px 20px rgba(79,70,229,0.4);
+        }
+        .sidebar-brand h3 { font-size: 1.4rem; font-weight: 800; margin: 0; }
+        .nav-menu { padding: 0; margin: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 15px; padding: 14px 20px;
+            color: #94a3b8; text-decoration: none; border-radius: 12px;
+            font-weight: 500; font-size: 0.95rem; transition: 0.3s;
+        }
+        .nav-item i { font-size: 1.1rem; width: 22px; text-align: center; }
+        .nav-item:hover { color: white; background: rgba(255,255,255,0.08); }
+        .nav-item.active { background: linear-gradient(90deg, var(--primary), var(--primary-light)); color: white; font-weight: 600; box-shadow: 0 4px 15px rgba(79,70,229,0.3); }
+        .logout-btn {
+            display: flex; align-items: center; gap: 15px; padding: 14px 20px;
+            color: #ef4444; text-decoration: none; border-radius: 12px;
+            font-weight: 600; transition: 0.3s; margin-top: auto;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.1); }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 280px; flex: 1; padding: 40px; }
+
+        /* TOP HEADER */
+        .content-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; padding: 18px 30px; border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 35px;
+            border: 1px solid #f1f5f9;
+        }
+        .content-header h4 { margin: 0; font-size: 1.4rem; font-weight: 800; color: #0f172a; }
+        .content-header h4 i { color: var(--primary); }
+        .content-header p { margin: 3px 0 0; color: #64748b; font-size: 0.9rem; }
+
+        /* FORM CARD */
+        .form-card {
+            background: white; border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9; overflow: hidden;
+        }
+        .form-card .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white; padding: 25px 30px;
+        }
+        .form-card .card-header h2 { font-size: 1.3rem; font-weight: 700; margin: 0; }
+        .form-card .card-body { padding: 35px; }
+        .form-label { font-weight: 600; color: #475569; font-size: 0.9rem; }
+        .form-label.required::after { content: ' *'; color: #ef4444; }
+        .form-control, .form-select {
+            border-radius: 12px; padding: 12px 16px;
+            border: 1.5px solid #e2e8f0; font-family: 'Outfit';
+            font-size: 0.95rem; transition: 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary); outline: none;
+            box-shadow: 0 0 0 4px rgba(79,70,229,0.1);
+        }
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border: none; border-radius: 14px; font-weight: 700;
+            font-size: 1rem; padding: 14px; font-family: 'Outfit';
+            box-shadow: 0 8px 20px rgba(79,70,229,0.3); transition: 0.3s;
+        }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(79,70,229,0.4); }
+        .form-text { color: #94a3b8; font-size: 0.83rem; }
+        
+        .icon-preview {
+            width: 50px; height: 50px; background: #e0e7ff; color: var(--primary);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; margin-top: 5px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-heartbeat"></i></div>
+            <h3>MedSmart HQ</h3>
+        </div>
+        <nav class="nav-menu">
+            <a href="../admin_dashboard.html" class="nav-item"><i class="fas fa-th-large"></i><span>Asosiy Dashboard</span></a>
+            <a href="../bemorlar/bemorlar_royxati.html" class="nav-item"><i class="fas fa-users"></i><span>Bemorlar Boshqaruvi</span></a>
+            <a href="../shifokorlar/shifokorlar_royxati.html" class="nav-item"><i class="fas fa-user-md"></i><span>Shifokorlar</span></a>
+            <a href="../navbatlar/navbatlar.html" class="nav-item"><i class="fas fa-calendar-check"></i><span>Navbatlar</span></a>
+            <a href="../xizmatlar/xizmatlar_royxati.html" class="nav-item"><i class="fas fa-hand-holding-medical"></i><span>Xizmatlar</span></a>
+            <a href="#" class="nav-item active"><i class="fas fa-plus-circle"></i><span>Yangi Xizmat</span></a>
+            <a href="../tolovlar/tolovlar.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i><span>Moliya & To'lovlar</span></a>
+            <a href="../tizim_sozlamalari/tizim_sozlamalari.html" class="nav-item"><i class="fas fa-sliders-h"></i><span>Sozlamalar</span></a>
+        </nav>
+        <a href="javascript:chiqish()" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i><span>Tizimdan chiqish</span>
+        </a>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-header">
+            <div>
+                <h4><i class="fas fa-plus-circle me-2"></i>Yangi Xizmat Qo'shish</h4>
+                <p>Klinika uchun yangi tibbiy xizmat yaratish</p>
+            </div>
+            <div style="text-align:right;">
+                <strong id="userName" style="display:block; font-weight:700;">Foydalanuvchi</strong>
+                <small style="color:#64748b;" id="userRole">Admin Panel</small>
+            </div>
+        </div>
+
+            <!-- FORM CONTENT -->
+            <div class="form-card">
+                <div class="card-header">
+                    <h2 class="mb-0"><i class="fas fa-plus-circle me-3"></i>Yangi Xizmat Qo'shish</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Asosiy ma'lumotlar -->
+                        <div class="col-md-8">
+                            <label class="form-label required">Xizmat nomi</label>
+                            <input type="text" id="nomi" class="form-control form-control-lg" placeholder="Masalan: Umumiy qon tahlili" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label required">Narxi (so'm)</label>
+                            <input type="number" id="narx" class="form-control form-control-lg" placeholder="150000" min="0" required>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label">Tavsif</label>
+                            <textarea id="tavsif" class="form-control" rows="3" placeholder="Xizmat haqida qisqacha ma'lumot..."></textarea>
+                        </div>
+                        
+                        <!-- Ikona tanlash -->
+                        <div class="col-md-6">
+                            <label class="form-label">Ikona tanlang</label>
+                            <select id="ikona" class="form-select form-select-lg" onchange="updateIconPreview()">
+                                <option value="fas fa-heartbeat">❤️ Yurak urishi</option>
+                                <option value="fas fa-syringe">💉 Ukol</option>
+                                <option value="fas fa-microscope">🔬 Tahlil</option>
+                                <option value="fas fa-x-ray">📷 Rentgen</option>
+                                <option value="fas fa-tooth">🦷 Tish</option>
+                                <option value="fas fa-eye">👁️ Ko'z</option>
+                                <option value="fas fa-stethoscope" selected>🩺 Umumiy</option>
+                                <option value="fas fa-brain">🧠 Nevrologiya</option>
+                                <option value="fas fa-lungs">🫁 Nafas olish</option>
+                                <option value="fas fa-bone">🦴 Suyak</option>
+                                <option value="fas fa-allergies">🤧 Allergiya</option>
+                                <option value="fas fa-ambulance">🚑 Shoshilinch</option>
+                                <option value="fas fa-bandage">🩹 Dori</option>
+                                <option value="fas fa-clipboard-list">📋 Tekshiruv</option>
+                                <option value="fas fa-dna">🧬 Genetika</option>
+                                <option value="fas fa-file-medical">📄 Hujjat</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Ikona ko'rinishi</label>
+                            <div class="icon-preview" id="iconPreview">
+                                <i class="fas fa-stethoscope"></i>
+                            </div>
+                        </div>
+
+                        <!-- Batafsil ma'lumotlar bo'limi -->
+                        <div class="col-12 form-section">
+                            <h5 class="text-primary mb-4">
+                                <i class="fas fa-info-circle me-2"></i>Batafsil Ma'lumotlar
+                            </h5>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Muolaja davomiyligi</label>
+                                    <input type="text" id="davomiylik" class="form-control" placeholder="Masalan: 30-45 daqiqa">
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label">Seanslar soni</label>
+                                    <input type="text" id="seanslar" class="form-control" placeholder="Masalan: 1 seans yoki 10 seans">
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label class="form-label">Mutaxassisligi</label>
+                                    <input type="text" id="mutaxassis" class="form-control" placeholder="Masalan: Terapevt, Kardiolog, Laborant">
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label class="form-label">Xizmat tarkibi</label>
+                                    <textarea id="tarkib" class="form-control" rows="4" placeholder="Har bir xizmat elementini yangi qatordan kiriting&#10;Masalan:&#10;• Qon olish&#10;• Laboratoriya tahlili&#10;• Natijalarni berish"></textarea>
+                                    <div class="form-text">Har bir elementni yangi qatorda kiriting</div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Qo'shimcha eslatmalar</label>
+                                    <textarea id="eslatmalar" class="form-control" rows="3" placeholder="Maxsus shartlar, tayyorgarlik, xavflar..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button onclick="saqlash()" class="btn btn-save text-white btn-lg">
+                            <i class="fas fa-save me-2"></i> Xizmatni Saqlash
+                        </button>
+                    </div>
+
+                    <div id="natija" class="mt-4 text-center fw-bold fs-5"></div>
+
+                    <div class="text-center mt-4">
+                        <a href="../xizmatlar/xizmatlar_royxati.html" class="btn btn-outline-secondary btn-lg me-3">
+                            <i class="fas fa-arrow-left me-2"></i> Xizmatlar Ro'yxatiga Qaytish
+                        </a>
+                        <button onclick="tozalash()" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-broom me-2"></i> Formani Tozalash
+                        </button>
+                    </div>
+                </div>
+            </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuthentication();
+    loadUserInfo();
+    updateIconPreview();
+});
+
+// Autentifikatsiya tekshirish
+function checkAuthentication() {
+    const user = localStorage.getItem('foydalanuvchi');
+
+}
+
+// Foydalanuvchi ma'lumotlarini yuklash
+function loadUserInfo() {
+    const user = localStorage.getItem('foydalanuvchi');
+    const userName = localStorage.getItem('foydalanuvchiNomi') || user;
+    setText('userName', userName);
+}
+
+// Chiqish
+function chiqish() {
+    if (confirm('Tizimdan chiqishni xohlaysizmi?')) {
+        localStorage.clear();
+        window.location.href = '../../index.html';
+    }
+}
+
+// Ikona preview yangilash
+function updateIconPreview() {
+    const selectedIcon = document.getElementById('ikona').value;
+    const preview = document.getElementById('iconPreview');
+    if (preview) preview.innerHTML = `<i class="${selectedIcon}"></i>`;
+}
+
+// Formani tozalash
+function tozalash() {
+    if (confirm('Formani tozalashni xohlaysizmi? Barcha kiritilgan ma\'lumotlar yo\'qoladi.')) {
+        ['nomi','narx','tavsif','davomiylik','seanslar','mutaxassis','tarkib','eslatmalar'].forEach(id=>{
+            const el=document.getElementById(id);
+            if(el) el.value='';
+        });
+        setHTML('natija','');
+        const ikonaEl=document.getElementById('ikona');
+        if(ikonaEl) ikonaEl.value='fas fa-stethoscope';
+        updateIconPreview();
+        const nomiEl=document.getElementById('nomi');
+        if(nomiEl) nomiEl.focus();
+    }
+}
+
+// Xizmat saqlash
+function saqlash() {
+    const nomi = getValue('nomi').trim();
+    const narx = parseInt(getValue('narx')) || 0;
+    const tavsif = getValue('tavsif').trim();
+    const ikona = getValue('ikona');
+    const davomiylik = getValue('davomiylik').trim();
+    const seanslar = getValue('seanslar').trim();
+    const mutaxassis = getValue('mutaxassis').trim();
+    const tarkib = getValue('tarkib').trim();
+    const eslatmalar = getValue('eslatmalar').trim();
+
+    if (!nomi) {
+        showResult('Xizmat nomini kiriting!', 'danger');
+        focusEl('nomi');
+        return;
+    }
+    if (narx <= 0) {
+        showResult('Xizmat narxini to\'g\'ri kiriting!', 'danger');
+        focusEl('narx');
+        return;
+    }
+
+    const xizmat = {
+        id: Date.now(),
+        nomi,
+        narx,
+        tavsif: tavsif || 'Tavsif kiritilmagan',
+        ikona,
+        davomiylik: davomiylik || "Ma'lumot kiritilmagan",
+        seanslar: seanslar || "Ma'lumot kiritilmagan",
+        mutaxassis: mutaxassis || "Ma'lumot kiritilmagan",
+        tarkib: tarkib ? tarkib.split('\n').filter(item => item.trim() !== '') : ["Ma'lumot kiritilmagan"],
+        eslatmalar: eslatmalar || "Qo'shimcha eslatmalar yo'q",
+        status: 'faol',
+        yaratilganSana: new Date().toISOString()
+    };
+
+    let xizmatlar = JSON.parse(localStorage.getItem('xizmatlar')) || [];
+    xizmatlar.push(xizmat);
+    localStorage.setItem('xizmatlar', JSON.stringify(xizmatlar));
+
+    showResult('Xizmat muvaffaqiyatli qo\'shildi!', 'success');
+    setTimeout(()=>{window.location.href='xizmatlar_royxati.html';},2000);
+}
+
+// Natijani ko'rsatish
+function showResult(message, type) {
+    const natija = document.getElementById('natija');
+    if (!natija) return;
+    const color = type === 'success' ? 'success' : 'danger';
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+    natija.innerHTML = `<span class="text-${color}"><i class="fas ${icon} me-2"></i>${message}</span>`;
+}
+
+// Enter tugmasi bilan saqlash
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const focused = document.activeElement;
+        if (focused.tagName==='INPUT'||focused.tagName==='TEXTAREA') {
+            if (focused.type!=='button'&&focused.type!=='submit') return;
+        }
+        saqlash();
+    }
+});
+
+// Yordamchi funksiyalar
+function setText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
+function setHTML(id,value){const el=document.getElementById(id);if(el)el.innerHTML=value;}
+function getValue(id){const el=document.getElementById(id);return el?el.value:'';}
+function focusEl(id){const el=document.getElementById(id);if(el)el.focus();}
+
+function addXizmat() {
+  const yangiXizmat = {
+    id: Date.now(),
+    nomi: document.getElementById("xizmatNomi").value,
+    narx: document.getElementById("xizmatNarx").value,
+    mutaxassis: document.getElementById("xizmatMutaxassis").value,
+    davomiylik: document.getElementById("xizmatDavomiylik").value,
+    seanslar: document.getElementById("xizmatSeanslar").value,
+    status: "faol"
+  };
+
+  const xizmatlar = JSON.parse(localStorage.getItem("adminXizmatlar")) || [];
+  xizmatlar.push(yangiXizmat);
+  localStorage.setItem("adminXizmatlar", JSON.stringify(xizmatlar));
+
+  alert("✅ Xizmat qo‘shildi!");
+}
+
+</script>
+
+</head>
+</html>

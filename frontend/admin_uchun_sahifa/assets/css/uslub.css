@@ -1,0 +1,846 @@
+/* uslub.css - To'liq optimallashtirilgan versiya */
+
+/* CSS Variables */
+:root {
+    --primary: #2c7fb8;
+    --secondary: #7fcdbb;
+    --success: #28a745;
+    --info: #17a2b8;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --light: #f8f9fa;
+    --dark: #343a40;
+    --border-radius: 12px;
+    --shadow: 0 5px 15px rgba(0,0,0,0.08);
+    --shadow-hover: 0 15px 30px rgba(0,0,0,0.15);
+    --transition: all 0.3s ease;
+}
+
+/* Reset va asosiy stil */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    line-height: 1.6;
+    color: var(--dark);
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    padding: 15px 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: white !important;
+}
+
+.navbar-brand i {
+    margin-right: 10px;
+}
+
+.nav-link {
+    color: rgba(255,255,255,0.9) !important;
+    font-weight: 500;
+    margin: 0 10px;
+    padding: 8px 15px !important;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: white !important;
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+}
+
+/* Hero section */
+.hero-section {
+    background: 
+        linear-gradient(rgba(44, 127, 184, 0.8), rgba(127, 205, 187, 0.8)), 
+        url('https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 100px 0;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.hero-section h1 {
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero-section .btn {
+    margin-top: 20px;
+    padding: 12px 30px;
+    font-weight: 600;
+}
+
+/* Kartalar */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    margin-bottom: 25px;
+    height: 100%;
+    background: white;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 15px;
+    transition: var(--transition);
+}
+
+.card:hover .card-icon {
+    transform: scale(1.1);
+}
+
+/* Stats kartalari */
+.stats-card {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    text-align: center;
+    border: none !important;
+}
+
+.stats-card .card-icon {
+    color: white;
+}
+
+.stats-card h3 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+/* Dashboard kartalari */
+.dashboard-card {
+    border-left: 5px solid var(--primary);
+}
+
+.dashboard-card .card-header {
+    background: white;
+    border-bottom: 2px solid var(--light);
+    font-weight: 600;
+    padding: 15px 20px;
+}
+
+/* Modul kartalari */
+.module-card {
+    border-top: 4px solid var(--secondary);
+    height: 100%;
+}
+
+.module-card .card-body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.module-card .btn-group {
+    margin-top: auto;
+}
+
+/* Tezkor kirish */
+.quick-access {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+}
+
+.quick-access h4 {
+    margin-bottom: 20px;
+}
+
+.quick-access h4 i {
+    margin-right: 10px;
+    color: var(--primary);
+}
+
+.btn-module {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: var(--transition);
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: left;
+    text-decoration: none;
+}
+
+.btn-module:hover {
+    transform: translateX(8px);
+    color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn-module i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Foydalanuvchi profili */
+.welcome-user {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 25px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.welcome-user h3 {
+    margin-bottom: 5px;
+    color: var(--dark);
+}
+
+.welcome-user .text-muted {
+    font-size: 0.9rem;
+}
+
+/* Tugmalar */
+.btn {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: var(--transition);
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(44, 127, 184, 0.4);
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.btn-light {
+    background: white;
+    color: var(--dark);
+}
+
+.btn-light:hover {
+    background: var(--light);
+    transform: translateY(-2px);
+}
+
+/* Footer */
+.footer {
+    background: var(--dark);
+    color: white;
+    padding: 40px 0 20px;
+    margin-top: 50px;
+}
+
+.footer h5 {
+    margin-bottom: 20px;
+    color: var(--secondary);
+}
+
+.footer a {
+    color: var(--light);
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-block;
+}
+
+.footer a:hover {
+    color: var(--secondary);
+    padding-left: 5px;
+}
+
+.footer hr {
+    border-color: rgba(255,255,255,0.1);
+    margin: 30px 0;
+}
+
+/* List guruhlari */
+.list-group {
+    border-radius: var(--border-radius);
+}
+
+.list-group-item {
+    border: none;
+    padding: 15px 0;
+    background: transparent;
+}
+
+.list-group-item:not(:last-child) {
+    border-bottom: 1px solid var(--light) !important;
+}
+
+.list-group-item small {
+    color: var(--info);
+    font-weight: 500;
+}
+
+/* Progress barlar */
+.progress {
+    height: 8px;
+    border-radius: 10px;
+    margin: 10px 0;
+    background: var(--light);
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+}
+
+/* Badge */
+.badge {
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* Dropdown menyu */
+.dropdown-menu {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 10px;
+}
+
+.dropdown-item {
+    padding: 8px 15px;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+}
+
+/* Responsive dizayn */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 60px 0;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .welcome-user {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .user-avatar {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    .card {
+        margin-bottom: 20px;
+    }
+    
+    .btn-module {
+        text-align: center;
+    }
+    
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+    
+    .stats-card h3 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .hero-section {
+        padding: 40px 0;
+    }
+    
+    .stats-card h3 {
+        font-size: 1.8rem;
+    }
+    
+    .card-icon {
+        font-size: 2rem;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 5px;
+    }
+}
+
+/* Animatsiyalar */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Loading state */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Utility klasslar */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.border-gradient {
+    border: 2px solid;
+    border-image: linear-gradient(135deg, var(--primary), var(--secondary)) 1;
+}
+
+.shadow-custom {
+    box-shadow: var(--shadow);
+}
+
+/* Section spacing */
+section {
+    margin-bottom: 40px;
+}
+
+.row {
+    margin-bottom: 20px;
+}
+
+/* Icon styles */
+.fas, .fab {
+    line-height: 1;
+}
+
+/* Text colors */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Background helpers */
+.bg-light {
+    background-color: var(--light) !important;
+}
+
+
+
+
+
+/* From Uiverse.io */
+.button {
+  --black-700: hsla(0 0% 12% / 1);
+  --border_radius: 9999px;
+  --transtion: 0.3s ease-in-out;
+  --offset: 2px;
+
+  cursor: pointer;
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  transform-origin: center;
+
+  padding: 1rem 2rem;
+  background-color: transparent;
+
+  border: none;
+  border-radius: var(--border_radius);
+  transform: scale(calc(1 + (var(--active, 0) * 0.1)));
+
+  transition: transform var(--transtion);
+}
+
+.button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 100%;
+  height: 100%;
+  background-color: var(--black-700);
+
+  border-radius: var(--border_radius);
+  box-shadow: inset 0 0.5px hsl(0, 0%, 100%), inset 0 -1px 2px 0 hsl(0, 0%, 0%),
+    0px 4px 10px -4px hsla(0 0% 0% / calc(1 - var(--active, 0))),
+    0 0 0 calc(var(--active, 0) * 0.375rem) hsl(260 97% 50% / 0.75);
+
+  transition: all var(--transtion);
+  z-index: 0;
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 100%;
+  height: 100%;
+  background-color: hsla(260 97% 61% / 0.75);
+  background-image: radial-gradient(
+      at 51% 89%,
+      hsla(266, 45%, 74%, 1) 0px,
+      transparent 50%
+    ),
+    radial-gradient(at 100% 100%, hsla(266, 36%, 60%, 1) 0px, transparent 50%),
+    radial-gradient(at 22% 91%, hsla(266, 36%, 60%, 1) 0px, transparent 50%);
+  background-position: top;
+
+  opacity: var(--active, 0);
+  border-radius: var(--border_radius);
+  transition: opacity var(--transtion);
+  z-index: 2;
+}
+
+.button:is(:hover, :focus-visible) {
+  --active: 1;
+}
+.button:active {
+  transform: scale(1);
+}
+
+.button .dots_border {
+  --size_border: calc(100% + 2px);
+
+  overflow: hidden;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: var(--size_border);
+  height: var(--size_border);
+  background-color: transparent;
+
+  border-radius: var(--border_radius);
+  z-index: -10;
+}
+
+.button .dots_border::before {
+  content: "";
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: left;
+  transform: rotate(0deg);
+
+  width: 100%;
+  height: 2rem;
+  background-color: white;
+
+  mask: linear-gradient(transparent 0%, white 120%);
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.button .sparkle {
+  position: relative;
+  z-index: 10;
+
+  width: 1.75rem;
+}
+
+.button .sparkle .path {
+  fill: currentColor;
+  stroke: currentColor;
+
+  transform-origin: center;
+
+  color: hsl(0, 0%, 100%);
+}
+
+.button:is(:hover, :focus) .sparkle .path {
+  animation: path 1.5s linear 0.5s infinite;
+}
+
+.button .sparkle .path:nth-child(1) {
+  --scale_path_1: 1.2;
+}
+.button .sparkle .path:nth-child(2) {
+  --scale_path_2: 1.2;
+}
+.button .sparkle .path:nth-child(3) {
+  --scale_path_3: 1.2;
+}
+
+@keyframes path {
+  0%,
+  34%,
+  71%,
+  100% {
+    transform: scale(1);
+  }
+  17% {
+    transform: scale(var(--scale_path_1, 1));
+  }
+  49% {
+    transform: scale(var(--scale_path_2, 1));
+  }
+  83% {
+    transform: scale(var(--scale_path_3, 1));
+  }
+}
+
+.button .text_button {
+  position: relative;
+  z-index: 10;
+
+  background-image: linear-gradient(
+    90deg,
+    hsla(0 0% 100% / 1) 0%,
+    hsla(0 0% 100% / var(--active, 0)) 120%
+  );
+  background-clip: text;
+
+  font-size: 1rem;
+  color: transparent;
+}
+.button {
+  --black-700: hsla(0 0% 12% / 1);
+  --border_radius: 9999px;
+  --transtion: 0.3s ease-in-out;
+  --offset: 2px;
+
+  cursor: pointer;
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;              /* ikonka va matn orasidagi masofa kichikroq */
+  transform-origin: center;
+
+  padding: 0.5rem 1rem;     /* tugma ichidagi joyni kichikroq qildik */
+  background-color: transparent;
+
+  border: none;
+  border-radius: var(--border_radius);
+  transform: scale(calc(1 + (var(--active, 0) * 0.1)));
+
+  transition: transform var(--transtion);
+}
+
+.button .sparkle {
+  position: relative;
+  z-index: 10;
+  width: 1.2rem;            /* ikonka kichikroq */
+}
+
+.button .text_button {
+  position: relative;
+  z-index: 10;
+  background-image: linear-gradient(
+    90deg,
+    hsla(0 0% 100% / 1) 0%,
+    hsla(0 0% 100% / var(--active, 0)) 120%
+  );
+  background-clip: text;
+  font-size: 0.85rem;       /* matn kichikroq */
+  color: transparent;
+}
+
+      .logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;   /* Aylana shakl */
+  object-fit: cover;    /* Rasmni to‘liq joylashtirish */
+  border: 2px solid white; /* Dekorativ oq ramka (ixtiyoriy) */
+}
+
+
+
+
+/* =========================
+   LOADING CARD
+========================= */
+.loading-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 360px;
+  height: 360px;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 28px;
+  z-index: 99999;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 25px 60px rgba(13,110,253,0.25),
+    inset 0 0 40px rgba(255,255,255,0.6);
+
+  animation: popup 0.6s ease;
+}
+
+/* Popup effect */
+@keyframes popup {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* =========================
+   SVG LOADER
+========================= */
+.loader {
+  width: 150px;
+  height: 150px;
+  filter: drop-shadow(0 0 14px rgba(13,110,253,0.6));
+  animation: slowRotate 18s linear infinite;
+}
+
+.loader path {
+  stroke: url(#loaderGradient);
+  stroke-width: 0.7px;
+  fill: none;
+
+  animation:
+    dashArray 4s ease-in-out infinite,
+    dashOffset 4s linear infinite,
+    glowPulse 2.8s ease-in-out infinite;
+}
+
+/* Stroke animation */
+@keyframes dashArray {
+  0%   { stroke-dasharray: 0 1 359 0; }
+  50%  { stroke-dasharray: 0 359 1 0; }
+  100% { stroke-dasharray: 359 1 0 0; }
+}
+
+@keyframes dashOffset {
+  0%   { stroke-dashoffset: 365; }
+  100% { stroke-dashoffset: 5; }
+}
+
+/* Glow */
+@keyframes glowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(13,110,253,0.4));
+    opacity: 0.75;
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(13,110,253,0.95));
+    opacity: 1;
+  }
+}
+
+/* =========================
+   TEXT
+========================= */
+.loading-overlay p {
+  margin-top: 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0d6efd;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+
+  animation: textPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+  0% {
+    opacity: 0.3;
+    letter-spacing: 2px;
+  }
+  50% {
+    opacity: 1;
+    letter-spacing: 6px;
+  }
+  100% {
+    opacity: 0.3;
+    letter-spacing: 2px;
+  }
+}

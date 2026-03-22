@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MedSmart - Tizim Sozlamalari</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- Global Modul CSSlar buzilmasligi uchun ulashlar qoldirildi -->
+  <link rel="stylesheet" href="tizim_sozlamalari.css">
+  <link rel="stylesheet" href="lokatsiya.css">
+  <link rel="stylesheet" href="ijtimoiy_tarmoqlar.css">
+  <link rel="stylesheet" href="ish_vaqti.css">
+  <link rel="stylesheet" href="xavfsizlik.css">
+
+  <style>
+    :root {
+        --primary: #10b981;
+        --secondary: #334155;
+        --accent: #3b82f6;
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text-dark: #0f172a;
+        --text-gray: #64748b;
+        --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 20px 35px -5px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        background-color: var(--bg);
+        color: var(--text-dark);
+        margin: 0;
+        display: flex;
+        min-height: 100vh;
+    }
+
+    /* GLOBAL YAGONA SIDEBAR (Admin Dashboard bilan bir xil) */
+    .sidebar {
+        width: 280px;
+        height: 100vh;
+        background: var(--secondary);
+        color: white;
+        position: fixed;
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+    }
+    .sidebar-brand { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; padding: 0 10px; }
+    .sidebar-brand img { width: 40px; border-radius: 8px; }
+    .sidebar-brand h3 { font-size: 1.3rem; margin: 0; font-weight: 700; }
+    
+    .nav-menu { list-style: none; padding: 0; margin: 0; flex-grow: 1; }
+    .nav-item {
+        display: flex; align-items: center; gap: 15px; padding: 14px 18px;
+        color: #94a3b8; text-decoration: none; border-radius: 12px;
+        margin-bottom: 10px; transition: 0.3s; font-weight: 500; font-size: 0.95rem;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
+    .nav-item i { width: 22px; text-align: center; font-size: 1.15rem; }
+
+    /* MAIN CONTENT */
+    .main-content {
+        margin-left: 280px; padding: 40px; width: calc(100% - 280px);
+    }
+
+    /* HEADER */
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
+        background: white; padding: 15px 30px; border-radius: 16px; box-shadow: var(--shadow-md);
+    }
+    .top-bar .page-title { display: flex; align-items: center; gap: 15px; }
+    .top-bar .page-title i { font-size: 1.8rem; color: var(--accent); }
+    .top-bar h2 { margin: 0; font-size: 1.6rem; font-weight: 700; color: var(--text-dark); }
+    
+    .profile-area { display: flex; align-items: center; gap: 20px; }
+    .user-block { text-align: right; }
+    .user-block h5 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--text-dark); }
+    .user-block span { font-size: 0.85rem; color: var(--text-gray); }
+    .profile-area img { width: 45px; height: 45px; border-radius: 12px; border: 2px solid #e2e8f0; }
+
+    /* PREMIUM SETTINGS GRID */
+    .premium-settings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    .premium-card {
+        background: white; border-radius: 20px; padding: 30px 25px;
+        box-shadow: var(--shadow-md); border: 1px solid #f1f5f9;
+        cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+        display: flex; flex-direction: column; align-items: flex-start;
+    }
+    
+    .premium-card::before { content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%; transition: 0.3s; }
+    .premium-card:nth-child(1)::before { background: var(--accent); }
+    .premium-card:nth-child(2)::before { background: #8b5cf6; }
+    .premium-card:nth-child(3)::before { background: var(--primary); }
+    .premium-card:nth-child(4)::before { background: #f59e0b; }
+
+    .premium-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+
+    .card-icon-box {
+        width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+        font-size: 1.6rem; margin-bottom: 20px;
+    }
+    
+    .premium-card:nth-child(1) .card-icon-box { background: #eff6ff; color: var(--accent); }
+    .premium-card:nth-child(2) .card-icon-box { background: #f5f3ff; color: #8b5cf6; }
+    .premium-card:nth-child(3) .card-icon-box { background: #ecfdf5; color: var(--primary); }
+    .premium-card:nth-child(4) .card-icon-box { background: #fffbeb; color: #f59e0b; }
+
+    .premium-card h5 { margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; pointer-events: none;}
+    .premium-card p { margin: 0; font-size: 0.9rem; color: #64748b; font-weight: 500; line-height: 1.5; pointer-events: none;}
+
+    /* Modul oynasi (CSS ni yengish uchun kuchli ID) */
+    #moduleDetails {
+        background: white; border-radius: 20px; padding: 40px;
+        box-shadow: var(--shadow-lg); border: 1px solid #e2e8f0;
+        display: none; animation: slideUp 0.4s ease-out; margin-top: 20px;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR (Admin Dashboard bn aynan bir xil global stil) -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+        <img src="../../rasmlar/logo.jpg" alt="Logo">
+        <h3>MedSmart HQ</h3>
+    </div>
+
+    <nav class="nav-menu">
+        <a href="../admin_dashboard.html" class="nav-item">
+            <i class="fas fa-grid-2"></i><span>Dashboard</span>
+        </a>
+        <a href="../bemorlar/bemorlar_royxati.html" class="nav-item">
+            <i class="fas fa-users"></i><span>Bemorlar Boshqaruvi</span>
+        </a>
+        <a href="../shifokorlar/shifokorlar_royxati.html" class="nav-item">
+            <i class="fas fa-user-md"></i><span>Shifokorlar</span>
+        </a>
+        <a href="../navbatlar/navbatlar.html" class="nav-item">
+            <i class="fas fa-calendar-check"></i><span>Navbatlar</span>
+        </a>
+        <a href="../xizmatlar/xizmatlar_royxati.html" class="nav-item">
+            <i class="fas fa-hand-holding-medical"></i><span>Xizmatlar</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="fas fa-sliders-h"></i><span>Tizim Sozlamalari</span>
+        </a>
+    </nav>
+
+    
+  <a href="javascript:chiqish()" class="logout-btn" style="margin-top: auto; color: #ef4444; display: flex; align-items: center; gap: 15px; padding: 14px 18px; text-decoration: none; font-weight: 600; border-radius: 12px; transition: 0.3s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+    <i class="fas fa-sign-out-alt" style="font-size: 1.1rem; width: 22px; text-align: center;"></i>
+    <span>Tizimdan chiqish</span>
+</a>
+    </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- HEADER -->
+    <header class="top-bar">
+      <div class="page-title">
+        <i class="fas fa-cogs"></i>
+        <h2>Global Asosiy Sozlamalar</h2>
+      </div>
+      <div class="profile-area">
+        <div class="user-block">
+          <h5 id="userName">Administrator</h5>
+          <span>Boshqaruv Tizimi</span>
+        </div>
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Admin">
+      </div>
+    </header>
+
+    <!-- PREMIUM SETTINGS CARDS (js ishlashi uchun funksiyasi saqlangan) -->
+    <div class="premium-settings-grid">
+      
+      <div class="premium-card" onclick="toggleModule(this)">
+        <div class="card-icon-box"><i class="fas fa-map-marked-alt"></i></div>
+        <h5>Lokatsiya Sozlamalari</h5>
+        <p>Klinika manzili, Google/Leaflet xarita sozlamalari va orientir integratsiyasi</p>
+      </div>
+
+      <div class="premium-card" onclick="toggleModule(this)">
+        <div class="card-icon-box"><i class="fab fa-telegram-plane"></i></div>
+        <h5>Ijtimoiy Tarmoqlar</h5>
+        <p>Telegram bot, Instagram, va PR markazlashgan kommunikatsiyani ulash</p>
+      </div>
+
+      <div class="premium-card" onclick="toggleModule(this)">
+        <div class="card-icon-box"><i class="fas fa-business-time"></i></div>
+        <h5>Ish Vaqti</h5>
+        <p>Klinika bo'limlari, smenalar, ta'til va avtomatlashtirilgan dam olish kunlari</p>
+      </div>
+
+      <div class="premium-card" onclick="toggleModule(this)">
+        <div class="card-icon-box"><i class="fas fa-user-shield"></i></div>
+        <h5>Xavfsizlik</h5>
+        <p>Foydalanuvchi rollari (RBAC), tizim parollari, nazorat jurnali va ruxsatlar</p>
+      </div>
+
+    </div>
+
+    <!-- MODULE DETAILS (Javascript shunga qarab HTML qo'shadi) -->
+    <div id="moduleDetails"></div>
+    
+  </main>
+
+  <!-- JS ULANISHLARI: Eskisi umuman buzilmasligi uchun asli qanday bo'lsa shunday ulangan -->
+  <script src="tizim_sozlamalari.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="lokatsiya.js"></script>
+  <script src="ijtimoiy_tarmoqlar.js"></script>
+  <script src="ish_vaqti.js"></script>
+  <script src="xavfsizlik.js"></script>
+  
+  <script>
+      // Agar eski html dan userName ni ololmasa xato bermasligi uchun safety catch:
+      window.addEventListener('load', () => {
+         const usr = document.getElementById('userName');
+         if(usr && !usr.innerText) usr.innerText = 'Admin';
+      });
+  </script>
+</body>
+</html>

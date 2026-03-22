@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <script>
+        const bemorUser = JSON.parse(localStorage.getItem('medsmart_user'));
+        if (!bemorUser || bemorUser.role !== 'bemor') { window.location.href = 'bemor_login.html'; }
+    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bemor Asosiy Paneli - MedSmart AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --bg: #f8fafc;
+      --card-shadow: 0 10px 30px -5px rgba(0,0,0,0.06);
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 260px;
+      background: white;
+      border-right: 1px solid #e2e8f0;
+      position: fixed;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: 28px 24px;
+      text-align: center;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .logo-wrap {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      box-shadow: 0 8px 20px -4px rgba(16,185,129,0.35);
+    }
+
+    .logo-wrap i { color: white; font-size: 1.6rem; }
+    .sidebar-header h5 { font-weight: 700; color: var(--primary-dark); margin: 0 0 2px; font-size: 1.1rem; }
+    .sidebar-header small { color: var(--muted); font-size: 0.8rem; }
+
+    .sidebar-nav { padding: 16px 14px; flex: 1; overflow-y: auto; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 16px; border-radius: 12px; text-decoration: none;
+      color: var(--muted); font-weight: 500; transition: 0.25s;
+      margin-bottom: 4px; font-size: 0.95rem;
+    }
+
+    .nav-item i { width: 20px; text-align: center; font-size: 1rem; }
+    .nav-item:hover { background: #f0fdf4; color: var(--primary-dark); }
+    .nav-item.active { background: var(--primary); color: white; box-shadow: 0 8px 16px -4px rgba(16,185,129,0.3); }
+
+    .sidebar-footer { padding: 16px 14px; border-top: 1px solid #f1f5f9; }
+    
+    .logout-btn {
+      width: 100%; padding: 12px; border-radius: 12px;
+      background: #fef2f2; color: #dc2626; border: none;
+      font-weight: 600; cursor: pointer; transition: 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .logout-btn:hover { background: #fee2e2; transform: translateY(-2px); }
+
+    /* ── MAIN ── */
+    .main-content { margin-left: 260px; flex: 1; padding: 40px; }
+
+    .page-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 36px;
+    }
+
+    .page-header h2 { font-weight: 700; font-size: 1.8rem; margin: 0; color: #0f172a; }
+    .page-header p { color: var(--muted); margin: 6px 0 0; font-size: 0.95rem; }
+
+    .user-badge {
+      display: flex; align-items: center; gap: 12px;
+      background: white; padding: 12px 20px; border-radius: 14px;
+      box-shadow: var(--card-shadow); border: 1px solid #f1f5f9;
+    }
+
+    .user-avatar-box {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex; align-items: center; justify-content: center; color: white;
+    }
+
+    /* ── STATS GRID ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px; }
+    .stat-card { 
+      background: white; border-radius: 24px; padding: 25px; 
+      display: flex; align-items: center; gap: 20px; 
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 10px 15px -3px rgba(0,0,0,0.03); 
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card:hover { 
+      transform: translateY(-8px); 
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02); 
+    }
+    .stat-card::after {
+      content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--primary); opacity: 0; transition: 0.3s;
+    }
+    .stat-card:hover::after { opacity: 1; }
+    
+    .stat-icon { 
+      width: 58px; height: 58px; border-radius: 18px; 
+      display: flex; align-items: center; justify-content: center; 
+      font-size: 1.6rem; transition: 0.3s;
+    }
+    .stat-card:hover .stat-icon { transform: scale(1.1) rotate(5deg); }
+    
+    .stat-val { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
+    .stat-label { color: var(--muted); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .icon-blue { background: #f0fdfa; color: #0d9488; }
+    .icon-green { background: #f0fdf4; color: #10b981; }
+    .icon-purple { background: #f5f3ff; color: #8b5cf6; }
+    .icon-orange { background: #fff7ed; color: #f97316; }
+
+    /* ── SECTION TITLES ── */
+    .section-title { 
+      font-weight: 700; font-size: 1.3rem; color: #0f172a; 
+      margin-bottom: 24px; display: flex; align-items: center; gap: 12px; 
+    }
+    .section-title i { color: var(--primary); }
+
+    /* ── QUICK ACTIONS ── */
+    .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 48px;}
+    .action-btn { 
+      padding: 30px 20px; border-radius: 24px; border: none; font-family: inherit; font-size: 1.05rem; 
+      font-weight: 700; color: white; cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+      display: flex; flex-direction: column; align-items: center; gap: 16px; 
+      position: relative; overflow: hidden;
+    }
+    .action-btn i { font-size: 2.4rem; z-index: 1; transition: 0.3s; }
+    .action-btn span { z-index: 1; }
+    .action-btn::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+      transform: scale(0); transition: 0.6s;
+    }
+    .action-btn:hover::before { transform: scale(1); }
+    .action-btn:hover { transform: translateY(-8px); }
+    .action-btn:hover i { transform: scale(1.15); }
+    
+    .bg-emerald { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 12px 24px -6px rgba(16,185,129,0.3); }
+    .bg-blue { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); box-shadow: 0 12px 24px -6px rgba(13,148,136,0.3); }
+    .bg-purple { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); box-shadow: 0 12px 24px -6px rgba(139,92,246,0.3); }
+    .bg-orange { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); box-shadow: 0 12px 24px -6px rgba(249,115,22,0.3); }
+
+    /* ── ROW PANELS ── */
+    .row-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .card-panel { 
+      background: white; border-radius: 24px; padding: 32px; 
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 10px 15px -3px rgba(0,0,0,0.03); 
+      border: 1px solid rgba(226, 232, 240, 0.8); 
+    }
+    .card-panel h5 { 
+      font-size: 1.2rem; font-weight: 700; color: #0f172a; 
+      margin-bottom: 24px; margin-top:0; border-bottom: 2px solid #f8fafc; padding-bottom: 18px;
+    }
+    
+    .list-item { 
+      display: flex; align-items: center; justify-content: space-between; 
+      padding: 18px 22px; border-radius: 18px; background: #f8fafc; 
+      margin-bottom: 14px; transition: 0.3s; border: 1px solid #f1f5f9; 
+    }
+    .list-item:hover { 
+      background: white; transform: translateX(8px); 
+      box-shadow: 0 10px 20px -5px rgba(0,0,0,0.05); border-color: var(--primary);
+    }
+    .list-left { display: flex; align-items: center; gap: 18px; }
+    .list-icon { 
+      width: 48px; height: 48px; border-radius: 14px; 
+      display: flex; align-items: center; justify-content: center; font-size: 1.35rem; 
+    }
+    .list-text { font-weight: 700; color: #1e293b; font-size: 1rem; }
+    .list-date { font-size: 0.85rem; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+    .check-btn { 
+      background: #f0fdf4; color: #10b981; border: none; 
+      width: 38px; height: 38px; border-radius: 12px; cursor: pointer; 
+      transition: 0.3s; display: flex; align-items: center; justify-content: center;
+    }
+    .check-btn:hover { background: var(--primary); color: white; transform: rotate(15deg); }
+
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-wrap">
+        <i class="fas fa-heartbeat"></i>
+      </div>
+      <h5>Med Smart</h5>
+      <small>Bemor Panel</small>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active">
+        <i class="fas fa-th-large"></i><span>Asosiy Panel</span>
+      </a>
+      <a href="navbatlarim/navbatlarim.html" class="nav-item">
+        <i class="fas fa-calendar-check"></i><span>Mening Navbatlarim</span>
+      </a>
+      <a href="xizmatlar/xizmatlar_bulimi.html" class="nav-item">
+        <i class="fas fa-stethoscope"></i><span>Xizmatlar</span>
+      </a>
+      <a href="to'lov_tizimi/to'lov.html" class="nav-item">
+        <i class="fas fa-wallet"></i><span>To'lovlar</span>
+      </a>
+      <a href="xabarlar/xabarlar.html" class="nav-item">
+        <i class="fas fa-envelope"></i><span>Xabarlar</span>
+      </a>
+      <a href="sozlamalar/sozlamalar.html" class="nav-item">
+        <i class="fas fa-cog"></i><span>Sozlamalar</span>
+      </a>
+      <!-- AI BASHORAT SAHIFASI LINKI -->
+      <a href="../ai_predictions.html" class="nav-item" style="margin-top:20px; background: #ecfdf5; color: #059669; border: 1px dashed #10b981;">
+        <i class="fas fa-magic"></i><span>AI Bashorat</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="chiqish()">
+        <i class="fas fa-sign-out-alt"></i> Tizimdan chiqish
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    
+    <!-- HEADER -->
+    <div class="page-header">
+      <div>
+        <h2>Sizning Shaxsiy Panelingiz</h2>
+        <p id="currentDate">Yuklanmoqda...</p>
+      </div>
+      <div class="user-badge">
+        <div class="user-avatar-box"><i class="fas fa-user"></i></div>
+        <div>
+          <div style="font-weight:600; font-size:0.95rem;" id="userName">Bemor</div>
+          <div style="color:var(--muted); font-size:0.8rem;">Platforma a'zosi</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon icon-blue"><i class="fas fa-calendar-alt"></i></div>
+        <div>
+          <div class="stat-val">2 ta</div>
+          <div class="stat-label">Tasdiqlangan navbat</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-green"><i class="fas fa-tags"></i></div>
+        <div>
+          <div class="stat-val">1 ta</div>
+          <div class="stat-label">Aktiv chegirma</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-purple"><i class="fas fa-wallet"></i></div>
+        <div>
+          <div class="stat-val">120K</div>
+          <div class="stat-label">So'nggi to'lov (so'm)</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-orange"><i class="fas fa-file-medical-alt"></i></div>
+        <div>
+          <div class="stat-val">3 marta</div>
+          <div class="stat-label">Tibbiy ko'rik tarixi</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="section-title">
+      <i class="fas fa-bolt text-warning"></i> Tezkor Amallar
+    </div>
+    <div class="quick-actions">
+      <button class="action-btn bg-emerald" onclick="window.location.href='navbatlarim/navbatlarim.html'">
+        <i class="fas fa-calendar-plus"></i> Yangi Navbat
+      </button>
+      <button class="action-btn bg-blue" onclick="window.location.href='xizmatlar/xizmatlar_bulimi.html'">
+        <i class="fas fa-stethoscope"></i> Barcha Xizmatlar
+      </button>
+      <button class="action-btn bg-purple" onclick="window.location.href='to\'lov_tizimi/to\'lov.html'">
+        <i class="fas fa-credit-card"></i> Kassa/To'lov
+      </button>
+      <button class="action-btn bg-orange" onclick="window.location.href='../ai_predictions.html'">
+        <i class="fas fa-robot"></i> AI Tahlil Olish
+      </button>
+    </div>
+
+    <!-- NOTICES ROW -->
+    <div class="row-grid">
+      
+      <!-- REMINDERS -->
+      <div class="card-panel">
+        <h5><i class="fas fa-bell text-warning me-2"></i> Muhim Eslatmalar</h5>
+        
+        <div class="list-item" id="rem-1">
+          <div class="list-left">
+            <div class="list-icon" style="background:#eff6ff; color:#3b82f6;"><i class="fas fa-clock"></i></div>
+            <div>
+              <div class="list-text">UZI tekshiruviga keling</div>
+              <div class="list-date">Bugun, 10:00 (104-xona)</div>
+            </div>
+          </div>
+          <button class="check-btn" onclick="doneRem(1)"><i class="fas fa-check"></i></button>
+        </div>
+
+        <div class="list-item" id="rem-2">
+          <div class="list-left">
+            <div class="list-icon" style="background:#fdf4ff; color:#a855f7;"><i class="fas fa-pills"></i></div>
+            <div>
+              <div class="list-text">Kerakli dorilarni ichishni unutmang</div>
+              <div class="list-date">Har kuni, ertablab va kechasi</div>
+            </div>
+          </div>
+          <button class="check-btn" onclick="doneRem(2)"><i class="fas fa-check"></i></button>
+        </div>
+
+      </div>
+
+      <!-- NEWS -->
+      <div class="card-panel">
+        <h5><i class="fas fa-bullhorn text-info me-2"></i> Klinika Yangiliklari</h5>
+        
+        <div class="list-item">
+          <div class="list-left">
+            <div class="list-icon" style="background:#ecfdf5; color:#10b981;"><i class="fas fa-star"></i></div>
+            <div>
+              <div class="list-text">Qishki Mega Skidka - Bolalar uchun 15%</div>
+              <div class="list-date">Faqat 1-dekabrgacha</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="list-item">
+          <div class="list-left">
+            <div class="list-icon" style="background:#fff7ed; color:#f97316;"><i class="fas fa-user-md"></i></div>
+            <div>
+              <div class="list-text">Yangi mutaxassis: Endokrinolog Dr. Qodirov</div>
+              <div class="list-date">Endi qabullari boshlandi</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="../js/ai-widget.js"></script>
+  <script>
+    function chiqish() {
+      if(confirm("Tizimdan chiqishni xohlaysizmi?")) {
+        localStorage.removeItem('medsmart_token');
+        localStorage.removeItem('medsmart_session');
+        window.location.href = "../index.html";
+      }
+    }
+
+    function doneRem(id) {
+      const el = document.getElementById("rem-" + id);
+      if (el) {
+        el.style.opacity = "0.4";
+        el.style.textDecoration = "line-through";
+        const btn = el.querySelector(".check-btn");
+        if (btn) { btn.disabled = true; btn.style.background = "#d1fae5"; }
+      }
+    }
+
+    window.onload = () => {
+      // Joriy sana
+      const now = new Date();
+      const months = ["Yanvar","Fevral","Mart","Aprel","May","Iyun","Iyul","Avgust","Sentyabr","Oktyabr","Noyabr","Dekabr"];
+      const days = ["Yakshanba","Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba"];
+      document.getElementById('currentDate').textContent = 
+        `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} yil`;
+
+      // Foydalanuvchi ismi
+      const user = localStorage.getItem('userName') || localStorage.getItem('foydalanuvchiNomi') || 'Bemor';
+      const userEl = document.getElementById('userName');
+      if (userEl) userEl.textContent = user;
+
+      // Stats — localStorage dan dinamik hisoblash
+      const userId = localStorage.getItem('userId');
+      const appointments = JSON.parse(localStorage.getItem('userAppointments_' + userId) || '[]');
+      const payments = JSON.parse(localStorage.getItem('userPayments_' + userId) || '[]');
+
+      // 1. Kelgusi navbatlar
+      const upcomingCount = appointments.filter(a => a.status === 'upcoming').length;
+      const stat1 = document.querySelector('.stat-card:nth-child(1) .stat-val');
+      if (stat1) stat1.textContent = upcomingCount + ' ta';
+
+      // 2. So'nggi to'lov
+      const paidPayments = payments.filter(p => p.status === "to'langan");
+      const lastPaid = paidPayments.length > 0 ? paidPayments[paidPayments.length - 1] : null;
+      const stat3 = document.querySelector('.stat-card:nth-child(3) .stat-val');
+      if (stat3) {
+        stat3.textContent = lastPaid ? (lastPaid.amount / 1000).toFixed(0) + 'K' : '0';
+        const stat3Label = document.querySelector('.stat-card:nth-child(3) .stat-label');
+        if (stat3Label && !lastPaid) stat3Label.textContent = "To'lov yo'q";
+      }
+
+      // 3. Yakunlangan navbatlar
+      const completedCount = appointments.filter(a => a.status === 'completed').length;
+      const stat4 = document.querySelector('.stat-card:nth-child(4) .stat-val');
+      if (stat4) stat4.textContent = completedCount + ' marta';
+
+      // === SINXRONIZATSIYA (GIBRID API) ===
+      if (typeof syncDownload === 'function') {
+          syncDownload();
+      }
+    }
+  </script>
+  <script src="../js/sync.js"></script>
+</body>
+</html>

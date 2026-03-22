@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - To'lovlar & Moliya</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #1e293b;
+            --accent: #3b82f6; 
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            --sidebar-color: #334155;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ADMIN SIDEBAR */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-color);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-brand { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; padding: 0 10px; }
+        .brand-icon {
+            width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white; box-shadow: 0 8px 20px rgba(79,70,229,0.4);
+        }
+        .sidebar-brand h3 { margin: 0; font-size: 1.4rem; font-weight: 700; color: white; }
+
+        .nav-menu { padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 15px; padding: 14px 20px;
+            color: #94a3b8; text-decoration: none; border-radius: 12px;
+            font-weight: 500; transition: 0.3s;
+        }
+        .nav-item i { font-size: 1.1rem; width: 22px; text-align: center; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.08); color: white; }
+        .nav-item.active { background: var(--accent); color: white; box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4); }
+
+        /* MAIN AREA */
+        .main-content { margin-left: 280px; flex: 1; padding: 40px; }
+        
+        /* HEADER */
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; }
+        .top-header h2 { font-weight: 700; color: #0f172a; margin: 0; font-size: 2rem; }
+        
+        .admin-profile { display: flex; align-items: center; gap: 15px; background: white; padding: 10px 20px; border-radius: 16px; box-shadow: var(--card-shadow); }
+        .admin-profile img { width: 45px; height: 45px; border-radius: 12px; }
+
+        /* FINANCIAL METRICS */
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-bottom: 40px; }
+        .metric-card {
+            background: white; padding: 25px; border-radius: 20px; box-shadow: var(--card-shadow);
+            border: 1px solid #f1f5f9; position: relative; overflow: hidden;
+        }
+        .metric-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+        }
+        .metric-card.success::before { background: var(--success); }
+        .metric-card.primary::before { background: var(--accent); }
+        .metric-card.warning::before { background: var(--warning); }
+        
+        .metric-icon { 
+            width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; 
+            font-size: 1.4rem; margin-bottom: 15px;
+        }
+        .metric-card.success .metric-icon { background: #dcfce7; color: var(--success); }
+        .metric-card.primary .metric-icon { background: #dbeafe; color: var(--accent); }
+        .metric-card.warning .metric-icon { background: #fef3c7; color: var(--warning); }
+
+        .metric-info h4 { margin: 0; font-size: 1.8rem; font-weight: 700; color: #0f172a; }
+        .metric-info p { margin: 5px 0 0; color: #64748b; font-size: 0.95rem; font-weight: 500; }
+
+        /* TRANSACTIONS TABLE */
+        .table-card { background: white; border-radius: 20px; padding: 30px; box-shadow: var(--card-shadow); }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .table-header h5 { font-weight: 700; margin: 0; }
+        
+        .filter-group { display: flex; gap: 15px; }
+        .filter-select { border-radius: 10px; padding: 10px 15px; border: 1px solid #e2e8f0; font-size: 0.95rem; color: #334155; outline: none; }
+        .filter-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+        .dataTable { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .dataTable th { color: #64748b; font-weight: 600; font-size: 0.9rem; padding: 15px; border-bottom: 2px solid #f1f5f9; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dataTable td { padding: 18px 15px; border-bottom: 1px solid #f8fafc; font-weight: 500; font-size: 0.95rem; vertical-align: middle; }
+        .dataTable tbody tr { transition: 0.2s; }
+        .dataTable tbody tr:hover { background: #f8fafc; transform: scale(1.005); }
+        
+        .bemor-name { font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; }
+        .bemor-avatar { width: 35px; height: 35px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 0.8rem; }
+        
+        .service-info { font-weight: 500; color: #1e293b; }
+        .service-date { display: block; font-size: 0.8rem; color: #94a3b8; margin-top: 3px; }
+
+        .amount { font-weight: 700; color: #0f172a; }
+
+        .status-badge { padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; text-align: center; display: inline-block; min-width: 100px; }
+        .paid { background: #dcfce7; color: #10b981; }
+        .unpaid { background: #fef3c7; color: #f59e0b; }
+        .refund { background: #fee2e2; color: #ef4444; }
+
+        .btn-view { border: none; background: transparent; color: var(--accent); font-weight: 600; padding: 8px; border-radius: 8px; transition: 0.2s; }
+        .btn-view:hover { background: #eff6ff; }
+        
+    </style>
+</head>
+<body>
+
+    <!-- ADMIN SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-heartbeat"></i></div>
+            <h3>MedSmart HQ</h3>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="../admin_dashboard.html" class="nav-item">
+                <i class="fas fa-grid-2"></i><span>Dashboard</span>
+            </a>
+            <a href="../bemorlar/bemorlar_royxati.html" class="nav-item">
+                <i class="fas fa-users"></i><span>Bemorlar Boshqaruvi</span>
+            </a>
+            <a href="../shifokorlar/shifokorlar_royxati.html" class="nav-item">
+                <i class="fas fa-user-md"></i><span>Shifokorlar</span>
+            </a>
+            <a href="../navbatlar/navbatlar.html" class="nav-item">
+                <i class="fas fa-calendar-check"></i><span>Navbatlar</span>
+            </a>
+            <a href="../xizmatlar/xizmatlar_royxati.html" class="nav-item">
+                <i class="fas fa-hand-holding-medical"></i><span>Xizmatlar</span>
+            </a>
+            <!-- YANGLI QISIM: MOLIYA VA TO'LOVLAR -->
+            <a href="#" class="nav-item active">
+                <i class="fas fa-file-invoice-dollar"></i><span>Moliya & To'lovlar</span>
+            </a>
+            <a href="../tizim_sozlamalari/tizim_sozlamalari.html" class="nav-item">
+                <i class="fas fa-sliders-h"></i><span>Tizim Sozlamalari</span>
+            </a>
+        </nav>
+
+        
+    <a href="javascript:chiqish()" class="logout-btn" style="margin-top: auto; color: #ef4444; display: flex; align-items: center; gap: 15px; padding: 14px 18px; text-decoration: none; font-weight: 600; border-radius: 12px; transition: 0.3s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+    <i class="fas fa-sign-out-alt" style="font-size: 1.1rem; width: 22px; text-align: center;"></i>
+    <span>Tizimdan chiqish</span>
+</a>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="main-content">
+        <header class="top-header">
+            <h2><i class="fas fa-wallet me-3" style="color: var(--accent);"></i>Klinika Moliyasi</h2>
+            <div class="admin-profile">
+                <div class="text-end">
+                    <span class="d-block fw-bold">Admin Panel</span>
+                    <small class="text-muted">Bosh Hisobchi</small>
+                </div>
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Admin">
+            </div>
+        </header>
+
+        <!-- DASHBOARD METRICS -->
+        <div class="metrics-grid">
+            <div class="metric-card success">
+                <div class="metric-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                <div class="metric-info">
+                    <h4 id="totIncome">0 UZS</h4>
+                    <p>Jami Daromad</p>
+                </div>
+            </div>
+            <div class="metric-card primary">
+                <div class="metric-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="metric-info">
+                    <h4 id="totOnline">0 UZS</h4>
+                    <p>Elektron To'lovlar</p>
+                </div>
+            </div>
+            <div class="metric-card primary">
+                <div class="metric-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="metric-info">
+                    <h4 id="totCash">0 UZS</h4>
+                    <p>Naqd Pul</p>
+                </div>
+            </div>
+            <div class="metric-card warning">
+                <div class="metric-icon"><i class="fas fa-clock"></i></div>
+                <div class="metric-info">
+                    <h4 id="totDebt">0 UZS</h4>
+                    <p>Kutilayotgan To'lovlar</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRANSACTIONS LIST -->
+        <div class="table-card">
+            <div class="table-header">
+                <h5><i class="fas fa-list-alt me-2 text-primary"></i> Tranzaksiyalar Tarixi</h5>
+                <div class="filter-group">
+                    <select class="filter-select" id="statusFilter" onchange="loadPayments()">
+                        <option value="all">Barcha Statuslar</option>
+                        <option value="paid">✅ To'langan</option>
+                        <option value="pending">⏳ Kutilmoqda</option>
+                    </select>
+                    <select class="filter-select">
+                        <option>Bugun</option>
+                        <option>Shu hafta</option>
+                        <option>Shu oy</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Bemor</th>
+                            <th>Xizmat & Sana</th>
+                            <th>To'lov Turi</th>
+                            <th>Summa</th>
+                            <th>Status</th>
+                            <th>Amal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="financeData">
+                        <!-- JS GENERATES CONTENT -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- RECEIPT MODAL -->
+    <div class="modal fade" id="invoiceModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: none;">
+                <div class="modal-header border-0 bg-light p-4" style="border-radius: 20px 20px 0 0;">
+                    <h5 class="modal-title fw-bold">Elektron Chek (#<span id="invId"></span>)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <i class="fas fa-file-invoice-dollar fa-4x text-success mb-3"></i>
+                    <h3 class="fw-bold mb-4" id="invTotal">0 UZS</h3>
+                    <ul class="list-group list-group-flush text-start mb-4">
+                        <li class="list-group-item d-flex justify-content-between px-0"><span>Bemor:</span><strong id="invBemor"></strong></li>
+                        <li class="list-group-item d-flex justify-content-between px-0"><span>Xizmat:</span><strong id="invSvc"></strong></li>
+                        <li class="list-group-item d-flex justify-content-between px-0"><span>Sana/Vaqt:</span><strong id="invDate"></strong></li>
+                        <li class="list-group-item d-flex justify-content-between px-0"><span>To'lov usuli:</span><strong id="invMethod"></strong></li>
+                    </ul>
+                    <button class="btn btn-primary w-100 py-3 rounded-3" data-bs-dismiss="modal">Yopish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // YAGONA BAZADAN TO'LOVLARNI YUKLASH (NAVBATLAR)
+        function loadPayments() {
+            const allApts = JSON.parse(localStorage.getItem('navbatlar') || '[]');
+            const tbody = document.getElementById('financeData');
+            
+            // Faqat to'lovga daxldor navbatlarni olish (yangi bekor qilinganlar emas)
+            const activeApts = allApts.filter(a => a.status !== 'bekor_qilingan' && a.status !== 'otkazilgan');
+
+            const statusFilter = document.getElementById('statusFilter').value;
+            let filtered = activeApts;
+            
+            if(statusFilter === 'paid') {
+                filtered = activeApts.filter(d => d.paymentStatus === 'paid');
+            } else if(statusFilter === 'pending') {
+                filtered = activeApts.filter(d => d.paymentStatus === 'verifying' || d.paymentStatus === 'pending' || !d.paymentStatus);
+            }
+
+            let html = '';
+            let totInc=0, totOnl=0, totCsh=0, totDbt=0;
+
+            filtered.forEach(d => {
+                // To'lov xususiyatlari
+                const status = d.paymentStatus;
+                const isPaid = status === 'paid';
+                const isVerifying = status === 'verifying';
+                const price = d.serviceDetails ? d.serviceDetails.narx : 100000;
+                const pMethod = d.paymentMethod || '-';
+                const patientName = d.patientName || 'Bemor';
+                
+                if(isPaid) {
+                    totInc += price;
+                    if(pMethod.toLowerCase() === 'offline' || pMethod === 'naqd') totCsh += price;
+                    else totOnl += price;
+                } else {
+                    totDbt += price;
+                }
+
+                // Status Badge styling
+                let badgeClass = 'unpaid';
+                let badgeHtml = '<i class="fas fa-clock me-1"></i> Kutilmoqda';
+                if(isPaid) {
+                    badgeClass = 'paid';
+                    badgeHtml = '<i class="fas fa-check-circle me-1"></i> To\'langan';
+                } else if(isVerifying) {
+                    badgeClass = 'unpaid text-dark bg-info';
+                    badgeHtml = '<i class="fas fa-spinner fa-spin me-1"></i> Tasdiq kutilmoqda';
+                }
+
+                // Action tugmasi: agar verifying bo'lsa tasdiqlash tugmasi chiqadi
+                let actionBtn = `
+                    <button class="btn-view" onclick="viewInvoice(${d.id}, '${patientName}', '${d.service || d.xizmat}', '${pMethod}', ${price}, '${d.date}')" ${!isPaid ? 'disabled style="opacity:0.3"' : ''}>
+                        <i class="fas fa-eye me-1"></i> Ko'rish
+                    </button>
+                `;
+                if(isVerifying) {
+                    actionBtn = `
+                        <button class="btn btn-sm btn-success fw-bold px-3 py-2" onclick="approvePayment(${d.id})" style="border-radius:10px; box-shadow:0 4px 10px rgba(16,185,129,0.3);">
+                            <i class="fas fa-check me-1"></i> Tasdiqlash
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <tr>
+                        <td>
+                            <div class="bemor-name">
+                                <div class="bemor-avatar bg-primary text-white">${patientName.charAt(0)}</div>
+                                <span>${patientName}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="service-info">${d.service || d.xizmat}</span>
+                            <span class="service-date">${d.date} ${d.time}</span>
+                        </td>
+                        <td><span class="badge bg-light text-dark shadow-sm border">${pMethod}</span></td>
+                        <td class="amount">${price.toLocaleString()} UZS</td>
+                        <td>
+                            <span class="status-badge ${badgeClass}">
+                                ${badgeHtml}
+                            </span>
+                        </td>
+                        <td>
+                            ${actionBtn}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if(filtered.length === 0) {
+                html = `<tr><td colspan="6" class="text-center py-5 text-muted"><i class="fas fa-folder-open fa-3x mb-3 d-block"></i> Hech qanday ma'lumot topilmadi</td></tr>`;
+            }
+
+            tbody.innerHTML = html;
+            
+            // Ekranda statistikalarni yangilash
+            document.getElementById('totIncome').innerText = totInc.toLocaleString() + ' UZS';
+            document.getElementById('totOnline').innerText = totOnl.toLocaleString() + ' UZS';
+            document.getElementById('totCash').innerText = totCsh.toLocaleString() + ' UZS';
+            document.getElementById('totDebt').innerText = totDbt.toLocaleString() + ' UZS';
+        }
+
+        // To'lovni tasdiqlash funksiyasi
+        window.approvePayment = function(appointmentId) {
+            if(confirm("Ushbu to'lovni tasdiqlaysizmi? (Pul tushganini tekshirdingizmi?)")) {
+                let allApts = JSON.parse(localStorage.getItem('navbatlar') || '[]');
+                const aptIndex = allApts.findIndex(a => a.id === appointmentId);
+                
+                if(aptIndex !== -1) {
+                    allApts[aptIndex].paymentStatus = 'paid';
+                    allApts[aptIndex].paymentVerifiedByAdmin = true;
+                    // Agar receipt id bo'lmasa yaratamiz
+                    if(!allApts[aptIndex].receiptId) {
+                        allApts[aptIndex].receiptId = "RCP-ADM-" + Date.now();
+                    }
+                    localStorage.setItem('navbatlar', JSON.stringify(allApts));
+                    
+                    // UI ni darhol yangilaymiz
+                    loadPayments();
+                    alert("To'lov muvaffaqiyatli tasdiqlandi!");
+                }
+            }
+        }
+
+        // Chekni ko'rish modalini ochish
+        window.viewInvoice = function(id, name, svc, meth, price, date) {
+            document.getElementById('invId').innerText = id;
+            document.getElementById('invTotal').innerText = price.toLocaleString() + ' UZS';
+            document.getElementById('invBemor').innerText = name;
+            document.getElementById('invSvc').innerText = svc;
+            document.getElementById('invDate').innerText = date;
+            document.getElementById('invMethod').innerText = meth;
+            new bootstrap.Modal(document.getElementById('invoiceModal')).show();
+        }
+
+        // Tizimdan chiqish
+        function chiqish() {
+            if(confirm("Tizimdan chiqmoqchimisiz?")) { 
+                localStorage.removeItem('medsmart_user');
+                window.location.href = '../admin_login.html'; 
+            }
+        }
+
+        window.onload = loadPayments;
+    </script>
+</body>
+</html>

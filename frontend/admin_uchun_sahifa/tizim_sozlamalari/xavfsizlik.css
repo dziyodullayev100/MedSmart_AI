@@ -1,0 +1,515 @@
+/* Xavfsizlik moduli umumiy stillari */
+.security-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Banner */
+.banner {
+  background: linear-gradient(135deg, #ecb5de, #d48cc9);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(236, 181, 222, 0.2);
+}
+
+/* Sektsiya */
+.security-section {
+  background: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.security-section:hover {
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.security-section h5 {
+  margin-bottom: 15px;
+  color: #6c5ce7;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Grid tizimlari */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.align-end { 
+  display: flex; 
+  align-items: end; 
+}
+
+/* Form elementlari */
+label { 
+  font-weight: 600; 
+  margin-bottom: 8px; 
+  display: block;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.form-control, .form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fdfdfd;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  outline: none;
+  border-color: #6c5ce7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+  background: white;
+}
+
+/* Tugmalar */
+.btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-save { 
+  background: linear-gradient(135deg, #00b894, #019874);
+  color: #fff;
+}
+
+.btn-warn { 
+  background: linear-gradient(135deg, #e67e22, #d35400);
+  color: #fff;
+}
+
+.btn-primary { 
+  background: linear-gradient(135deg, #0984e3, #0767b3);
+  color: #fff;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* Xabarlar */
+.msg {
+  margin-top: 12px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.msg.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.msg.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Permission matrix */
+.matrix-container {
+  overflow-x: auto;
+  margin-top: 15px;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  padding: 5px;
+}
+
+.perm-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.perm-table th {
+  background: linear-gradient(135deg, #6c5ce7, #5b4bd8);
+  color: white;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  position: sticky;
+  left: 0;
+}
+
+.perm-table td {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.perm-row:hover {
+  background: #f9f9ff;
+}
+
+/* Checkbox va radio tugmalari */
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.form-check-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #6c5ce7;
+}
+
+.form-check-label {
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.95rem;
+}
+
+.form-check-input:checked + .form-check-label {
+  font-weight: 600;
+  color: #6c5ce7;
+}
+
+/* Captcha */
+.captcha-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.captcha-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f7f7ff;
+  border: 1px solid #eaeaea;
+  padding: 10px 15px;
+  border-radius: 6px;
+}
+
+#captchaText {
+  font-weight: 600;
+  letter-spacing: 2px;
+  font-size: 1.2rem;
+  color: #6c5ce7;
+}
+
+/* Log jadvali */
+.log-container {
+  overflow-x: auto;
+  margin-top: 15px;
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.log-table th {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #eaeaea;
+}
+
+.log-table td {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Huquq matritsasi animatsiyalari */
+.perm-row.allowed { 
+  background: #e8f9e9; 
+  transition: background 0.3s ease;
+}
+
+.perm-row.denied { 
+  background: #fdeaea; 
+  transition: background 0.3s ease;
+}
+
+.perm-icon {
+  cursor: pointer;
+  font-size: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.perm-icon:hover {
+  transform: scale(1.2);
+  background: rgba(108, 92, 231, 0.1);
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 1200px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .security-section {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 992px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .grid-3 {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .align-end {
+    align-items: stretch;
+  }
+  
+  .banner {
+    font-size: 1rem;
+  }
+}
+
+/* Tablet (768px) */
+@media (max-width: 768px) {
+  .security-container {
+    padding: 0 5px;
+  }
+  
+  .security-section {
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+  }
+  
+  .security-section h5 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  
+  .btn:last-child {
+    margin-bottom: 0;
+  }
+  
+  .form-control, .form-select {
+    padding: 12px 14px;
+    font-size: 16px; /* iOS da klaviatura uchun */
+  }
+  
+  .captcha-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .captcha-box {
+    justify-content: center;
+    padding: 12px;
+  }
+  
+  .perm-table th,
+  .perm-table td,
+  .log-table th,
+  .log-table td {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+  
+  .perm-icon {
+    font-size: 18px;
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* Mobile (576px) */
+@media (max-width: 576px) {
+  .banner {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+  }
+  
+  .security-section {
+    padding: 12px;
+  }
+  
+  label {
+    font-size: 0.9rem;
+  }
+  
+  .form-check {
+    margin-bottom: 10px;
+  }
+  
+  .form-check-label {
+    font-size: 0.9rem;
+  }
+  
+  .msg {
+    width: 100%;
+    text-align: center;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+  
+  .matrix-container,
+  .log-container {
+    border-radius: 4px;
+    padding: 3px;
+  }
+  
+  .perm-table,
+  .log-table {
+    min-width: 500px;
+  }
+}
+
+/* Small Mobile (480px) */
+@media (max-width: 480px) {
+  .banner {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+  
+  .security-section h5 {
+    font-size: 0.95rem;
+  }
+  
+  .form-control, .form-select {
+    padding: 10px 12px;
+  }
+  
+  .btn {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+  
+  #captchaText {
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+  
+  .perm-table,
+  .log-table {
+    min-width: 400px;
+  }
+}
+
+/* Landscape Orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  .grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .btn {
+    width: auto;
+    padding: 8px 14px;
+    margin-bottom: 0;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .btn:hover {
+    transform: none;
+  }
+  
+  .btn:active {
+    transform: scale(0.98);
+  }
+  
+  .perm-icon:hover {
+    transform: none;
+  }
+  
+  .perm-icon:active {
+    transform: scale(1.1);
+    background: rgba(108, 92, 231, 0.2);
+  }
+  
+  .form-check-input {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .form-control, .form-select {
+    padding: 14px 12px; /* Touch uchun kattaroq target */
+  }
+}
+
+/* Katta ekranlar uchun */
+@media (min-width: 1400px) {
+  .security-section {
+    padding: 25px;
+  }
+  
+  .grid-2 {
+    gap: 25px;
+  }
+  
+  .grid-3 {
+    gap: 25px;
+  }
+}

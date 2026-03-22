@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #6366f1;
+      --bg-color: #f8fafc;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+    }
+
+    body {
+      margin: 0; padding: 0; min-height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+    }
+
+    .login-wrapper { width: 100%; max-width: 420px; padding: 20px; box-sizing: border-box; }
+
+    .login-card {
+      background: white; border-radius: 24px; padding: 45px 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.5); text-align: center;
+    }
+
+    .brand-icon {
+      width: 65px; height: 65px; margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      border-radius: 18px; display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: white;
+      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35);
+    }
+
+    .login-card h2 { margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text-dark); }
+    .login-card p { margin: 8px 0 35px; color: var(--text-muted); font-size: 0.95rem; }
+
+    .input-group { margin-bottom: 22px; text-align: left; }
+    .input-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #475569; font-size: 0.95rem; }
+    
+    .input-field { position: relative; display: flex; align-items: center; }
+    .input-field i { position: absolute; left: 18px; color: #94a3b8; font-size: 1.1rem; }
+    .input-field input {
+      width: 100%; padding: 14px 18px 14px 48px; border-radius: 14px;
+      border: 1.5px solid #e2e8f0; background: #f8fafc; box-sizing: border-box;
+      font-family: inherit; font-size: 1rem; color: var(--text-dark); transition: 0.3s;
+    }
+    .input-field input:focus {
+      border-color: var(--primary); background: white; outline: none;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-actions {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 30px; font-size: 0.9rem;
+    }
+    .remember-me { display: flex; align-items: center; gap: 8px; color: #475569; cursor: pointer; }
+    .forgot-pass { color: var(--primary); font-weight: 600; text-decoration: none; }
+    .forgot-pass:hover { text-decoration: underline; }
+
+    .btn-login {
+      width: 100%; padding: 15px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white; border: none; font-size: 1.05rem; font-weight: 700;
+      font-family: inherit; cursor: pointer; transition: 0.3s;
+      box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-login:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(79, 70, 229, 0.35); }
+
+    .back-link { margin-top: 25px; }
+    .back-link a {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--text-muted); font-weight: 500; font-size: 0.95rem; text-decoration: none; transition: 0.3s;
+    }
+    .back-link a:hover { color: var(--text-dark); }
+  </style>
+</head>
+<body>
+  <!-- Login wrapper -->
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="brand-icon"><i class="fas fa-heartbeat"></i></div>
+      <h2>Admin Ko'prigi</h2>
+      <p>Boshqaruv paneliga xush kelibsiz</p>
+      
+      <form id="adminForm">
+        <div class="input-group">
+          <label>Elektron pochta</label>
+          <div class="input-field">
+            <i class="fas fa-envelope"></i>
+            <input id="username" type="email" required placeholder="admin@medsmart.uz" />
+          </div>
+        </div>
+        
+        <div class="input-group">
+          <label>Xavfsiz parol</label>
+          <div class="input-field">
+            <i class="fas fa-lock"></i>
+            <input id="password" type="password" required placeholder="••••••••" />
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <label class="remember-me">
+            <input type="checkbox"> <span>Eslab qolish</span>
+          </label>
+          <a href="#" class="forgot-pass">Parolni unutdingizmi?</a>
+        </div>
+        
+        <button class="btn-login" type="submit">
+          Tizimga kirish <i class="fas fa-arrow-right"></i>
+        </button>
+        
+        <div class="back-link">
+          <a href="../index.html"><i class="fas fa-home"></i> Asosiy sahifaga qaytish</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script src="../js/xavfsizlik.js"></script>
+<script src="../js/sinxronizatsiya.js"></script>
+<script>
+  const adminForm = document.getElementById("adminForm");
+
+  adminForm.onsubmit = async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    try {
+      // Xavfsizlik tekshiruvi
+      if (securityManager.isAccountLocked(email)) {
+        throw new Error('Hisobingiz vaqtincha bloklangan. Iltimos, keyinroq urinib ko\'ring.');
+      }
+
+      // Parolni tekshirish
+      const passwordValidation = securityManager.validatePassword(password);
+      if (!passwordValidation.isValid) {
+        throw new Error(passwordValidation.errors.join(', '));
+      }
+
+      // Xavfsiz login
+      const loginResult = await secureLogin(email, password);
+      
+      if (loginResult.success) {
+        // Admin ma'lumotlarini saqlash
+        const adminData = {
+          id: loginResult.user.id || 'admin_master',
+          email: email,
+          role: loginResult.user.role || 'admin',
+          fullName: loginResult.user.name || 'Asosiy Administrator',
+          loginTime: new Date().toISOString(),
+          permissions: ['all']
+        };
+
+        localStorage.setItem('medsmart_user', JSON.stringify(adminData));
+        
+        // Sinxronizatsiyani yangilash
+        SyncManager.updatePatient(adminData.id, { lastLogin: new Date().toISOString() });
+        
+        // Muvaffaqiyatli o'tish
+        window.location.href = "./admin_dashboard.html";
+      }
+    } catch (error) {
+      // Xatolik holatida urinishni kuzatish
+      securityManager.trackFailedAttempt(email);
+      
+      // Xatolikni ko'rsatish
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'login-error';
+      errorDiv.innerHTML = `
+        <div class="error-content">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>${error.message}</span>
+        </div>
+      `;
+      errorDiv.style.cssText = `
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 50px;
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        z-index: 9999;
+        animation: errorSlideIn 0.3s ease;
+        max-width: 240px;
+        font-size: 11px;
+        margin: 8px auto;
+        word-wrap: break-word;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        text-align: center;
+      `;
+      
+      // Error content styles
+      const style = document.createElement('style');
+      style.textContent = `
+        .error-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          text-align: center;
+        }
+        .error-content i {
+          font-size: 12px;
+          flex-shrink: 0;
+        }
+        .error-content span {
+          line-height: 1.2;
+          font-weight: 500;
+        }
+        @keyframes errorSlideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+        }
+        @keyframes errorSlideOut {
+          from {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+          to {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+          }
+        }
+      `;
+      if (!document.querySelector('style[data-error-styles]')) {
+        style.setAttribute('data-error-styles', 'true');
+        document.head.appendChild(style);
+      }
+      
+      // Avvalgi xatolikni olib tashlash
+      const existingError = adminForm.querySelector('.login-error');
+      if (existingError) {
+        existingError.remove();
+      }
+      
+      adminForm.appendChild(errorDiv);
+      
+      // 5 soniyadan keyin xatolikni olib tashlash
+      setTimeout(() => {
+        if (document.body.contains(errorDiv)) {
+          errorDiv.style.animation = 'errorSlideOut 0.3s ease';
+          setTimeout(() => {
+            if (document.body.contains(errorDiv)) {
+              errorDiv.remove();
+            }
+          }, 300);
+        }
+      }, 5000);
+    }
+  };
+
+  // Shake animatsiyasi
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+
+</body>
+</html>

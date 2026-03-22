@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <title>Shaxsiy Sozlamalar - MedSmart</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --bg: #f8fafc;
+      --card-shadow: 0 10px 30px -5px rgba(0,0,0,0.06);
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); margin: 0; color: var(--text); display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: 260px; background: white; border-right: 1px solid #e2e8f0; position: fixed; height: 100vh; display: flex; flex-direction: column; z-index: 100; }
+    .sidebar-header { padding: 28px 24px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+    .logo-wrap { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 8px 20px -4px rgba(16,185,129,0.35); }
+    .logo-wrap i { color: white; font-size: 1.6rem; }
+    .sidebar-header h5 { font-weight: 700; color: var(--primary-dark); margin: 0 0 2px; font-size: 1.1rem; }
+    .sidebar-header small { color: var(--muted); font-size: 0.8rem; }
+    .sidebar-nav { padding: 16px 14px; flex: 1; overflow-y: auto; }
+    .nav-item { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-radius: 12px; text-decoration: none; color: var(--muted); font-weight: 500; transition: 0.25s; margin-bottom: 4px; font-size: 0.95rem; }
+    .nav-item i { width: 20px; text-align: center; font-size: 1rem; }
+    .nav-item:hover { background: #f0fdf4; color: var(--primary-dark); }
+    .nav-item.active { background: var(--primary); color: white; box-shadow: 0 8px 16px -4px rgba(16,185,129,0.3); }
+    .sidebar-footer { padding: 16px 14px; border-top: 1px solid #f1f5f9; }
+    .logout-btn { width: 100%; padding: 12px; border-radius: 12px; background: #fef2f2; color: #dc2626; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .logout-btn:hover { background: #fee2e2; }
+
+    /* ── MAIN ── */
+    .main-content { margin-left: 260px; flex: 1; padding: 0; min-height: 100vh; background: var(--bg); }
+    .content-header { background: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 50; }
+    .header-title h4 { margin: 0; font-size: 1.3rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 10px; }
+    .header-title h4 i { color: var(--primary); }
+    .header-title p { margin: 4px 0 0; color: var(--muted); font-size: 0.85rem; }
+    .user-panel { display: flex; align-items: center; gap: 12px; }
+    .user-info { display: flex; align-items: center; gap: 10px; background: white; padding: 10px 16px; border-radius: 12px; box-shadow: var(--card-shadow); border: 1px solid #f1f5f9; }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.95rem; }
+    .user-name { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+    .user-role { font-size: 0.75rem; color: var(--muted); }
+    .btn-logout { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #dc2626; cursor: pointer; transition: 0.2s; }
+    .btn-logout:hover { background: #fee2e2; }
+    /* Sozlamalar uchun maxsus CSS */
+    .settings-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .settings-header {
+      margin-bottom: 30px;
+    }
+
+    .settings-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      color: #666;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16,185,129,0.25);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: #f0fdf4;
+      color: var(--primary-dark);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .settings-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 30px;
+      margin-bottom: 25px;
+    }
+
+    .settings-card h5 {
+      margin-bottom: 25px;
+      color: #2c3e50;
+      font-weight: 600;
+      border-bottom: 2px solid #f8f9fa;
+      padding-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .settings-card h5 i {
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #495057;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
+    }
+
+    .form-control:disabled {
+      background: #f8f9fa;
+      cursor: not-allowed;
+    }
+
+    .input-with-icon {
+      position: relative;
+    }
+
+    .input-with-icon i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6c757d;
+    }
+
+    .input-with-icon input {
+      padding-left: 45px;
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-save:hover {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, #047857 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(16,185,129,0.3);
+    }
+
+    .btn-cancel {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-left: 10px;
+    }
+
+    .btn-cancel:hover {
+      background: #5a6268;
+    }
+
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-delete:hover {
+      background: #c82333;
+    }
+
+    .toggle-switch {
+      display: inline-block;
+      position: relative;
+      width: 60px;
+      height: 30px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(30px);
+    }
+
+    .notification-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.3s;
+    }
+
+    .notification-item:hover {
+      background: #f8f9fa;
+    }
+
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+
+    .notification-info h6 {
+      margin: 0 0 5px 0;
+      font-weight: 500;
+    }
+
+    .notification-info p {
+      margin: 0;
+      color: #6c757d;
+      font-size: 14px;
+    }
+
+    .avatar-upload {
+      text-align: center;
+    }
+
+    .avatar-preview {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--primary);
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .avatar-preview:hover {
+      opacity: 0.8;
+    }
+
+    .btn-upload {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-upload:hover {
+      background: #218838;
+    }
+
+    .language-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .language-option {
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .language-option:hover {
+      border-color: var(--primary);
+      transform: translateY(-5px);
+    }
+
+    .language-option.selected {
+      border-color: var(--primary);
+      background: #ecfdf5;
+    }
+
+    .language-option i {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    .security-item {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .last-login {
+      color: #6c757d;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    .danger-zone {
+      border: 2px solid #dc3545;
+      border-radius: 10px;
+      padding: 25px;
+      background: #fff5f5;
+    }
+
+    .danger-zone h5 {
+      color: #dc3545 !important;
+      border-color: #dc3545 !important;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      animation: fadeIn 0.3s;
+    }
+
+    .modal h4 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 25px;
+    }
+
+    .password-strength {
+      height: 5px;
+      border-radius: 3px;
+      margin-top: 5px;
+      background: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0;
+      transition: width 0.3s, background 0.3s;
+    }
+
+    .password-requirements {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #6c757d;
+    }
+
+    .requirement {
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .requirement i {
+      color: #28a745;
+      font-size: 12px;
+    }
+
+    .requirement.not-met i {
+      color: #dc3545;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .settings-tabs {
+        flex-direction: column;
+      }
+      
+      .tab-btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .settings-card {
+        padding: 20px;
+      }
+    }
+
+          .logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;   /* Aylana shakl */
+  object-fit: cover;    /* Rasmni to‘liq joylashtirish */
+  border: 2px solid white; /* Dekorativ oq ramka (ixtiyoriy) */
+}
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-wrap"><i class="fas fa-heartbeat"></i></div>
+      <h5>Med Smart</h5>
+      <small>Bemor Panel</small>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="../bemor_dashboard.html" class="nav-item">
+        <i class="fas fa-th-large"></i><span>Asosiy Panel</span>
+      </a>
+      <a href="../navbatlarim/navbatlarim.html" class="nav-item">
+        <i class="fas fa-calendar-check"></i><span>Mening Navbatlarim</span>
+      </a>
+      <a href="../xizmatlar/xizmatlar_bulimi.html" class="nav-item">
+        <i class="fas fa-stethoscope"></i><span>Xizmatlar</span>
+      </a>
+      <a href="../to'lov_tizimi/to'lov.html" class="nav-item">
+        <i class="fas fa-wallet"></i><span>To'lovlar</span>
+      </a>
+      <a href="../xabarlar/xabarlar.html" class="nav-item">
+        <i class="fas fa-envelope"></i><span>Xabarlar</span>
+      </a>
+      <a href="#" class="nav-item active">
+        <i class="fas fa-cog"></i><span>Sozlamalar</span>
+      </a>
+      <a href="../../ai_predictions.html" class="nav-item" style="margin-top:20px; background:#ecfdf5; color:#059669; border:1px dashed #10b981;">
+        <i class="fas fa-magic"></i><span>AI Bashorat</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="chiqish()">
+        <i class="fas fa-sign-out-alt"></i> Tizimdan chiqish
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <!-- HEADER -->
+    <div class="content-header">
+      <div class="header-title">
+        <h4><i class="fas fa-cog me-2"></i>Sozlamalar</h4>
+        <p class="mb-0 text-muted" id="currentDateTime"></p>
+      </div>
+      <div class="user-panel">
+        <div class="user-info">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="user-details">
+            <div class="user-name" id="userName">Bemor Foydalanuvchi</div>
+            <div class="user-role">Bemor</div>
+          </div>
+        </div>
+        <button class="btn btn-logout" onclick="chiqish()">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- SOZLAMALAR SECTION -->
+    <div class="settings-container">
+      <div class="settings-header">
+        <h2>Shaxsiy Sozlamalar</h2>
+        <p class="text-muted">Profilingiz va hisobingizni boshqaring</p>
+      </div>
+
+      <!-- TABLAR -->
+      <div class="settings-tabs">
+        <button class="tab-btn active" onclick="openTab('profile')">
+          <i class="fas fa-user"></i> Profil
+        </button>
+        <button class="tab-btn" onclick="openTab('security')">
+          <i class="fas fa-shield-alt"></i> Xavfsizlik
+        </button>
+        <button class="tab-btn" onclick="openTab('notifications')">
+          <i class="fas fa-bell"></i> Bildirishnomalar
+        </button>
+        <button class="tab-btn" onclick="openTab('preferences')">
+          <i class="fas fa-sliders-h"></i> Imkoniyatlar
+        </button>
+        <button class="tab-btn" onclick="openTab('danger')">
+          <i class="fas fa-exclamation-triangle"></i> Xavfli zona
+        </button>
+      </div>
+
+      <!-- PROFIL SOZLAMLARI -->
+      <div id="profile" class="tab-content active">
+        <!-- Shaxsiy ma'lumotlar -->
+        <div class="settings-card">
+          <h5><i class="fas fa-id-card"></i> Shaxsiy ma'lumotlar</h5>
+          
+          <div class="avatar-upload">
+            <img src="" alt="Profil rasmi" class="avatar-preview" id="avatarPreview" onclick="document.getElementById('avatarInput').click()">
+            <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="previewAvatar(event)">
+            <br>
+            <button class="btn-upload" onclick="document.getElementById('avatarInput').click()">
+              <i class="fas fa-camera"></i> Rasm yuklash
+            </button>
+          </div>
+
+          <form id="profileForm">
+            <div class="form-group">
+              <label class="form-label">Ism</label>
+              <div class="input-with-icon">
+                <i class="fas fa-user"></i>
+                <input type="text" class="form-control" id="firstName" value="Bemor" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Familiya</label>
+              <div class="input-with-icon">
+                <i class="fas fa-user"></i>
+                <input type="text" class="form-control" id="lastName" value="Foydalanuvchi" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Telefon raqami</label>
+              <div class="input-with-icon">
+                <i class="fas fa-phone"></i>
+                <input type="tel" class="form-control" id="phone" value="+998901234567" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Elektron pochta</label>
+              <div class="input-with-icon">
+                <i class="fas fa-envelope"></i>
+                <input type="email" class="form-control" id="email" value="bemor@example.com" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Tug'ilgan sana</label>
+              <input type="date" class="form-control" id="birthDate" value="1990-01-01">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Jins</label>
+              <select class="form-control" id="gender">
+                <option value="male">Erkak</option>
+                <option value="female">Ayol</option>
+                <option value="other">Boshqa</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Manzil</label>
+              <textarea class="form-control" id="address" rows="3">Toshkent shahri</textarea>
+            </div>
+
+            <button type="button" class="btn-save" onclick="saveProfile()">
+              <i class="fas fa-save"></i> O'zgarishlarni saqlash
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- XAVFSIZLIK SOZLAMLARI -->
+      <div id="security" class="tab-content">
+        <div class="settings-card">
+          <h5><i class="fas fa-key"></i> Parolni o'zgartirish</h5>
+          
+          <div class="security-item">
+            <h6>Oxirgi faollik</h6>
+            <p class="last-login" id="lastLogin"></p>
+          </div>
+
+          <form id="passwordForm">
+            <div class="form-group">
+              <label class="form-label">Joriy parol</label>
+              <div class="input-with-icon">
+                <i class="fas fa-lock"></i>
+                <input type="password" class="form-control" id="currentPassword" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Yangi parol</label>
+              <div class="input-with-icon">
+                <i class="fas fa-lock"></i>
+                <input type="password" class="form-control" id="newPassword" required oninput="checkPasswordStrength()">
+              </div>
+              <div class="password-strength">
+                <div class="password-strength-bar" id="passwordStrengthBar"></div>
+              </div>
+              <div class="password-requirements" id="passwordRequirements">
+                <div class="requirement" id="reqLength"><i class="fas fa-times"></i> Kamida 8 ta belgi</div>
+                <div class="requirement" id="reqUppercase"><i class="fas fa-times"></i> Kamida 1 ta katta harf</div>
+                <div class="requirement" id="reqNumber"><i class="fas fa-times"></i> Kamida 1 ta raqam</div>
+                <div class="requirement" id="reqSpecial"><i class="fas fa-times"></i> Kamida 1 ta maxsus belgi</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Yangi parolni tasdiqlash</label>
+              <div class="input-with-icon">
+                <i class="fas fa-lock"></i>
+                <input type="password" class="form-control" id="confirmPassword" required>
+              </div>
+              <small class="text-danger" id="passwordError" style="display:none;">Parollar mos kelmadi!</small>
+            </div>
+
+            <button type="button" class="btn-save" onclick="changePassword()">
+              <i class="fas fa-key"></i> Parolni o'zgartirish
+            </button>
+          </form>
+        </div>
+
+        <div class="settings-card">
+          <h5><i class="fas fa-shield-alt"></i> Ikki faktorli autentifikatsiya</h5>
+          
+          <div class="security-item">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h6>SMS orqali tasdiqlash</h6>
+                <p class="last-login">Telefoningizga kod yuboriladi</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="twoFactorSMS">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="security-item">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h6>Email orqali tasdiqlash</h6>
+                <p class="last-login">Emailingizga kod yuboriladi</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="twoFactorEmail">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <button type="button" class="btn-save" onclick="saveTwoFactorSettings()">
+            <i class="fas fa-save"></i> Saqlash
+          </button>
+        </div>
+      </div>
+
+      <!-- BILDIRISHNOMA SOZLAMLARI -->
+      <div id="notifications" class="tab-content">
+        <div class="settings-card">
+          <h5><i class="fas fa-bell"></i> Bildirishnoma sozlamalari</h5>
+          
+          <div class="notification-item">
+            <div class="notification-info">
+              <h6>Navbat xabarlari</h6>
+              <p>Navbat vaqti yaqinlashganda bildirishnoma</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="notifyAppointments" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="notification-item">
+            <div class="notification-info">
+              <h6>To'lov eslatmalari</h6>
+              <p>To'lov muddati yaqinlashganda eslatma</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="notifyPayments" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="notification-item">
+            <div class="notification-info">
+              <h6>Xabarlar</h6>
+              <p>Doktordan yangi xabar kelganda</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="notifyMessages" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="notification-item">
+            <div class="notification-info">
+              <h6>Tizim yangiliklari</h6>
+              <p>Yangiliklar va yangi xizmatlar haqida</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="notifyNews" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="notification-item">
+            <div class="notification-info">
+              <h6>Promo-kodlar</h6>
+              <p>Aksiyalar va chegirmalar haqida</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="notifyPromo">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <button type="button" class="btn-save" onclick="saveNotificationSettings()">
+            <i class="fas fa-save"></i> Saqlash
+          </button>
+        </div>
+      </div>
+
+      <!-- IMKONIYATLAR -->
+      <div id="preferences" class="tab-content">
+        <div class="settings-card">
+          <h5><i class="fas fa-globe"></i> Tildan foydalanish</h5>
+          
+          <div class="language-selector">
+            <div class="language-option selected" onclick="selectLanguage('uz')">
+              <i class="fas fa-flag"></i>
+              <h6>O'zbekcha</h6>
+              <p>Ona tili</p>
+            </div>
+            
+            <div class="language-option" onclick="selectLanguage('ru')">
+              <i class="fas fa-flag"></i>
+              <h6>Русский</h6>
+              <p>Rus tili</p>
+            </div>
+            
+            <div class="language-option" onclick="selectLanguage('en')">
+              <i class="fas fa-flag"></i>
+              <h6>English</h6>
+              <p>Ingliz tili</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h5><i class="fas fa-palette"></i> Interfeys sozlamalari</h5>
+          
+          <div class="form-group">
+            <label class="form-label">Tema</label>
+            <select class="form-control" id="theme" onchange="changeTheme()">
+              <option value="light">Yorug'</option>
+              <option value="dark">Qorong'i</option>
+              <option value="auto">Avtomatik</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Shrift o'lchami</label>
+            <select class="form-control" id="fontSize" onchange="changeFontSize()">
+              <option value="small">Kichik</option>
+              <option value="medium" selected>O'rta</option>
+              <option value="large">Katta</option>
+              <option value="xlarge">Juda katta</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Animatsiyalar</label>
+            <label class="toggle-switch" style="display: block;">
+              <input type="checkbox" id="animations" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <small class="text-muted">Interfeys animatsiyalarini yoqish/ochish</small>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h5><i class="fas fa-database"></i> Ma'lumotlar boshqaruvi</h5>
+          
+          <button type="button" class="btn-save" onclick="exportData()">
+            <i class="fas fa-download"></i> Ma'lumotlarni eksport qilish
+          </button>
+          
+          <button type="button" class="btn-cancel" onclick="clearCache()">
+            <i class="fas fa-trash"></i> Keshlarni tozalash
+          </button>
+        </div>
+      </div>
+
+      <!-- XAVFLI ZONA -->
+      <div id="danger" class="tab-content">
+        <div class="settings-card danger-zone">
+          <h5><i class="fas fa-exclamation-triangle"></i> Xavfli zona</h5>
+          <p><strong>Ogohlantirish:</strong> Quyidagi amallarni bajarish qaytarib bo'lmaydi!</p>
+          
+          <div class="form-group">
+            <button type="button" class="btn-delete" onclick="showDeleteModal()">
+              <i class="fas fa-user-slash"></i> Hisobni o'chirish
+            </button>
+            <p class="text-muted">Barcha ma'lumotlaringiz butunlay o'chiriladi.</p>
+          </div>
+
+          <div class="form-group">
+            <button type="button" class="btn-delete" onclick="showLogoutAllModal()">
+              <i class="fas fa-sign-out-alt"></i> Barcha qurilmalardan chiqish
+            </button>
+            <p class="text-muted">Barcha qurilmalardan tizimdan chiqariladi.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALLAR -->
+  <!-- Hisobni o'chirish modali -->
+  <div id="deleteModal" class="modal">
+    <div class="modal-content">
+      <h4><i class="fas fa-exclamation-triangle text-danger"></i> Hisobni o'chirishni tasdiqlash</h4>
+      <p>Hisobingizni o'chirishni xohlaysizmi? Bu amalni qaytarib bo'lmaydi!</p>
+      <p><strong>Barcha ma'lumotlaringiz yo'qoladi:</strong></p>
+      <ul>
+        <li>Barcha navbatlar</li>
+        <li>To'lov tarixi</li>
+        <li>Shaxsiy ma'lumotlar</li>
+        <li>Barcha xabarlar</li>
+      </ul>
+      <div class="form-group">
+        <label class="form-label">Parolni kiriting:</label>
+        <input type="password" class="form-control" id="deletePassword" placeholder="Parolni tasdiqlash">
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-delete" onclick="deleteAccount()">O'chirish</button>
+        <button class="btn-cancel" onclick="closeDeleteModal()">Bekor qilish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barcha qurilmalardan chiqish modali -->
+  <div id="logoutAllModal" class="modal">
+    <div class="modal-content">
+      <h4><i class="fas fa-sign-out-alt text-warning"></i> Barcha qurilmalardan chiqish</h4>
+      <p>Barcha qurilmalaringizdan tizimdan chiqmoqchimisiz?</p>
+      <p><strong>Amalni tasdiqlang:</strong></p>
+      <div class="form-group">
+        <label class="toggle-switch">
+          <input type="checkbox" id="confirmLogoutAll">
+          <span class="toggle-slider"></span>
+        </label>
+        <span style="margin-left: 10px;">Ha, barcha qurilmalardan chiqmoqchiman</span>
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-delete" onclick="logoutAllDevices()">Chiqish</button>
+        <button class="btn-cancel" onclick="closeLogoutAllModal()">Bekor qilish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Muvaffaqiyat modali -->
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <h4><i class="fas fa-check-circle text-success"></i> Muvaffaqiyatli</h4>
+      <p id="successMessage">O'zgarishlar saqlandi!</p>
+      <div class="modal-buttons">
+        <button class="btn-save" onclick="closeSuccessModal()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global o'zgaruvchilar
+    const userId = localStorage.getItem('userId') || 'user_' + Math.random().toString(36).substr(2, 9);
+    let currentUser = {};
+
+    // DOM yuklanganda
+    document.addEventListener("DOMContentLoaded", () => {
+      // Foydalanuvchi ma'lumotlarini yuklash
+      loadUserData();
+      
+      // Sozlamalarni yuklash
+      loadSettings();
+      
+      // Joriy sanani ko'rsatish
+      document.getElementById("currentDateTime").textContent = new Date().toLocaleString('uz-UZ', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      // Oxirgi login vaqtini ko'rsatish
+      const lastLogin = localStorage.getItem('lastLogin_' + userId);
+      if (lastLogin) {
+        document.getElementById("lastLogin").textContent = new Date(lastLogin).toLocaleString('uz-UZ');
+      }
+    });
+
+    // ============================
+    // TAB FUNKSIYALARI
+    // ============================
+
+    function openTab(tabName) {
+      // Barcha tablarni yashirish
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      
+      // Barcha tugmalarni faol holatdan chiqarish
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => btn.classList.remove('active'));
+      
+      // Tanlangan tabni ko'rsatish
+      document.getElementById(tabName).classList.add('active');
+      
+      // Tanlangan tugmani faollashtirish
+      event.target.classList.add('active');
+    }
+
+    // ============================
+    // PROFIL FUNKSIYALARI
+    // ============================
+
+    // Foydalanuvchi ma'lumotlarini yuklash
+    function loadUserData() {
+      currentUser = JSON.parse(localStorage.getItem('userData_' + userId)) || {
+        firstName: 'Bemor',
+        lastName: 'Foydalanuvchi',
+        phone: '+998901234567',
+        email: 'bemor@example.com',
+        birthDate: '1990-01-01',
+        gender: 'male',
+        address: 'Toshkent shahri',
+        avatar: ''
+      };
+      
+      // Formlarni to'ldirish
+      document.getElementById('firstName').value = currentUser.firstName;
+      document.getElementById('lastName').value = currentUser.lastName;
+      document.getElementById('phone').value = currentUser.phone;
+      document.getElementById('email').value = currentUser.email;
+      document.getElementById('birthDate').value = currentUser.birthDate;
+      document.getElementById('gender').value = currentUser.gender;
+      document.getElementById('address').value = currentUser.address;
+      document.getElementById('userName').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+      
+      // Avatar rasm
+      if (currentUser.avatar) {
+        document.getElementById('avatarPreview').src = currentUser.avatar;
+      }
+    }
+
+    // Avatar rasmni ko'rish
+    function previewAvatar(event) {
+      const reader = new FileReader();
+      reader.onload = function() {
+        const output = document.getElementById('avatarPreview');
+        output.src = reader.result;
+        currentUser.avatar = reader.result;
+      }
+      reader.readAsDataURL(event.target.files[0]);
+    }
+
+    // Profilni saqlash
+    function saveProfile() {
+      // Yangi ma'lumotlarni olish
+      currentUser.firstName = document.getElementById('firstName').value;
+      currentUser.lastName = document.getElementById('lastName').value;
+      currentUser.phone = document.getElementById('phone').value;
+      currentUser.email = document.getElementById('email').value;
+      currentUser.birthDate = document.getElementById('birthDate').value;
+      currentUser.gender = document.getElementById('gender').value;
+      currentUser.address = document.getElementById('address').value;
+      
+      // LocalStorage'ga saqlash
+      localStorage.setItem('userData_' + userId, JSON.stringify(currentUser));
+      
+      // Ismni headerda yangilash
+      document.getElementById('userName').textContent = currentUser.firstName + ' ' + currentUser.lastName;
+      
+      // Muvaffaqiyat xabarini ko'rsatish
+      showSuccess('Profil ma\'lumotlari muvaffaqiyatli saqlandi!');
+    }
+
+    // ============================
+    // PAROL FUNKSIYALARI
+    // ============================
+
+    // Parol kuchini tekshirish
+    function checkPasswordStrength() {
+      const password = document.getElementById('newPassword').value;
+      const bar = document.getElementById('passwordStrengthBar');
+      const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        number: /\d/.test(password),
+        special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+      };
+      
+      // Talablarni yangilash
+      document.getElementById('reqLength').className = requirements.length ? 'requirement' : 'requirement not-met';
+      document.getElementById('reqLength').innerHTML = requirements.length ? 
+        '<i class="fas fa-check"></i> Kamida 8 ta belgi' : 
+        '<i class="fas fa-times"></i> Kamida 8 ta belgi';
+      
+      document.getElementById('reqUppercase').className = requirements.uppercase ? 'requirement' : 'requirement not-met';
+      document.getElementById('reqUppercase').innerHTML = requirements.uppercase ? 
+        '<i class="fas fa-check"></i> Kamida 1 ta katta harf' : 
+        '<i class="fas fa-times"></i> Kamida 1 ta katta harf';
+      
+      document.getElementById('reqNumber').className = requirements.number ? 'requirement' : 'requirement not-met';
+      document.getElementById('reqNumber').innerHTML = requirements.number ? 
+        '<i class="fas fa-check"></i> Kamida 1 ta raqam' : 
+        '<i class="fas fa-times"></i> Kamida 1 ta raqam';
+      
+      document.getElementById('reqSpecial').className = requirements.special ? 'requirement' : 'requirement not-met';
+      document.getElementById('reqSpecial').innerHTML = requirements.special ? 
+        '<i class="fas fa-check"></i> Kamida 1 ta maxsus belgi' : 
+        '<i class="fas fa-times"></i> Kamida 1 ta maxsus belgi';
+      
+      // Kuchni hisoblash
+      let strength = 0;
+      if (requirements.length) strength += 25;
+      if (requirements.uppercase) strength += 25;
+      if (requirements.number) strength += 25;
+      if (requirements.special) strength += 25;
+      
+      // Rangni belgilash
+      bar.style.width = strength + '%';
+      if (strength < 50) {
+        bar.style.background = '#dc3545';
+      } else if (strength < 75) {
+        bar.style.background = '#ffc107';
+      } else {
+        bar.style.background = '#28a745';
+      }
+    }
+
+    // Parolni o'zgartirish
+    function changePassword() {
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      // Parolni tasdiqlash
+      if (newPassword !== confirmPassword) {
+        document.getElementById('passwordError').style.display = 'block';
+        return;
+      }
+      
+      // Parol talablarini tekshirish
+      if (newPassword.length < 8) {
+        showError('Parol kamida 8 ta belgidan iborat bo\'lishi kerak');
+        return;
+      }
+      
+      // Bu yerda aslida serverga so'rov yuboriladi
+      // Demo uchun oddiy tekshirish
+      if (currentPassword === 'demo123') {
+        showSuccess('Parol muvaffaqiyatli o\'zgartirildi!');
+        // Formlarni tozalash
+        document.getElementById('passwordForm').reset();
+        document.getElementById('passwordStrengthBar').style.width = '0';
+        document.getElementById('passwordError').style.display = 'none';
+      } else {
+        showError('Joriy parol noto\'g\'ri!');
+      }
+    }
+
+    // ============================
+    // SOZLAMALAR FUNKSIYALARI
+    // ============================
+
+    // Sozlamalarni yuklash
+    function loadSettings() {
+      const settings = JSON.parse(localStorage.getItem('userSettings_' + userId)) || {
+        notifications: {
+          appointments: true,
+          payments: true,
+          messages: true,
+          news: true,
+          promo: false
+        },
+        twoFactor: {
+          sms: false,
+          email: false
+        },
+        preferences: {
+          language: 'uz',
+          theme: 'light',
+          fontSize: 'medium',
+          animations: true
+        }
+      };
+      
+      // Bildirishnomalar
+      document.getElementById('notifyAppointments').checked = settings.notifications.appointments;
+      document.getElementById('notifyPayments').checked = settings.notifications.payments;
+      document.getElementById('notifyMessages').checked = settings.notifications.messages;
+      document.getElementById('notifyNews').checked = settings.notifications.news;
+      document.getElementById('notifyPromo').checked = settings.notifications.promo;
+      
+      // Ikki faktorli autentifikatsiya
+      document.getElementById('twoFactorSMS').checked = settings.twoFactor.sms;
+      document.getElementById('twoFactorEmail').checked = settings.twoFactor.email;
+      
+      // Til
+      document.querySelectorAll('.language-option').forEach(option => {
+        option.classList.remove('selected');
+        if (option.getAttribute('onclick').includes(settings.preferences.language)) {
+          option.classList.add('selected');
+        }
+      });
+      
+      // Tema va boshqalar
+      document.getElementById('theme').value = settings.preferences.theme;
+      document.getElementById('fontSize').value = settings.preferences.fontSize;
+      document.getElementById('animations').checked = settings.preferences.animations;
+    }
+
+    // Bildirishnoma sozlamalarini saqlash
+    function saveNotificationSettings() {
+      const settings = JSON.parse(localStorage.getItem('userSettings_' + userId)) || {};
+      settings.notifications = {
+        appointments: document.getElementById('notifyAppointments').checked,
+        payments: document.getElementById('notifyPayments').checked,
+        messages: document.getElementById('notifyMessages').checked,
+        news: document.getElementById('notifyNews').checked,
+        promo: document.getElementById('notifyPromo').checked
+      };
+      
+      localStorage.setItem('userSettings_' + userId, JSON.stringify(settings));
+      showSuccess('Bildirishnoma sozlamalari saqlandi!');
+    }
+
+    // Ikki faktorli autentifikatsiyani saqlash
+    function saveTwoFactorSettings() {
+      const settings = JSON.parse(localStorage.getItem('userSettings_' + userId)) || {};
+      settings.twoFactor = {
+        sms: document.getElementById('twoFactorSMS').checked,
+        email: document.getElementById('twoFactorEmail').checked
+      };
+      
+      localStorage.setItem('userSettings_' + userId, JSON.stringify(settings));
+      showSuccess('Xavfsizlik sozlamalari saqlandi!');
+    }
+
+    // Tilni tanlash
+    function selectLanguage(lang) {
+      document.querySelectorAll('.language-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      event.target.closest('.language-option').classList.add('selected');
+      
+      const settings = JSON.parse(localStorage.getItem('userSettings_' + userId)) || {};
+      settings.preferences = settings.preferences || {};
+      settings.preferences.language = lang;
+      
+      localStorage.setItem('userSettings_' + userId, JSON.stringify(settings));
+      showSuccess('Til o\'zgartirildi! Sahifani yangilang.');
+    }
+
+    // Temani o'zgartirish
+    function changeTheme() {
+      const theme = document.getElementById('theme').value;
+      const settings = JSON.parse(localStorage.getItem('userSettings_' + userId)) || {};
+      settings.preferences = settings.preferences || {};
+      settings.preferences.theme = theme;
+      
+      localStorage.setItem('userSettings_' + userId, JSON.stringify(settings));
+      
+      if (theme === 'dark') {
+        document.documentElement.style.setProperty('--background-color', '#1a1a1a');
+        document.documentElement.style.setProperty('--text-color', '#ffffff');
+      } else {
+        document.documentElement.style.setProperty('--background-color', '#ffffff');
+        document.documentElement.style.setProperty('--text-color', '#000000');
+      }
+      
+      showSuccess('Tema o\'zgartirildi!');
+    }
+
+    // Shrift o'lchamini o'zgartirish
+    function changeFontSize() {
+      const fontSize = document.getElementById('fontSize').value;
+      const settings = JSON.parse(localStorage.getItem('userSettings_' + userId)) || {};
+      settings.preferences = settings.preferences || {};
+      settings.preferences.fontSize = fontSize;
+      
+      localStorage.setItem('userSettings_' + userId, JSON.stringify(settings));
+      
+      let size;
+      switch(fontSize) {
+        case 'small': size = '12px'; break;
+        case 'medium': size = '14px'; break;
+        case 'large': size = '16px'; break;
+        case 'xlarge': size = '18px'; break;
+      }
+      
+      document.body.style.fontSize = size;
+      showSuccess('Shrift o\'lchami o\'zgartirildi!');
+    }
+
+    // Ma'lumotlarni eksport qilish
+    function exportData() {
+      const userData = localStorage.getItem('userData_' + userId);
+      const appointments = localStorage.getItem('userAppointments_' + userId);
+      const payments = localStorage.getItem('userPayments_' + userId);
+      
+      const data = {
+        userData: userData ? JSON.parse(userData) : {},
+        appointments: appointments ? JSON.parse(appointments) : [],
+        payments: payments ? JSON.parse(payments) : []
+      };
+      
+      const dataStr = JSON.stringify(data, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = 'medsmart-data-' + new Date().toISOString().slice(0,10) + '.json';
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+      showSuccess('Ma\'lumotlar eksport qilindi!');
+    }
+
+    // Keshlarni tozalash
+    function clearCache() {
+      if (confirm('Kesh ma\'lumotlarini tozalashni xohlaysizmi? Bu amal sahifani yangilaydi.')) {
+        localStorage.removeItem('userSettings_' + userId);
+        location.reload();
+      }
+    }
+
+    // ============================
+    // XAVFLI ZONA FUNKSIYALARI
+    // ============================
+
+    // Hisobni o'chirish modalini ochish
+    function showDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    // Hisobni o'chirish modalini yopish
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'none';
+      document.getElementById('deletePassword').value = '';
+    }
+
+    // Hisobni o'chirish
+    function deleteAccount() {
+      const password = document.getElementById('deletePassword').value;
+      
+      if (!password) {
+        alert('Iltimos, parolni kiriting!');
+        return;
+      }
+      
+      if (confirm('HAQQIYATDAN ham hisobingizni o\'chirmoqchimisiz? Bu amalni qaytarib bo\'lmaydi!')) {
+        // Bu yerda aslida serverga so'rov yuboriladi
+        // Demo uchun:
+        localStorage.clear();
+        showSuccess('Hisob muvaffaqiyatli o\'chirildi!');
+        setTimeout(() => {
+          window.location.href = '../../index.html';
+        }, 2000);
+      }
+    }
+
+    // Barcha qurilmalardan chiqish modalini ochish
+    function showLogoutAllModal() {
+      document.getElementById('logoutAllModal').style.display = 'flex';
+    }
+
+    // Barcha qurilmalardan chiqish modalini yopish
+    function closeLogoutAllModal() {
+      document.getElementById('logoutAllModal').style.display = 'none';
+      document.getElementById('confirmLogoutAll').checked = false;
+    }
+
+    // Barcha qurilmalardan chiqish
+    function logoutAllDevices() {
+      if (!document.getElementById('confirmLogoutAll').checked) {
+        alert('Iltimos, amalni tasdiqlang!');
+        return;
+      }
+      
+      // Bu yerda aslida serverga so'rov yuboriladi
+      // Demo uchun:
+      localStorage.removeItem('userToken_' + userId);
+      showSuccess('Barcha qurilmalardan chiqildi!');
+      setTimeout(() => {
+        window.location.href = '../login.html';
+      }, 2000);
+    }
+
+    // ============================
+    // UMUMIY FUNKSIYALAR
+    // ============================
+
+    // Chiqish funksiyasi
+    function chiqish() {
+      if (confirm('Tizimdan chiqishni xohlaysizmi?')) {
+        localStorage.removeItem('userToken_' + userId);
+        window.location.href = '../../home.html';
+      }
+    }
+
+    // Muvaffaqiyat xabarini ko'rsatish
+    function showSuccess(message) {
+      document.getElementById('successMessage').textContent = message;
+      document.getElementById('successModal').style.display = 'flex';
+    }
+
+    // Muvaffaqiyat modalini yopish
+    function closeSuccessModal() {
+      document.getElementById('successModal').style.display = 'none';
+    }
+
+    // Xatolik xabarini ko'rsatish
+    function showError(message) {
+      alert('Xatolik: ' + message);
+    }
+  </script>
+<script src="../../js/ai-widget.js"></script>
+</body>
+</html>

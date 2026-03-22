@@ -1,0 +1,189 @@
+/* Umumiy bo‘lim konteyneri */
+.content-section {
+  background: linear-gradient(135deg, #f0f8ff, #e6f7ff); /* gradient fon */
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  margin-bottom: 40px;
+  border: 1px solid rgba(0, 123, 255, 0.2); /* dekorativ border */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dekorativ element */
+.content-section::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle at center, rgba(0,123,255,0.15), transparent 70%);
+  border-radius: 50%;
+  z-index: 0;
+}
+.content-section::after {
+  content: "";
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle at center, rgba(40,167,69,0.15), transparent 70%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+/* Sarlavha */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 1; /* dekorativ element ustida ko‘rinishi uchun */
+}
+.section-header h5 {
+  font-weight: 700;
+  color: #2e7d32;
+  letter-spacing: 0.5px;
+}
+
+/* Kartalar */
+#xizmatlarList .card {
+  border: none;
+  border-radius: 14px;
+  transition: 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  position: relative;
+  z-index: 1;
+}
+#xizmatlarList .card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+  background: #f9fcff;
+}
+
+/* Kartadagi ikonka */
+.stat-icon {
+  width: 55px;
+  height: 55px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+.bg-primary { background: #007bff; }
+.bg-success { background: #28a745; }
+.bg-warning { background: #ffc107; color: #212529; }
+.bg-info { background: #17a2b8; }
+.bg-purple { background: #6f42c1; }
+.bg-orange { background: #fd7e14; }
+
+/* Kartadagi matn */
+#xizmatlarList h6 {
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  color: #333;
+}
+#xizmatlarList p {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+/* Tugma */
+#xizmatlarList .btn {
+  font-size: 0.85rem;
+  border-radius: 6px;
+  margin-top: auto;
+  transition: 0.3s ease;
+}
+#xizmatlarList .btn:hover {
+  background: #28a745;
+  color: #fff;
+}
+
+/* Kartalar */
+#xizmatlarList .card {
+  border: none;
+  border-radius: 14px;
+  transition: 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #ffffff, #f9f9ff); /* rangli fon */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover effekti */
+#xizmatlarList .card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+  background: linear-gradient(135deg, #e6f7ff, #f0f8ff); /* hoverda rangli fon */
+}
+
+/* Dekorativ chiziq */
+#xizmatlarList .card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 5px;
+  width: 100%;
+  background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #fd7e14);
+}
+
+
+/* Kartadagi sarlavha */
+#xizmatlarList h6 {
+  font-weight: 700;              /* qalinroq */
+  margin-top: 12px;
+  margin-bottom: 6px;
+  color: #2c3e50;                /* to‘q kulrang */
+  font-size: 1.05rem;            /* biroz kattaroq */
+  letter-spacing: 0.5px;         /* harflar oralig‘i */
+  transition: 0.3s ease;
+}
+
+/* Hoverda sarlavha rangini o‘zgartirish */
+#xizmatlarList .card:hover h6 {
+  color: #007bff;                /* hoverda ko‘k rang */
+}
+
+/* Kartadagi matn */
+#xizmatlarList p {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 10px;
+  line-height: 1.4;              /* matn oralig‘i */
+  transition: 0.3s ease;
+}
+
+/* Hoverda matn rangini o‘zgartirish */
+#xizmatlarList .card:hover p {
+  color: #333;                   /* hoverda to‘qroq rang */
+}
+
+/* Badge (status) */
+#xizmatlarList .badge {
+  font-size: 0.75rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+
+      .logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;   /* Aylana shakl */
+  object-fit: cover;    /* Rasmni to‘liq joylashtirish */
+  border: 2px solid white; /* Dekorativ oq ramka (ixtiyoriy) */
+}

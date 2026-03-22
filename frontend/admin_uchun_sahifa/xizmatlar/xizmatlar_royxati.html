@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <script>
+        const adminUser = JSON.parse(localStorage.getItem('medsmart_user'));
+        if (!adminUser || adminUser.role !== 'admin') { window.location.href = '../admin_login.html'; }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MedSmart Admin - Xizmatlar Boshqaruvi</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #059669;
+            --bg-light: #f8fafc;
+            --secondary: #334155;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* PREMIUM SIDEBAR (Global Loyiha stili) */
+        .sidebar {
+            width: 280px;
+            background: var(--secondary);
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            padding: 30px 20px;
+            z-index: 1000;
+        }
+        .sidebar-brand { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; padding: 0 10px; }
+        .sidebar-brand .brand-icon {
+            width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+        }
+        .sidebar-brand h3 { font-size: 1.4rem; font-weight: 800; margin: 0; }
+        .nav-menu { padding: 0; margin: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 15px; padding: 14px 20px;
+            color: #94a3b8; text-decoration: none; border-radius: 12px; font-weight: 500; font-size: 0.95rem;
+            transition: 0.3s;
+        }
+        .nav-item i { font-size: 1.2rem; width: 22px; text-align: center; }
+        .nav-item:hover, .nav-item.active { color: white; background: rgba(255,255,255,0.08); }
+        .nav-item.active { background: linear-gradient(90deg, var(--primary), var(--primary-light)); font-weight: 600; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 280px; flex: 1; padding: 40px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .header h2 { font-weight: 700; color: #0f172a; margin: 0; }
+
+        /* STATS */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-bottom: 40px; }
+        .stat-card {
+            background: white; padding: 22px; border-radius: 20px; box-shadow: var(--card-shadow);
+            display: flex; align-items: center; gap: 15px; border: 1px solid #f1f5f9;
+        }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .stat-info h3 { margin: 0; font-weight: 700; font-size: 1.4rem; }
+        .stat-info p { margin: 0; color: var(--text-muted); font-size: 0.85rem; }
+
+        /* SERVICE CARDS */
+        .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .service-card {
+            background: white; border-radius: 24px; padding: 30px; box-shadow: var(--card-shadow);
+            transition: 0.3s; border: 1px solid #f1f5f9; position: relative; overflow: hidden;
+        }
+        .service-card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        
+        .service-badge {
+            position: absolute; top: 0; right: 0; background: #f0fdf4; color: var(--primary-dark);
+            padding: 8px 15px; border-bottom-left-radius: 20px; font-weight: 600; font-size: 0.75rem;
+        }
+
+        .service-icon-box {
+            width: 60px; height: 60px; border-radius: 18px; background: #f8fafc;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: var(--primary); margin-bottom: 20px;
+        }
+
+        .service-name { font-weight: 700; font-size: 1.2rem; margin-bottom: 15px; color: #1e293b; min-height: 3rem; }
+        
+        .service-detail { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; }
+        .detail-label { color: var(--text-muted); }
+        .detail-value { font-weight: 600; color: #334155; }
+
+        .price-tag {
+            background: #f1f5f9; padding: 12px; border-radius: 12px; text-align: center;
+            font-weight: 700; font-size: 1.1rem; color: var(--primary-dark); margin: 20px 0;
+        }
+
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-action { padding: 10px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; border: none; transition: 0.3s; }
+        .btn-edit { background: #f8fafc; color: var(--text-main); border: 1px solid #e2e8f0; }
+        .btn-edit:hover { background: #e2e8f0; }
+        .btn-delete { background: #fef2f2; color: #dc2626; }
+        .btn-delete:hover { background: #fee2e2; }
+
+        .btn-add {
+            background: var(--primary); color: white; padding: 12px 24px; border-radius: 12px;
+            font-weight: 600; border: none; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+        }
+        .btn-add:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+        /* SEARCH BAR */
+        .top-tools { background: white; padding: 20px 30px; border-radius: 20px; box-shadow: var(--card-shadow); margin-bottom: 30px; display: flex; gap: 20px; align-items: center; }
+        .search-input { flex: 1; position: relative; }
+        .search-input i { position: absolute; left: 15px; top: 15px; color: var(--text-muted); }
+        .search-input input { width: 100%; padding: 12px 15px 12px 45px; border-radius: 12px; border: 1.5px solid #e2e8f0; outline: none; transition: 0.3s; }
+        .search-input input:focus { border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <!-- PREMIUM SIDEBAR (Global Loyiha stili) -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-heartbeat"></i></div>
+            <h3>MedSmart HQ</h3>
+        </div>
+        <nav class="nav-menu">
+            <a href="../admin_dashboard.html" class="nav-item"><i class="fas fa-grid-2"></i><span>Dashbord</span></a>
+            <a href="../bemorlar/bemorlar_royxati.html" class="nav-item"><i class="fas fa-users"></i><span>Bemorlar Boshqaruvi</span></a>
+            <a href="../shifokorlar/shifokorlar_royxati.html" class="nav-item"><i class="fas fa-user-md"></i><span>Shifokorlar</span></a>
+            <a href="../navbatlar/navbatlar.html" class="nav-item"><i class="fas fa-calendar-check"></i><span>Navbatlar</span></a>
+            <a href="#" class="nav-item active"><i class="fas fa-hand-holding-medical"></i><span>Klinika Xizmatlari</span></a>
+            <a href="../tolovlar/tolovlar.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i><span>Moliya & To'lovlar</span></a>
+            <a href="../tizim_sozlamalari/tizim_sozlamalari.html" class="nav-item"><i class="fas fa-sliders-h"></i><span>Tizim Sozlamalari</span></a>
+        </nav>
+        <a href="javascript:chiqish()" class="nav-item" style="color: #ef4444; margin-top: auto;">
+            <i class="fas fa-sign-out-alt"></i><span>Tizimdan chiqish</span>
+        </a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <header class="header">
+            <div>
+                <h2>Xizmatlar va Narxlar</h2>
+                <p class="text-muted">Klinika koshidgi barcha tibbiy xizmatlar boshqaruvi</p>
+            </div>
+            <a href="xizmat_qoshish.html" class="btn btn-add"><i class="fas fa-plus me-2"></i> Yangi Xizmat</a>
+        </header>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#ecfdf5; color:#10b981;"><i class="fas fa-briefcase-medical"></i></div>
+                <div class="stat-info"><h3 id="totalXizmat">0</h3><p>Jami Xizmatlar</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#eff6ff; color:#3b82f6;"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info"><h3 id="activeXizmat">0</h3><p>Faol</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fff7ed; color:#f97316;"><i class="fas fa-hand-holding-usd"></i></div>
+                <div class="stat-info"><h3 id="avgPrice">0</h3><p>O'rtacha Narx</p></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fdf2f8; color:#db2777;"><i class="fas fa-chart-pie"></i></div>
+                <div class="stat-info"><h3 id="totalValue">0</h3><p>Jami Qiymat</p></div>
+            </div>
+        </div>
+
+        <!-- TOOLS -->
+        <div class="top-tools">
+            <div class="search-input">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Xizmat nomini qidiring..." onkeyup="filterXizmatlar()">
+            </div>
+            <select id="priceFilter" class="form-select" style="width:200px; border-radius:12px;" onchange="filterXizmatlar()">
+                <option value="all">Barcha narxlar</option>
+                <option value="0-100000">100k gacha</option>
+                <option value="100000-200000">100k - 200k</option>
+                <option value="200000+">200k +</option>
+            </select>
+        </div>
+
+        <!-- LIST -->
+        <div class="service-grid" id="xizmatlar_list">
+            <!-- JS -->
+        </div>
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'xizmatlar';
+        let allXizmatlar = [];
+
+        function init() {
+            allXizmatlar = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            if(allXizmatlar.length === 0) {
+                allXizmatlar = [
+                    { id: 1, nomi: "Umumiy shifokor qabuli", narx: 100000, mutaxassis: "Terapevt", davomiylik: "30 daq", seanslar: "1 seans", ikona: "fas fa-stethoscope", status: "faol" },
+                    { id: 2, nomi: "Pediatr konsultatsiyasi", narx: 120000, mutaxassis: "Pediatr", davomiylik: "30 daq", seanslar: "1 seans", ikona: "fas fa-baby", status: "faol" },
+                    { id: 3, nomi: "Ginekolog konsultatsiyasi", narx: 150000, mutaxassis: "Ginekolog", davomiylik: "40 daq", seanslar: "1 seans", ikona: "fas fa-female", status: "faol" },
+                    { id: 4, nomi: "Kardiolog konsultatsiyasi", narx: 180000, mutaxassis: "Kardiolog", davomiylik: "30 daq", seanslar: "1 seans", ikona: "fas fa-heartbeat", status: "faol" },
+                    { id: 5, nomi: "Nevrolog konsultatsiyasi", narx: 160000, mutaxassis: "Nevrolog", davomiylik: "30 daq", seanslar: "1 seans", ikona: "fas fa-brain", status: "faol" },
+                    { id: 6, nomi: "Stomatolog tekshiruvi", narx: 120000, mutaxassis: "Stomatolog", davomiylik: "20-30 daq", seanslar: "1 seans", ikona: "fas fa-tooth", status: "faol" },
+                    { id: 7, nomi: "Oftalmolog tekshiruvi", narx: 140000, mutaxassis: "Oftalmolog", davomiylik: "25 daq", seanslar: "1 seans", ikona: "fas fa-eye", status: "faol" },
+                    { id: 8, nomi: "Dermatolog konsultatsiyasi", narx: 130000, mutaxassis: "Dermatolog", davomiylik: "30 daq", seanslar: "1 seans", ikona: "fas fa-allergies", status: "faol" },
+                    { id: 9, nomi: "USM tekshiruvi", narx: 250000, mutaxassis: "USM mutaxassisi", davomiylik: "20-30 daq", seanslar: "1 seans", ikona: "fas fa-wave-square", status: "faol" },
+                    { id: 10, nomi: "EKG tekshiruvi", narx: 150000, mutaxassis: "Kardiolog", davomiylik: "15-20 daq", seanslar: "1 seans", ikona: "fas fa-heartbeat", status: "faol" },
+                    { id: 11, nomi: "Qon tahlillari", narx: 80000, mutaxassis: "Laboratoriya mutaxassisi", davomiylik: "15 daq", seanslar: "1 seans", ikona: "fas fa-microscope", status: "faol" },
+                    { id: 12, nomi: "Siydik tahlili", narx: 60000, mutaxassis: "Laboratoriya mutaxassisi", davomiylik: "10 daq", seanslar: "1 seans", ikona: "fas fa-microscope", status: "faol" },
+                    { id: 13, nomi: "Fizioterapiya muolajasi", narx: 200000, mutaxassis: "Fizioterapevt", davomiylik: "30-40 daq", seanslar: "5-10 seans", ikona: "fas fa-dumbbell", status: "faol" },
+                    { id: 14, nomi: "Psixolog konsultatsiyasi", narx: 130000, mutaxassis: "Psixolog", davomiylik: "40 daq", seanslar: "1 seans", ikona: "fas fa-head-side-virus", status: "faol" }
+                ];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allXizmatlar));
+            }
+            
+            renderXizmatlar(allXizmatlar);
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('totalXizmat').textContent = allXizmatlar.length;
+            document.getElementById('activeXizmat').textContent = allXizmatlar.filter(x => x.status === 'faol').length;
+            const total = allXizmatlar.reduce((s, x) => s + x.narx, 0);
+            document.getElementById('avgPrice').textContent = Math.round(total / (allXizmatlar.length || 1)).toLocaleString();
+            document.getElementById('totalValue').textContent = total.toLocaleString();
+        }
+
+        function renderXizmatlar(data) {
+            const container = document.getElementById('xizmatlar_list');
+            if(data.length === 0) {
+                container.innerHTML = `<div class="col-12 text-center py-5">Xizmatlar topilmadi</div>`;
+                return;
+            }
+
+            container.innerHTML = data.map(x => `
+                <div class="service-card">
+                    <div class="service-badge">ID: #${x.id}</div>
+                    <div class="service-icon-box"><i class="${x.ikona || 'fas fa-briefcase-medical'}"></i></div>
+                    <div class="service-name">${x.nomi}</div>
+                    
+                    <div class="service-detail">
+                        <span class="detail-label">Mutaxassis:</span>
+                        <span class="detail-value">${x.mutaxassis}</span>
+                    </div>
+                    <div class="service-detail">
+                        <span class="detail-label">Davomiylik:</span>
+                        <span class="detail-value">${x.davomiylik}</span>
+                    </div>
+
+                    <div class="price-tag">${x.narx.toLocaleString()} so'm</div>
+
+                    <div class="card-actions">
+                        <button class="btn-action btn-edit" onclick="editXizmat(${x.id})">
+                            <i class="fas fa-edit me-1"></i> Tahrirlash
+                        </button>
+                        <button class="btn-action btn-delete" onclick="deleteXizmat(${x.id})">
+                            <i class="fas fa-trash me-1"></i> O'chirish
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterXizmatlar() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const priceVal = document.getElementById('priceFilter').value;
+
+            const filtered = allXizmatlar.filter(x => {
+                const matchesName = x.nomi.toLowerCase().includes(query);
+                let matchesPrice = true;
+                if(priceVal === '0-100000') matchesPrice = x.narx <= 100000;
+                else if(priceVal === '100000-200000') matchesPrice = x.narx > 100000 && x.narx <= 200000;
+                else if(priceVal === '200000+') matchesPrice = x.narx > 200000;
+                
+                return matchesName && matchesPrice;
+            });
+            renderXizmatlar(filtered);
+        }
+
+        function editXizmat(id) {
+            const x = allXizmatlar.find(item => item.id === id);
+            if (!x) return;
+            document.getElementById('editXizmatId').value = x.id;
+            document.getElementById('editXizmatNom').value = x.nomi;
+            document.getElementById('editXizmatNarx').value = x.narx;
+            document.getElementById('editXizmatMutaxassis').value = x.mutaxassis;
+            document.getElementById('editXizmatDavomiylik').value = x.davomiylik;
+            document.getElementById('editXizmatIkona').value = x.ikona || '';
+            new bootstrap.Modal(document.getElementById('editXizmatModal')).show();
+        }
+
+        function saveEditXizmat() {
+            const id = parseInt(document.getElementById('editXizmatId').value);
+            const idx = allXizmatlar.findIndex(x => x.id === id);
+            if (idx === -1) return;
+            allXizmatlar[idx].nomi = document.getElementById('editXizmatNom').value;
+            allXizmatlar[idx].narx = parseInt(document.getElementById('editXizmatNarx').value) || 0;
+            allXizmatlar[idx].mutaxassis = document.getElementById('editXizmatMutaxassis').value;
+            allXizmatlar[idx].davomiylik = document.getElementById('editXizmatDavomiylik').value;
+            allXizmatlar[idx].ikona = document.getElementById('editXizmatIkona').value || 'fas fa-briefcase-medical';
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(allXizmatlar));
+            bootstrap.Modal.getInstance(document.getElementById('editXizmatModal')).hide();
+            renderXizmatlar(allXizmatlar);
+            updateStats();
+        }
+
+        function deleteXizmat(id) {
+            if(confirm('Ushbu xizmatni o\'chirishni tasdiqlaysizmi?')) {
+                allXizmatlar = allXizmatlar.filter(x => x.id !== id);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allXizmatlar));
+                renderXizmatlar(allXizmatlar);
+                updateStats();
+            }
+        }
+
+        function chiqish() {
+            if(confirm('Tizimdan chiqishni tasdiqlaysizmi?')) {
+                localStorage.removeItem('medsmart_user');
+                window.location.href = '../admin_login.html';
+            }
+        }
+
+        window.onload = init;
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- XIZMAT TAHRIRLASH MODALI -->
+    <div class="modal fade" id="editXizmatModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:20px;border:none;box-shadow:0 25px 50px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="border-bottom:1px solid #f1f5f9;padding:20px 25px;">
+                    <h5 class="modal-title fw-bold" style="font-family:'Outfit';"><i class="fas fa-edit me-2 text-warning"></i>Xizmatni Tahrirlash</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="editXizmatId">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-muted" style="font-size:0.85rem;">Xizmat Nomi</label>
+                            <input type="text" id="editXizmatNom" class="form-control" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted" style="font-size:0.85rem;">Narx (so'm)</label>
+                            <input type="number" id="editXizmatNarx" class="form-control" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted" style="font-size:0.85rem;">Mutaxassis</label>
+                            <input type="text" id="editXizmatMutaxassis" class="form-control" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted" style="font-size:0.85rem;">Davomiylik</label>
+                            <input type="text" id="editXizmatDavomiylik" class="form-control" placeholder="Masalan: 30 daq" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted" style="font-size:0.85rem;">Icon (FontAwesome)</label>
+                            <input type="text" id="editXizmatIkona" class="form-control" placeholder="fas fa-stethoscope" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #f1f5f9;padding:15px 25px;background:#f8fafc;border-radius:0 0 20px 20px;">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:10px;">Bekor qilish</button>
+                    <button type="button" class="btn btn-warning text-dark fw-bold px-4" onclick="saveEditXizmat()" style="border-radius:10px;font-family:'Outfit';"><i class="fas fa-check me-2"></i>Saqlash</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

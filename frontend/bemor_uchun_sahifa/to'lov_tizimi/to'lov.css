@@ -1,0 +1,952 @@
+/* === Umumiy layout === */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f9;
+  display: flex;
+}
+
+/* === To‘lovlar bo‘limi (farqli dizayn) === */
+.content-section {
+  background: linear-gradient(135deg, #ffffff, #f9f9ff);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  margin-bottom: 40px;
+  border: 1px solid rgba(0, 123, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+.section-header h5 {
+  margin: 0;
+  color: #2e7d32;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* === To‘lov kartalari === */
+#tolovList .card {
+  border: none;
+  border-radius: 18px;
+  transition: 0.4s ease;
+  background: linear-gradient(135deg, #ffffff, #f9f9ff);
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+#tolovList .card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+  background: linear-gradient(135deg, #e6f7ff, #f0f8ff);
+}
+#tolovList .card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 6px;
+  width: 100%;
+  background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #fd7e14);
+}
+
+/* === Yozuvlar === */
+#tolovList h6 {
+  font-weight: 700;
+  margin: 8px 0;
+  color: #2c3e50;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+}
+#tolovList p {
+  margin: 4px 0;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* === Badge (status) === */
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.bg-success { background: #28a745; color: #fff; }
+.bg-warning { background: #ffc107; color: #212529; }
+
+/* === Tugma (To‘lash) === */
+.btn-pay {
+  margin-top: 10px;
+  padding: 6px 12px;
+  border: 1px solid #007bff;
+  background: transparent;
+  color: #007bff;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-pay:hover {
+  background: #007bff;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+}
+
+/* === Modal oyna === */
+.modal {
+  display: none; /* default yopiq */
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 500px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+.payment-options {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+.payment-box {
+  flex: 1;
+  margin: 0 10px;
+  padding: 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+  text-align: center;
+}
+.payment-box i {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+.payment-box.offline {
+  background: #fce4ec;
+  border: 2px solid #e91e63;
+}
+.payment-box.online {
+  background: #e3f2fd;
+  border: 2px solid #2196f3;
+}
+.payment-box:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+.btn-later {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  background: #6c757d;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn-later:hover {
+  background: #5a6268;
+}
+
+.modal-content {
+  background: linear-gradient(
+    270deg,
+    #7fbfff,   /* yumshoq ko‘k */
+    #ff9999,   /* yumshoq qizil */
+    #ffe680,   /* yumshoq sariq */
+    #ffb3a7,   /* yumshoq pushti */
+    #80e5d1    /* yumshoq havo-yashil */
+  );
+  background-size: 600% 600%;
+  animation: animateBox 8s ease infinite; /* biroz sekinroq va yumshoqroq oqim */
+  padding: 30px;
+  border-radius: 12px;
+  width: 500px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15); /* soyani ham yumshatdik */
+  position: relative;
+  z-index: 1000;
+}
+
+@keyframes animateBox {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+/* Gradient animatsiya */
+@keyframes animateBox {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Modal sarlavha */
+.modal-content h4 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #007bff, #ff4d4d, #ffc107, #28a745, #6f42c1);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+  animation: gradientFlow 5s ease infinite; /* jonli rang oqimi */
+}
+
+/* Gradient oqimi animatsiyasi */
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+/* Box sarlavhalar */
+.payment-box h5 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 10px 0;
+  color: #2c3e50;
+  letter-spacing: 0.5px;
+  transition: 0.3s;
+}
+.payment-box:hover h5 {
+  color: #007bff;
+  transform: scale(1.05);
+}
+
+/* Box matn */
+.payment-box p {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.4;
+  margin: 0;
+  transition: 0.3s;
+}
+.payment-box:hover p {
+  color: #333;
+}
+
+/* Tugma */
+.btn-later {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border: none;
+  background: linear-gradient(90deg, #6c757d, #495057);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-later:hover {
+  background: linear-gradient(90deg, #007bff, #28a745);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* Toast notification */
+.toast {
+  visibility: hidden;
+  min-width: 280px;
+  background: linear-gradient(90deg, #007bff, #28a745);
+  color: #fff;
+  text-align: left;
+  border-radius: 8px;
+  padding: 12px 16px;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.5s, transform 0.5s;
+}
+.toast i {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(-10px);
+}
+
+.online-pay-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  text-align: center;
+}
+.online-pay-box input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.btn-back {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #6c757d;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn-back:hover {
+  background: #495057;
+}
+
+/* === Modal oyna === */
+.modal {
+  display: none; /* default yopiq */
+  position: fixed;
+  z-index: 9999; /* yuqoriroq qo‘yildi */
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); /* orqa fonni to‘liq yopadi */
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: linear-gradient(
+    270deg,
+    #7fbfff, #ff9999, #ffe680, #ffb3a7, #80e5d1
+  );
+  background-size: 600% 600%;
+  animation: animateBox 8s ease infinite;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;          /* kichik ekranlarda moslashadi */
+  max-width: 500px;    /* maksimal kenglik */
+  max-height: 90vh;    /* balandlik ekranning 90% gacha */
+  overflow-y: auto;    /* balandlik oshsa scroll chiqadi */
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  position: relative;
+  z-index: 10000;      /* kontent overlaydan ham yuqorida */
+}
+
+
+/* Online modal uchun maxsus */
+#onlineModal .modal-content {
+  width: 90%;        /* ekranning 90% gacha kengayadi */
+  max-width: 800px;  /* maksimal kenglik */
+  max-height: 90vh;  /* balandlik ekranning 90% gacha */
+  overflow-y: auto;  /* balandlik oshsa scroll chiqadi */
+}
+
+
+/* Yopish tugmasi */
+.btn-close {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border: none;
+  background: linear-gradient(90deg, #ff4d4d, #dc3545);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover effekti */
+.btn-close:hover {
+  background: linear-gradient(90deg, #28a745, #007bff);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transform: scale(1.05);
+}
+
+/* Tugma jonli animatsiya (pulse) */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.btn-close:active {
+  animation: pulse 0.4s ease;
+}
+
+/* Tugma ustida jonli oqim (live shine) */
+.btn-close::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: rgba(255,255,255,0.3);
+  transform: skewX(-20deg);
+}
+
+/* Hoverda oqim animatsiyasi */
+.btn-close:hover::after {
+  left: 100%;
+  transition: left 0.7s ease;
+}
+
+/* Keyinroq to‘lash tugmasi */
+.btn-later {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border: none;
+  background: linear-gradient(90deg, #6c757d, #495057); /* kulrang gradient */
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover effekti */
+.btn-later:hover {
+  background: linear-gradient(90deg, #28a745, #007bff); /* yashil-ko‘k gradient */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transform: scale(1.05);
+}
+
+/* Tugma jonli animatsiya (pulse) */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.btn-later:active {
+  animation: pulse 0.4s ease;
+}
+
+/* Tugma ustida jonli oqim (shine) */
+.btn-later::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: rgba(255,255,255,0.3);
+  transform: skewX(-20deg);
+}
+
+/* Hoverda oqim animatsiyasi */
+.btn-later:hover::after {
+  left: 100%;
+  transition: left 0.7s ease;
+}
+
+.receipt-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: left;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin: 20px 0;
+}
+.receipt-box p {
+  margin: 8px 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.btn-confirm {
+  padding: 12px 24px;
+  border: none;
+  background: linear-gradient(90deg, #28a745, #007bff);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-confirm:hover {
+  background: linear-gradient(90deg, #007bff, #28a745);
+  transform: scale(1.05);
+}
+.receipt-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: left;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin: 20px 0;
+}
+.receipt-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+.receipt-table th, .receipt-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+.receipt-table th {
+  background: #f4f6f9;
+  font-weight: 700;
+}
+.btn-confirm {
+  padding: 12px 24px;
+  border: none;
+  background: linear-gradient(90deg, #28a745, #007bff);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-confirm:hover {
+  background: linear-gradient(90deg, #007bff, #28a745);
+  transform: scale(1.05);
+}
+
+.btn-print {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%; /* tugmani aylana qilish */
+  border: none;
+  background: linear-gradient(135deg, #007bff, #28a745);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+/* Hoverda kattalashish */
+.btn-print:hover {
+  transform: scale(1.1);
+}
+
+/* Live pulsatsiya animatsiyasi */
+.btn-print::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 123, 255, 0.5);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+}
+
+.qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* markazga chiqaradi */
+  justify-content: center;
+  margin-top: 20px;
+}
+
+#qrcode {
+  padding: 10px;
+  border: 3px solid #007bff;   /* ramka */
+  border-radius: 12px;         /* yumaloq burchak */
+  background: #fff;            /* orqa fon */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* soyali ramka */
+}
+
+
+/* ========== TO'LOV KARTALARI ========== */
+.payment-card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  border-left: 5px solid #007bff;
+}
+
+.payment-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.payment-card .card-header {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border-bottom: none;
+  padding: 15px 20px;
+}
+
+.payment-card .card-header h6 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.payment-card .card-body {
+  padding: 20px;
+}
+
+.payment-card .doctor-info {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.payment-card .date-info {
+  color: #777;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.payment-card .amount-info {
+  color: #2c3e50;
+  font-size: 15px;
+  margin-bottom: 15px;
+}
+
+.payment-card .status-badge {
+  margin-top: 10px;
+}
+
+.payment-card .card-footer {
+  background: #f8f9fa;
+  border-top: 1px solid #eee;
+  padding: 15px 20px;
+  text-align: right;
+}
+
+/* ========== TO'LOV TUGMALARI ========== */
+.btn-pay {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #28a745, #218838);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-pay:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-receipt {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-receipt:hover {
+  background: linear-gradient(135deg, #138496, #117a8b);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+/* ========== JAMI TO'LOV SUMYASI ========== */
+.summary-section {
+  margin-top: 30px;
+  margin-bottom: 40px;
+}
+
+.summary-card {
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.summary-item {
+  text-align: center;
+  flex: 1;
+  min-width: 200px;
+}
+
+.summary-item span:first-child {
+  display: block;
+  color: #6c757d;
+  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.summary-item span:last-child {
+  display: block;
+  color: #2c3e50;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* ========== BO'SH KARTA ========== */
+.empty-card {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 16px;
+}
+
+.empty-card h5 {
+  color: #6c757d;
+  margin: 20px 0 10px;
+}
+
+/* ========== TO'LOV BADGELARI ========== */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bg-success { background-color: #28a745 !important; }
+.bg-warning { background-color: #ffc107 !important; color: #212529; }
+.bg-info { background-color: #17a2b8 !important; }
+
+/* ========== RESPONSIVELIK ========== */
+@media (max-width: 768px) {
+  .summary-card {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .summary-item {
+    min-width: 100%;
+  }
+  
+  .payment-options {
+    flex-direction: column;
+  }
+  
+  .payment-box {
+    margin: 10px 0;
+  }
+}
+
+/* ========== PRINT STILLARI ========== */
+@media print {
+  .sidebar, .content-header, .btn-close, .btn-later {
+    display: none !important;
+  }
+  
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .receipt-box {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+}
+
+
+/* ========== YANGI NAVBAT TO'LOVI MODALI ========== */
+.modal.new-appointment-payment .modal-content {
+    animation: pulseGlow 2s infinite;
+    border: 3px solid #28a745;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal.new-appointment-payment .modal-content::before {
+    content: "🆕 Yangi Navbat To'lovi";
+    position: absolute;
+    top: 10px;
+    right: -35px;
+    background: #28a745;
+    color: white;
+    padding: 5px 40px;
+    font-size: 12px;
+    font-weight: bold;
+    transform: rotate(45deg);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(40, 167, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+/* ========== TEZKOR TO'LOV TUGMALARI ========== */
+#quickPaymentButtons {
+    display: none;
+    margin: 15px 0;
+}
+
+.quick-payment-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.quick-pay-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.quick-pay-btn.click {
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    color: white;
+}
+
+.quick-pay-btn.payme {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    color: white;
+}
+
+.quick-pay-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* ========== NAVBATLARDA TO'LOV TUGMASI ========== */
+.btn-payment {
+    background-color: #28a745 !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn-payment:hover {
+    background-color: #218838 !important;
+}
+
+/* ========== NAVBAT TO'LOVI KARTASI ========== */
+.appointment-payment-card {
+    border: 2px solid #28a745 !important;
+    background: linear-gradient(135deg, #f8fff9, #e6ffe6) !important;
+}
+
+.appointment-payment-card .card-header {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+}
+
+/* ========== TO'LOV OGOHLANTIRISH XABARI ========== */
+.payment-alert {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    animation: slideInRight 0.5s ease;
+    max-width: 400px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.payment-alert i {
+    font-size: 24px;
+    margin-right: 15px;
+}
+
+.payment-alert-content h5 {
+    margin: 0 0 5px 0;
+    font-weight: bold;
+}
+
+.payment-alert-content p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* ========== TO'LOV HOLATI BADGELARI ========== */
+.badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.badge.bg-info {
+    background-color: #17a2b8 !important;
+}
+
+      .logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;   /* Aylana shakl */
+  object-fit: cover;    /* Rasmni to‘liq joylashtirish */
+  border: 2px solid white; /* Dekorativ oq ramka (ixtiyoriy) */
+}

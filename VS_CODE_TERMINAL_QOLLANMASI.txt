@@ -1,0 +1,240 @@
+===============================================================
+              VISUAL STUDIO CODE TERMINAL QO'LLANMASI
+===============================================================
+
+SANA: 2026-03-14
+MUALLIF: AI Assistant
+MAQSAD: VS Code terminalida samarali ishlashni o'rgatish
+
+===============================================================
+                    1. TERMINALNI OCHISH
+===============================================================
+
+1.1. Usullar:
+- Ctrl + ` (backtick) - Terminalni tezkor ochish/yopish
+- View -> Terminal (menyu orqali)
+- Ctrl + Shift + ` - Yangi terminal ochish
+
+1.2. Terminal turlari:
+- PowerShell (Windows default)
+- Command Prompt (cmd)
+- Git Bash (agar o'rnatilgan bo'lsa)
+- WSL Terminal (Linux subsystem)
+
+===============================================================
+                    2. ASOSIY KOMANDALAR
+===============================================================
+
+2.1. Papkalar bilan ishlash:
+pwd                    - Joriy papkani ko'rsatish
+cd <papka_nomi>        - Papkaga o'tish
+cd ..                  - Yuqori papkaga chiqish
+cd \                   - Asosiy papkaga chiqish
+ls / dir               - Papka ichidagi fayllarni ko'rsatish
+
+2.2. Fayllar bilan ishlash:
+touch <fayl_nomi>      - Yangi fayl yaratish
+echo "matn" > fayl.txt - Faylga matn yozish
+cat <fayl_nomi>        - Fayl ichini ko'rish
+del <fayl_nomi>        - Faylni o'chirish
+copy <manba> <nish>    - Faylni nusxalash
+move <manba> <nish>    - Faylni ko'chirish
+
+2.3. Papkalar bilan ishlash:
+mkdir <papka_nomi>     - Yangi papka yaratish
+rmdir <papka_nomi>     - Bo'sh papkani o'chirish
+rd /s /q <papka_nomi>  - Papkani ichidagi hamma narsa bilan o'chirish
+
+===============================================================
+                    3. NODE.JS VA NPM KOMANDALARI
+===============================================================
+
+3.1. Asosiy komandalar:
+node --version         - Node.js versiyasini ko'rish
+npm --version          - NPM versiyasini ko'rish
+npm init               - Yangi loyiha yaratish
+npm install            - package.json dagi package'larni o'rnatish
+npm install <paket>   - Yangi paket o'rnatish
+
+3.2. MedSmart0 uchun komandalar:
+cd Med_Smart0          - Loyiha papkasiga o'tish
+cd backend             - Backend papkasiga o'tish
+npm start              - Serverni ishga tushurish
+npm install            - Dependenciyalarni o'rnatish
+npm install <paket>   - Yangi paket qo'shish
+
+===============================================================
+                    4. GIT KOMANDALARI
+===============================================================
+
+4.1. Asosiy komandalar:
+git init               - Yangi repository yaratish
+git clone <url>        - Repositoryni klonlash
+git add .              - Barcha fayllarni qo'shish
+git commit -m "msg"    - Commit qilish
+git push               - Serverga yuborish
+git pull               - Serverdan olish
+
+4.2. Status komandalari:
+git status             - O'zgarishlarni ko'rish
+git log                - Commitlar tarixi
+git diff               - O'zgarishlarni solishtirish
+
+===============================================================
+                    5. FAYLLARNI TahrirlASH
+===============================================================
+
+5.1. VS Code orqali:
+code <fayl_nomi>      - VS Code da faylni ochish
+code .                 - Joriy papkani VS Code da ochish
+code -r <papka>       - Papkani yangi oynada ochish
+
+5.2. Matn tahrirlash:
+echo "matn" >> fayl    - Faylga matn qo'shish
+notepad fayl.txt       - Notepad da ochish
+
+===============================================================
+                    6. PROSESSLAR BOSHLASH
+===============================================================
+
+6.1. Node.js dasturlari:
+node app.js            - Dasturni ishga tushurish
+node server.js         - Serverni ishga tushurish
+npm run dev            - Development rejimda ishga tushurish
+npm run build          - Build qilish
+
+6.2. Proseslarni boshqarish:
+Ctrl + C               - Prosesni to'xtatish
+taskkill /F /IM node.exe - Node jarayonlarini to'xtatish
+netstat -ano | findstr :5000 - Port holatini tekshirish
+
+===============================================================
+                    7. MEDSMART0 UCHUN MISOQLAR
+===============================================================
+
+7.1. Loyihani ishga tushurish:
+# 1. Papkaga o'tish
+cd C:\Users\user\Downloads\Med_Smart0
+
+# 2. Backend papkasiga o'tish
+cd backend
+
+# 3. Dependenciyalarni o'rnatish
+npm install
+
+# 4. Serverni ishga tushurish
+npm start
+
+7.2. Tezkor ishga tushurish:
+# Bitta qatorda
+cd C:\Users\user\Downloads\Med_Smart0\backend && npm start
+
+7.3. Xatolarni tuzatish:
+# Port band bo'lsa
+taskkill /F /IM node.exe
+npm start
+
+===============================================================
+                    8. TERMINAL SOZLAMALARI
+===============================================================
+
+8.1. Terminalni sozlash:
+- VS Code da: File -> Preferences -> Settings
+- "terminal.integrated.shell.windows" qidiruv
+- PowerShell yoki cmd ni tanlash
+
+8.2. Ranglar va shriftlar:
+- "terminal.integrated.fontFamily"
+- "terminal.integrated.fontSize"
+- "terminal.integrated.lineHeight"
+
+===============================================================
+                    9. FAYL YO'LLARI
+===============================================================
+
+9.1. Windows yo'llari:
+cd "C:\Users\user\Downloads\Med_Smart0"
+cd "C:\Program Files"
+cd "D:\ARXITEKTURA PATTERINLARI\Layered arxitekturasi1"
+
+9.2. Qisqa yo'llar:
+cd ..                  - Yuqori papka
+cd ..\..              - Ikki pog'ona yuqori
+cd .\backend           - Ichkaridagi backend papkasi
+
+===============================================================
+                    10. TEZKOR TIPS VA TRIKLAR
+===============================================================
+
+10.1. Tezkor komandalar:
+- Tab tugmasi - Komandalarni to'ldirish
+- ↑/↑ tugmalari - Oldingi komandalarni ko'rish
+- Ctrl + C - Jarayonni to'xtatish
+- Ctrl + V - Terminalga joylash
+
+10.2. Foydali triklar:
+cls                    - Ekranani tozalash
+exit                   - Terminalni yopish
+history                - Komandalar tarixi
+help                   - Yordam
+
+===============================================================
+                    11. XATOLAR VA YO'LLAR
+===============================================================
+
+11.1. Umumiy xatolar:
+- 'EADDRINUSE' - Port band: taskkill /F /IM node.exe
+- 'command not found' - Komanda topilmadi: yo'l tekshirish
+- 'access denied' - Ruxsat yo'q: administrator rejim
+
+11.2. MedSmart0 xatolari:
+- Port band: taskkill /F /IM node.exe
+- Module topilmadi: npm install
+- Fayl yo'li xato: cd to'g'ri papkaga o'tish
+
+===============================================================
+                    12. AMALIY MASHQLAR
+===============================================================
+
+12.1. Mashq 1 - Loyihani ochish:
+cd C:\Users\user\Downloads\Med_Smart0\backend
+npm start
+
+12.2. Mashq 2 - Yangi fayl yaratish:
+cd C:\Users\user\Downloads\Med_Smart0
+echo "console.log('Hello MedSmart0');" > test.js
+node test.js
+
+12.3. Mashq 3 - Fayllarni ko'rish:
+dir
+type package.json
+cat README.md
+
+===============================================================
+                    13. QO'SHIMCHA RESURSLAR
+===============================================================
+
+13.1. VS Code hujjatlar:
+- https://code.visualstudio.com/docs
+- https://code.visualstudio.com/docs/editor/integrated-terminal
+
+13.2. Windows terminal:
+- PowerShell docs.microsoft.com
+- Command Prompt reference
+
+===============================================================
+                    14. XULOSA
+===============================================================
+
+VS Code terminali - bu kuchli vosita:
+- Tezkor papka o'tkazish
+- Dasturlarni ishga tushurish
+- Fayllar bilan ishlash
+- Git operatsiyalari
+- Proseslarni boshqarish
+
+Muntazam mashq qiling va tezda o'rganasiz!
+
+===============================================================
+                    O'RGATISH TUGADI!
+===============================================================

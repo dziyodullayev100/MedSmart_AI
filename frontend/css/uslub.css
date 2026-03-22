@@ -1,0 +1,389 @@
+/* ===================================================== */
+/* MED SMART - Umumiy uslublar fayli               */
+/* Versiya: 1.0.0                                   */
+/* Muallif: MED SMART Development Team                */
+/* ===================================================== */
+
+/* CSS o'zgaruvchilar (tizimli ranglar) */
+:root {
+  /* Asosiy ranglar */
+  --primary-blue: #0066cc;
+  --primary-light: #2e8eff;
+  --primary-dark: #004499;
+  --secondary-green: #00cc66;
+  --secondary-light: #00ff88;
+  --accent-purple: #3f1fc0;
+  --accent-pink: #ff6ec7;
+  
+  
+  /* Neytral ranglar */
+  --white: #ffffff;
+  --light-gray: #f8fafc;
+  --medium-gray: #e2e8f0;
+  --dark-gray: #64748b;
+  --text-dark: #1e293b;
+  --text-light: #94a3b8;
+  --error-red: #ef4444;
+  --success-green: #10b981;
+  --warning-yellow: #f59e0b;
+  
+  /* Soyalar */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  
+  /* O'tishlar */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* chegaralar */
+  --border-radius-sm: 6px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 20px;
+  --border-radius-full: 50%;
+  
+  /* Oraliqlar */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+}
+
+/* Global reset va base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  color: var(--text-dark);
+  background: var(--light-gray);
+  overflow-x: hidden;
+}
+
+/* Optimallashtirilgan animatsiyalar */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Umumiy komponentlar */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--primary-light), var(--primary-blue));
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--secondary-green), var(--secondary-light));
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--secondary-light), var(--secondary-green));
+}
+
+.btn-danger {
+  background: var(--error-red);
+  color: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Form elementlar */
+.form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--medium-gray);
+  border-radius: var(--border-radius-md);
+  font-size: 14px;
+  transition: var(--transition-normal);
+  background: var(--white);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.form-input.error {
+  border-color: var(--error-red);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+/* Card komponentlari */
+.card {
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+  transition: var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+/* Toast notifikatsiyalar */
+.toast {
+  position: fixed;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  color: var(--white);
+  font-weight: 500;
+  z-index: 9999;
+  transform: translateX(100%);
+  transition: var(--transition-normal);
+  max-width: 300px;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast-success {
+  background: linear-gradient(135deg, var(--secondary-green), var(--secondary-light));
+}
+
+.toast-error {
+  background: var(--error-red);
+}
+
+.toast-warning {
+  background: var(--warning-yellow);
+  color: var(--text-dark);
+}
+
+.toast-info {
+  background: var(--primary-blue);
+}
+
+/* Loading spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--medium-gray);
+  border-top: 4px solid var(--primary-blue);
+  border-radius: var(--border-radius-full);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Modal oynalar */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition-normal);
+}
+
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  transform: scale(0.9);
+  transition: var(--transition-normal);
+}
+
+.modal.show .modal-content {
+  transform: scale(1);
+}
+
+/* Responsive dizayn */
+@media (max-width: 768px) {
+  .btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 13px;
+  }
+  
+  .card {
+    padding: var(--spacing-md);
+  }
+  
+  .modal-content {
+    padding: var(--spacing-lg);
+    margin: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .toast {
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    left: var(--spacing-md);
+    max-width: none;
+    width: calc(100% - var(--spacing-lg));
+  }
+  
+  .form-input {
+    font-size: 16px; /* iOS zoom ni oldini olish uchun */
+  }
+}
+
+/* Foydalanuvchi tanlash uchun */
+.user-select-none {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--light-gray);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--medium-gray);
+  border-radius: var(--border-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dark-gray);
+}
+
+/* Print uchun optimallashtirish */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid var(--medium-gray);
+  }
+  
+  body {
+    background: var(--white);
+    color: var(--text-dark);
+  }
+}
+
+/* Accessibility yaxshilovchi */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus states */
+.focus-visible:focus {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+}
+
+/* Performance optimallashtirish */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.will-change-transform {
+  will-change: transform;
+}

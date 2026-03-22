@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <script>
+        const adminUser = JSON.parse(localStorage.getItem('medsmart_user'));
+        if (!adminUser || adminUser.role !== 'admin') { window.location.href = '../admin_login.html'; }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MedSmart Admin - Navbatlar Boshqaruvi</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #059669;
+            --secondary: #334155;
+            --bg-light: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* PREMIUM SIDEBAR (Global Loyiha stili) */
+        .sidebar {
+            width: 280px;
+            background: var(--secondary);
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            padding: 30px 20px;
+            z-index: 1000;
+        }
+        .sidebar-brand { display: flex; align-items: center; gap: 15px; margin-bottom: 50px; padding: 0 10px; }
+        .sidebar-brand .brand-icon {
+            width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white; box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+        }
+        .sidebar-brand h3 { font-size: 1.4rem; font-weight: 800; margin: 0; }
+        .nav-menu { padding: 0; margin: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 15px; padding: 14px 20px;
+            color: #94a3b8; text-decoration: none; border-radius: 12px; font-weight: 500; font-size: 0.95rem;
+            transition: 0.3s;
+        }
+        .nav-item i { font-size: 1.2rem; width: 22px; text-align: center; }
+        .nav-item:hover, .nav-item.active { color: white; background: rgba(255,255,255,0.08); }
+        .nav-item.active { background: linear-gradient(90deg, var(--primary), var(--primary-light)); font-weight: 600; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header h2 { font-weight: 700; color: #0f172a; margin: 0; }
+
+        /* STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .stat-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+
+        .stat-info h3 { margin: 0; font-weight: 700; font-size: 1.6rem; }
+        .stat-info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; }
+
+        /* FILTERS */
+        .filter-section {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .filter-item { flex: 1; }
+        .filter-item label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-muted); font-size: 0.85rem; }
+        .filter-item select, .filter-item input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .filter-item select:focus, .filter-item input:focus { border-color: var(--primary); }
+
+        /* DATA TABLE */
+        .data-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .table-toolbar {
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .table-toolbar h5 { margin: 0; font-weight: 700; color: #1e293b; }
+
+        .table-responsive { padding: 0; }
+        table { width: 100%; margin: 0; }
+        thead { background: #f8fafc; }
+        th { padding: 18px 25px !important; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; border: none !important; }
+        td { padding: 20px 25px !important; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+        .patient-info { display: flex; align-items: center; gap: 12px; }
+        .patient-avatar { width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: var(--primary); }
+        .patient-name { font-weight: 600; color: #1e293b; }
+
+        .badge {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        .badge-upcoming { background: #ecfdf5; color: #059669; }
+        .badge-completed { background: #f1f5f9; color: #64748b; }
+        .badge-cancelled { background: #fef2f2; color: #dc2626; }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            border: 1px solid #e2e8f0;
+            background: white;
+            transition: 0.3s;
+            text-decoration: none;
+            margin-right: 5px;
+        }
+        .action-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .action-btn.delete:hover { background: #ef4444; border-color: #ef4444; }
+
+        .btn-add {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+        }
+        .btn-add:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+    </style>
+</head>
+<body>
+
+    <!-- PREMIUM SIDEBAR (Global Loyiha stili) -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-heartbeat"></i></div>
+            <h3>MedSmart HQ</h3>
+        </div>
+        <nav class="nav-menu">
+            <a href="../admin_dashboard.html" class="nav-item"><i class="fas fa-grid-2"></i><span>Dashbord</span></a>
+            <a href="../bemorlar/bemorlar_royxati.html" class="nav-item"><i class="fas fa-users"></i><span>Bemorlar Boshqaruvi</span></a>
+            <a href="../shifokorlar/shifokorlar_royxati.html" class="nav-item"><i class="fas fa-user-md"></i><span>Shifokorlar</span></a>
+            <a href="#" class="nav-item active"><i class="fas fa-calendar-check"></i><span>Navbatlar</span></a>
+            <a href="../xizmatlar/xizmatlar_royxati.html" class="nav-item"><i class="fas fa-hand-holding-medical"></i><span>Klinika Xizmatlari</span></a>
+            <a href="../tolovlar/tolovlar.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i><span>Moliya & To'lovlar</span></a>
+            <a href="../tizim_sozlamalari/tizim_sozlamalari.html" class="nav-item"><i class="fas fa-sliders-h"></i><span>Tizim Sozlamalari</span></a>
+        </nav>
+        <a href="javascript:chiqish()" class="nav-item" style="color: #ef4444; margin-top: auto;">
+            <i class="fas fa-sign-out-alt"></i><span>Tizimdan chiqish</span>
+        </a>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="main-content">
+        <header class="header">
+            <div>
+                <h2>Navbatlar Boshqaruvi</h2>
+                <p class="text-muted">Klinikadagi barcha qabullar monitoringi</p>
+            </div>
+            <a href="navbat_yozish.html" class="btn btn-add">
+                <i class="fas fa-plus me-2"></i> Yangi Navbat
+            </a>
+        </header>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #ecfdf5; color: #10b981;"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-info">
+                    <h3 id="bugun_soni">0</h3>
+                    <p>Bugungi</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #eff6ff; color: #3b82f6;"><i class="fas fa-user-friends"></i></div>
+                <div class="stat-info">
+                    <h3 id="jami_soni">0</h3>
+                    <p>Jami Bemorlar</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fff7ed; color: #f97316;"><i class="fas fa-clock"></i></div>
+                <div class="stat-info">
+                    <h3 id="kutilayotgan_soni">0</h3>
+                    <p>Kutilmoqda</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fdf2f8; color: #db2777;"><i class="fas fa-check-double"></i></div>
+                <div class="stat-info">
+                    <h3 id="yakunlangan_soni">0</h3>
+                    <p>Yakunlangan</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filter-section">
+            <div class="filter-item">
+                <label>Qidiv (Bemor F.I.O)</label>
+                <input type="text" id="searchInput" placeholder="Bemor ismini yozing..." onkeyup="filterData()">
+            </div>
+            <div class="filter-item">
+                <label>Status</label>
+                <select id="statusFilter" onchange="filterData()">
+                    <option value="all">Barchasi</option>
+                    <option value="upcoming">Kelgusi</option>
+                    <option value="completed">Yakunlangan</option>
+                    <option value="cancelled">Bekor qilindi</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>Shifokor</label>
+                <select id="drFilter" onchange="filterData()">
+                    <option value="all">Barcha shifokorlar</option>
+                </select>
+            </div>
+            <button class="btn btn-outline-secondary" style="height:48px; border-radius:12px;" onclick="resetFilters()">
+                <i class="fas fa-undo"></i>
+            </button>
+        </div>
+
+        <!-- TABLE CARD -->
+        <div class="data-card">
+            <div class="table-toolbar">
+                <h5>Barcha Navbatlar Ro'yxati</h5>
+                <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i> Yangilash
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Bemor</th>
+                            <th>Shifokor & Kasallik</th>
+                            <th>Sana & Vaqt</th>
+                            <th>Status</th>
+                            <th>Harakatlar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="aptList">
+                        <!-- JS orqali -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const STORAGE_KEY = 'navbatlar';
+        let allData = [];
+
+        function init() {
+            allData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            
+            // Demo ma'lumotlar agar bo'sh bo'lsa
+            if(allData.length === 0) {
+                const today = new Date().toISOString().split('T')[0];
+                allData = [
+                    { id: 1, bemor_fio: "Anvarov Jamshid", shifokor: "Dr. Aliyev Olim", xizmat: "Umumiy ko'rik", sana: today, vaqt: "09:30", holati: "upcoming" },
+                    { id: 2, bemor_fio: "Karimova Ziyoda", shifokor: "Dr. Saidov Rustam", xizmat: "Stomatologiya", sana: today, vaqt: "11:00", holati: "completed" },
+                    { id: 3, bemor_fio: "Ismoilov Bahodir", shifokor: "Dr. Sharipov Jasur", xizmat: "Kardiologiya", sana: "2026-03-20", vaqt: "14:15", holati: "upcoming" }
+                ];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+            }
+
+            loadDrFilter();
+            renderTable(allData);
+            updateStats();
+        }
+
+        function loadDrFilter() {
+            const drs = [...new Set(allData.map(d => d.shifokor))];
+            const select = document.getElementById('drFilter');
+            drs.forEach(dr => {
+                const opt = document.createElement('option');
+                opt.value = dr;
+                opt.textContent = dr;
+                select.appendChild(opt);
+            });
+        }
+
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('bugun_soni').textContent = allData.filter(d => d.sana === today).length;
+            document.getElementById('jami_soni').textContent = allData.length;
+            document.getElementById('kutilayotgan_soni').textContent = allData.filter(d => d.holati === 'upcoming').length;
+            document.getElementById('yakunlangan_soni').textContent = allData.filter(d => d.holati === 'completed').length;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('aptList');
+            if(data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5">Ma'lumot topilmadi</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td>
+                        <div class="patient-info">
+                            <div class="patient-avatar"><i class="fas fa-user"></i></div>
+                            <div>
+                                <div class="patient-name">${item.bemor_fio}</div>
+                                <div class="text-muted small">ID: #${item.id}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-500">${item.shifokor}</div>
+                        <div class="text-muted small">${item.xizmat || 'Maslahat'}</div>
+                    </td>
+                    <td>
+                        <div class="fw-600 text-primary">${item.sana}</div>
+                        <div class="badge bg-light text-dark">${item.vaqt}</div>
+                    </td>
+                    <td>
+                        <span class="badge ${getStatusClass(item.holati)}">
+                            ${getStatusLabel(item.holati)}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="action-btn" title="O'zgartirish" onclick="editApt(${item.id})"><i class="fas fa-pen"></i></button>
+                        <button class="action-btn delete" title="O'chirish" onclick="deleteApt(${item.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusClass(status) {
+            if(status === 'upcoming' || status === 'kutilmoqda') return 'badge-upcoming';
+            if(status === 'completed' || status === 'yakunlandi') return 'badge-completed';
+            return 'badge-cancelled';
+        }
+
+        function getStatusLabel(status) {
+            if(status === 'upcoming' || status === 'kutilmoqda') return 'Kutilmoqda';
+            if(status === 'completed' || status === 'yakunlandi') return 'Yakunlandi';
+            return 'Bekor qilindi';
+        }
+
+        function filterData() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const dr = document.getElementById('drFilter').value;
+
+            const filtered = allData.filter(item => {
+                const matchesSearch = item.bemor_fio.toLowerCase().includes(search);
+                // Status mismatch hal qilindi - har ikki ko'rinishni qabul qiladi
+                let matchesStatus = status === 'all';
+                if (!matchesStatus) {
+                    if (status === 'upcoming') matchesStatus = item.holati === 'upcoming' || item.holati === 'kutilmoqda';
+                    else if (status === 'completed') matchesStatus = item.holati === 'completed' || item.holati === 'yakunlandi';
+                    else matchesStatus = item.holati === status;
+                }
+                const matchesDr = dr === 'all' || item.shifokor === dr;
+                return matchesSearch && matchesStatus && matchesDr;
+            });
+            renderTable(filtered);
+        }
+
+        // ===== TAHRIRLASH (EDIT) FUNKSIYASI =====
+        let currentEditId = null;
+
+        function editApt(id) {
+            const item = allData.find(d => d.id === id);
+            if (!item) return;
+            currentEditId = id;
+
+            document.getElementById('editBemor').value = item.bemor_fio || '';
+            document.getElementById('editShifokor').value = item.shifokor || '';
+            document.getElementById('editXizmat').value = item.xizmat || '';
+            
+            const sanaEl = document.getElementById('editSana');
+            sanaEl.value = item.sana || '';
+            
+            // Faqat bugun va kelajakdagi sanani tanlashga ruxsat
+            const now = new Date();
+            const todayStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            sanaEl.setAttribute("min", todayStr);
+            
+            document.getElementById('editVaqt').value = item.vaqt || '';
+            document.getElementById('editHolat').value = item.holati || 'upcoming';
+
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+        }
+
+        function saveEditApt() {
+            if (currentEditId === null) return;
+            const idx = allData.findIndex(d => d.id === currentEditId);
+            if (idx === -1) return;
+            
+            // Data Validation (O'tgan sana)
+            const kiritilganSana = document.getElementById('editSana').value;
+            const selectedDate = new Date(kiritilganSana);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            if (selectedDate < today) {
+                alert("XATOLIK: O'tib ketgan sanaga navbatni ko'chirish taqiqlanadi!");
+                return;
+            }
+
+            allData[idx].bemor_fio = document.getElementById('editBemor').value;
+            allData[idx].patientName = document.getElementById('editBemor').value;
+            
+            allData[idx].shifokor = document.getElementById('editShifokor').value;
+            allData[idx].doctor = document.getElementById('editShifokor').value;
+            
+            allData[idx].xizmat = document.getElementById('editXizmat').value;
+            allData[idx].service = document.getElementById('editXizmat').value;
+            
+            allData[idx].sana = document.getElementById('editSana').value;
+            allData[idx].date = document.getElementById('editSana').value;
+            
+            allData[idx].vaqt = document.getElementById('editVaqt').value;
+            allData[idx].time = document.getElementById('editVaqt').value;
+            
+            allData[idx].holati = document.getElementById('editHolat').value;
+            allData[idx].status = document.getElementById('editHolat').value;
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+            bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+            renderTable(allData);
+            updateStats();
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            document.getElementById('drFilter').value = 'all';
+            renderTable(allData);
+        }
+
+        function deleteApt(id) {
+            if(confirm('Ushbu navbatni o\'chirishni tasdiqlaysizmi?')) {
+                allData = allData.filter(d => d.id !== id);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+                renderTable(allData);
+                updateStats();
+            }
+        }
+
+        function chiqish() {
+            if(confirm('Tizimdan chiqishni tasdiqlaysizmi?')) {
+                localStorage.removeItem('medsmart_user');
+                window.location.href = '../admin_login.html';
+            }
+        }
+
+        window.onload = init;
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- TAHRIRLASH MODALI -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:20px; border:none; box-shadow:0 25px 50px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="border-bottom:1px solid #f1f5f9; padding:20px 25px;">
+                    <h5 class="modal-title fw-bold" style="font-family:'Outfit';"><i class="fas fa-edit me-2 text-warning"></i>Navbatni Tahrirlash</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-muted" style="font-size:0.85rem;">Bemor F.I.O</label>
+                            <input type="text" id="editBemor" class="form-control" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted" style="font-size:0.85rem;">Shifokor</label>
+                            <input type="text" id="editShifokor" class="form-control" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted" style="font-size:0.85rem;">Xizmat</label>
+                            <input type="text" id="editXizmat" class="form-control" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted" style="font-size:0.85rem;">Sana</label>
+                            <input type="date" id="editSana" class="form-control" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted" style="font-size:0.85rem;">Vaqt</label>
+                            <input type="time" id="editVaqt" class="form-control" style="border-radius:10px;font-family:'Outfit';">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-muted" style="font-size:0.85rem;">Holati</label>
+                            <select id="editHolat" class="form-select" style="border-radius:10px;font-family:'Outfit';">
+                                <option value="upcoming">Kutilmoqda</option>
+                                <option value="completed">Yakunlandi</option>
+                                <option value="cancelled">Bekor qilindi</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #f1f5f9; padding:15px 25px; background:#f8fafc; border-radius:0 0 20px 20px;">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:10px;">Bekor qilish</button>
+                    <button type="button" class="btn btn-warning text-dark fw-bold px-4" onclick="saveEditApt()" style="border-radius:10px; font-family:'Outfit';"><i class="fas fa-check me-2"></i>Saqlash</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

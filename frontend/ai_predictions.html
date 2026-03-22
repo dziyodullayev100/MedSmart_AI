@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedSmart AI - Zumrad Design</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --emerald: #10b981;
+            --emerald-dark: #059669;
+            --emerald-soft: #ecfdf5;
+            --bg: #f3f4f6;
+            --text: #064e3b;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            border-bottom: 3px solid var(--emerald);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 1.4rem;
+            color: var(--emerald-dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img { width: 35px; filter: hue-rotate(90deg); }
+
+        .back-btn {
+            background: var(--emerald-soft);
+            color: var(--emerald-dark);
+            text-decoration: none;
+            padding: 10px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+            border: 1px solid var(--emerald);
+        }
+
+        .back-btn:hover { background: var(--emerald); color: white; }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 15px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.15);
+            margin-bottom: 30px;
+        }
+
+        .hero h1 { margin: 0; font-size: 1.6rem; }
+        .hero p { opacity: 0.9; margin-top: 5px; font-size: 0.9rem; font-weight: 300; }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.02);
+            border-top: 6px solid var(--emerald);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--emerald-dark);
+        }
+
+        .risk-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .risk-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .risk-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 10px;
+            transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0;
+        }
+
+        .history-badge {
+            background: var(--emerald-soft);
+            color: var(--emerald-dark);
+            padding: 8px 15px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .alert-login {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px dashed #d1d5db;
+            color: #6b7280;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.6rem; }
+            .container { margin: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="rasmlar/logo1.png" alt="Med Smart Logo">
+            MED SMART AI
+        </div>
+        <a href="javascript:history.back()" class="back-btn">Orqaga</a>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <h1>Sizning Sog'liq Bashoratingiz</h1>
+            <p>Eng ilg'or sun'iy intellekt tahlili yordamida shakllantirilgan.</p>
+        </section>
+
+        <div id="seasonal-card" class="card">
+            <h2>📅 Mavsumiy Kasalliklar Bashorati</h2>
+            <div id="seasonal-content">
+                <div class="alert-login">Yuklanmoqda...</div>
+            </div>
+        </div>
+
+        <div id="progression-card" class="card" style="border-top-color: #059669;">
+            <h2>📈 Kasallik Rivojlanish Tahlili</h2>
+            <div id="progression-content">
+                <div class="alert-login">Yuklanmoqda...</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function loadAI() {
+            // Login ma'lumotlarini olish
+            const userData = JSON.parse(localStorage.getItem('medsmart_user') || '{}');
+            const patientId = userData.id || '1'; // Agar login qilmagan bo'lsa default '1'
+            const token = localStorage.getItem('token') || '';
+
+            try {
+                // Seasonal API
+                const sRes = await fetch('/api/ai/seasonal-prediction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ patientId })
+                });
+                const sData = await sRes.json();
+                renderSeasonal(sData);
+
+                // Progression API
+                const pRes = await fetch('/api/ai/disease-progression', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ patientId })
+                });
+                const pData = await pRes.json();
+                renderProgression(pData);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderSeasonal(data) {
+            const container = document.getElementById('seasonal-content');
+            if (data.message) { container.innerHTML = '<div class="alert-login">Iltimos, avval tizimga kiring.</div>'; return; }
+
+            const forecast = data["Patient Forecast"];
+            let html = `<div class="history-badge">Hozirgi mavsum: ${forecast.Season}</div>`;
+            
+            forecast["Top Risks"].forEach(r => {
+                html += `
+                    <div class="risk-item">
+                        <span>${r.disease}</span>
+                        <span style="color: #059669;">${r.risk}%</span>
+                    </div>
+                    <div class="risk-bar-container">
+                        <div class="risk-bar" style="width: ${r.risk}%"></div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderProgression(data) {
+            const container = document.getElementById('progression-content');
+            if (data.message) { container.innerHTML = '<div class="alert-login">Iltimos, avval tizimga kiring.</div>'; return; }
+
+            const analysis = data["Patient Risk Analysis"];
+            let text = analysis["History Found"].join(', ') || "Ma'lumot topilmadi";
+            let html = `<div class="history-badge" style="background: #f0fdf4;">${text} aniqlangan</div>`;
+            
+            if (analysis["Future Risks"].length === 0) {
+                html += "<p style='color: #6b7280; text-align: center;'>Hozircha qo'shimcha risklar aniqlanmadi.</p>";
+            } else {
+                analysis["Future Risks"].forEach(r => {
+                    html += `
+                        <div class="risk-item">
+                            <span>Kutilmoqda: ${r.disease}</span>
+                            <span style="color: #059669;">${r.probability}</span>
+                        </div>
+                        <div class="risk-bar-container">
+                            <div class="risk-bar" style="width: ${r.probability}; background: #059669;"></div>
+                        </div>
+                    `;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        loadAI();
+    </script>
+</body>
+</html>

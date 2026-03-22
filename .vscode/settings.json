@@ -1,0 +1,11 @@
+{
+    "python.defaultInterpreterPath": "C:\\Users\\user\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/ai_service"
+    ],
+    "python.analysis.typeCheckingMode": "basic",
+    "python.languageServer": "Pylance",
+    "pyre2.enable": false,
+    "python.analysis.reportMissingImports": "none",
+    "python.analysis.reportMissingModuleSource": "none"
+}
