@@ -53,4 +53,5 @@ Med_Smart0/
 - **Ma'lumotlar bazasi**: SQLite
 
 ## Muallif
-MedSmart0 Development Team
+ZIYODULLAYEV DOSTON
+
