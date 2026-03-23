@@ -22,7 +22,7 @@ async function testApi() {
         // --- 1. DOCTOR TESTS ---
         console.log('\n[1] Testing DOCTOR CRUD');
         let doctorId;
-        
+
         // POST
         let res = await fetchAPI('/doctors', {
             method: 'POST',
@@ -49,12 +49,12 @@ async function testApi() {
         });
         console.log('Update Doctor Status:', res.status);
         console.log('Updated Doctor Name/Exp:', res.data.name, res.data.experience);
-        
+
 
         // --- 2. PATIENT TESTS ---
         console.log('\n[2] Testing PATIENT CRUD');
         let patientId;
-        
+
         // POST
         res = await fetchAPI('/patients', {
             method: 'POST',
@@ -84,7 +84,7 @@ async function testApi() {
         // --- 3. APPOINTMENT TESTS ---
         console.log('\n[3] Testing APPOINTMENT CRUD');
         let appointmentId;
-        
+
         // POST
         res = await fetchAPI('/appointments', {
             method: 'POST',
@@ -110,18 +110,18 @@ async function testApi() {
         console.log('Update Appointment Status:', res.status);
         console.log('Updated Appointment Notes:', res.data.notes);
 
-        
+
         // --- 4. CLEANUP (DELETE TESTS) ---
         console.log('\n[4] Testing DELETE operations');
-        
+
         // DELETE Appointment
         res = await fetchAPI(`/appointments/${appointmentId}`, { method: 'DELETE' });
         console.log('Delete Appointment Status:', res.status);
-        
+
         // DELETE Patient
         res = await fetchAPI(`/patients/${patientId}`, { method: 'DELETE' });
         console.log('Delete Patient Status:', res.status);
-        
+
         // DELETE Doctor
         res = await fetchAPI(`/doctors/${doctorId}`, { method: 'DELETE' });
         console.log('Delete Doctor Status:', res.status);
