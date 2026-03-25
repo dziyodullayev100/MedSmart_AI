@@ -23,6 +23,27 @@ const logger = require('../utils/logger');
 // Read AI service URL from environment (fallback to localhost for dev)
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
+// ─── Helper: Resilient Axios POST with Request Retry (Cold Start Fix) ───────
+async function aiPostWithRetry(endpoint, payload, retries = 1) {
+    const url = `${AI_SERVICE_URL}${endpoint}`;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            // 25000ms is the optimal max-wait for Render free-tier cold starts
+            return await axios.post(url, payload, { timeout: 25000 });
+        } catch (error) {
+            const isTimeout = error.code === 'ECONNABORTED' || error.message.includes('timeout');
+            const isOffline = !error.response;
+            
+            if (attempt < retries && (isTimeout || isOffline)) {
+                logger.warn(`[AI Service] Cold start detected. Retrying request... (${attempt + 1}/${retries})`);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2s before retry
+                continue;
+            }
+            throw error; // Throw to the main catch block if out of retries
+        }
+    }
+}
+
 // ─── Helper: determine current season ─────────────────────────────────────────
 
 function getSeason(month) {
@@ -118,15 +139,14 @@ exports.getSeasonalPrediction = async (req, res, next) => {
         let aiStatus = 'success';
 
         try {
-            const aiResponse = await axios.post(
-                `${AI_SERVICE_URL}/ai/seasonal-prediction`,
-                inputPayload,
-                { timeout: 25000 }
-            );
+            // Use the new resilient retry function
+            const aiResponse = await aiPostWithRetry('/ai/seasonal-prediction', inputPayload);
             aiResult = aiResponse.data;
         } catch (aiError) {
             aiStatus = 'error';
+            const isTimeout = aiError.code === 'ECONNABORTED' || aiError.message.includes('timeout');
             const isOffline = !aiError.response;
+            
             logger.error('[AI Service] Seasonal prediction failed', { error: aiError.message });
 
             await AIPrediction.create({
@@ -138,10 +158,13 @@ exports.getSeasonalPrediction = async (req, res, next) => {
                 aiServiceStatus: 'error'
             });
 
+            // 🎯 Fallback Response
             return res.status(503).json({
-                message: isOffline
-                    ? 'AI service is offline. Please start the Python AI service on port 8000.'
-                    : 'AI service returned an error.',
+                message: isTimeout 
+                    ? 'AI xizmati hozircha band yoki uxlab qolgan (Kutish vaqti tugadi). Iltimos, birozdan so\'ng qayta urinib ko\'ring.' 
+                    : isOffline
+                        ? 'AI xizmati vaqtincha o\'chiq holatda.'
+                        : 'AI xizmatidan xatolik qaytdi.',
                 detail: aiError.response ? aiError.response.data : aiError.message
             });
         }
@@ -248,15 +271,13 @@ exports.getDiseaseProgression = async (req, res, next) => {
         let aiStatus = 'success';
 
         try {
-            const aiResponse = await axios.post(
-                `${AI_SERVICE_URL}/ai/disease-progression`,
-                inputPayload,
-                { timeout: 25000 }
-            );
+            const aiResponse = await aiPostWithRetry('/ai/disease-progression', inputPayload);
             aiResult = aiResponse.data;
         } catch (aiError) {
             aiStatus = 'error';
+            const isTimeout = aiError.code === 'ECONNABORTED' || aiError.message.includes('timeout');
             const isOffline = !aiError.response;
+            
             logger.error('[AI Service] Disease progression failed', { error: aiError.message });
 
             await AIPrediction.create({
@@ -269,9 +290,11 @@ exports.getDiseaseProgression = async (req, res, next) => {
             });
 
             return res.status(503).json({
-                message: isOffline
-                    ? 'AI service is offline. Please start the Python AI service on port 8000.'
-                    : 'AI service returned an error.',
+                message: isTimeout 
+                    ? 'AI xizmati hozircha band yoki uxlab qolgan (Kutish vaqti tugadi). Iltimos, birozdan so\'ng qayta urinib ko\'ring.' 
+                    : isOffline
+                        ? 'AI xizmati vaqtincha o\'chiq holatda.'
+                        : 'AI xizmatidan xatolik qaytdi.',
                 detail: aiError.response ? aiError.response.data : aiError.message
             });
         }
@@ -405,17 +428,14 @@ exports.chatAI = async (req, res, next) => {
 
         let aiResult;
         try {
-            const aiResponse = await axios.post(
-                `${AI_SERVICE_URL}/ai/chat`,
-                payload,
-                { timeout: 25000 }
-            );
+            const aiResponse = await aiPostWithRetry('/ai/chat', payload);
             aiResult = aiResponse.data;
         } catch (aiError) {
+            const isTimeout = aiError.code === 'ECONNABORTED' || aiError.message.includes('timeout');
             const isOffline = !aiError.response;
+            
             logger.error('[AI Service] Chat endpoint failed', { error: aiError.message });
 
-            // Save failed attempt if we have a patientId for traceability
             if (patientId) {
                 await AIPrediction.create({
                     patientId,
@@ -424,13 +444,16 @@ exports.chatAI = async (req, res, next) => {
                     resultData: { error: aiError.message },
                     riskLevel: 'Unknown',
                     aiServiceStatus: 'error'
-                }).catch(() => {}); // non-fatal
+                }).catch(() => {});
             }
 
             return res.status(503).json({
-                message: isOffline
-                    ? 'AI service is offline. Please start the Python AI service on port 8000.'
-                    : 'AI service returned an error.',
+                message: isTimeout 
+                    ? 'AI xizmati hozircha band yoxud uxlab qolgan (Kutish vaqti tugadi). Iltimos, 1-2 daqiqadan so\'ng qayta urinib ko\'ring.' 
+                    : isOffline
+                        ? 'AI xizmati vaqtincha o\'chiq holatda.'
+                        : 'AI xizmatidan xatolik qaytdi.',
+                reply: 'Texnik tanaffus. AI Xizmati hozircha tarmoqqa qayta ulanmoqda...',
                 detail: aiError.response ? aiError.response.data : aiError.message
             });
         }
