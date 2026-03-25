@@ -29,7 +29,7 @@ const AIPrediction = sequelize.define('AIPrediction', {
         }
     },
     predictionType: {
-        type: DataTypes.ENUM('seasonal', 'progression'),
+        type: DataTypes.ENUM('seasonal', 'progression', 'chat'),
         allowNull: false
     },
     inputData: {
@@ -56,7 +56,11 @@ const AIPrediction = sequelize.define('AIPrediction', {
     }
 }, {
     timestamps: true,  // Adds createdAt and updatedAt automatically
-    indexes: [{ fields: ['patientId'] }]
+    indexes: [
+        { fields: ['patientId'] },
+        { fields: ['predictionType'] },
+        { fields: ['createdAt'] }
+    ]
 });
 
 // Association methods

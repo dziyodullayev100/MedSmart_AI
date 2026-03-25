@@ -1,7 +1,10 @@
 from __future__ import annotations
 import os
 import logging
-from typing import Any, Optional
+import json
+import uuid
+from collections import deque
+from typing import Any, Optional, Literal
 from datetime import datetime
 
 # Configure logging
@@ -13,7 +16,7 @@ logger = logging.getLogger("medsmart_ai")
 
 from fastapi import FastAPI, HTTPException  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
-from pydantic import BaseModel  # type: ignore
+from pydantic import BaseModel, Field  # type: ignore
 import joblib  # type: ignore
 import numpy as np  # type: ignore
 
@@ -28,6 +31,12 @@ app = FastAPI(
     version="1.0.0"
 )
 
+try:
+    from config.production_config import apply_production_config # type: ignore
+    apply_production_config(app)
+except ImportError as e:
+    logger.warning("Production config not found or failed to load. Running default.")
+
 # Allow requests from Node.js backend and any local frontend
 app.add_middleware(
     CORSMiddleware,
@@ -37,16 +46,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ─── Input Schemas ────────────────────────────────────────────────────────────
+# ─── Input Schemas with Validation (Task 5) ───────────────────────────────────
 
 class SeasonalPredictionRequest(BaseModel):
-    """Request body for seasonal disease prediction."""
+    """Request body for seasonal disease prediction with Pydantic validation."""
     patient_id: Any
-    age: int
-    month: int
-    season: str
-    previous_diseases: list[str] = []
-    chronic_conditions: list[str] = []
+    age: int = Field(..., ge=1, le=120, description="Patient age between 1 and 120.")
+    month: int = Field(..., ge=1, le=12, description="Month of the year (1-12).")
+    season: Literal["Winter", "Spring", "Summer", "Autumn"] = Field(
+        ..., description="Current season."
+    )
+    previous_diseases: list[str] = Field(
+        default=[], max_length=20, description="List of previous diseases."
+    )
+    chronic_conditions: list[str] = Field(
+        default=[], max_length=20, description="List of chronic conditions."
+    )
 
 class DiagnosisEntry(BaseModel):
     """A single diagnosis entry from the patient's history."""
@@ -67,11 +82,50 @@ class VitalsData(BaseModel):
     recordedAt: Optional[str] = None
 
 class DiseaseProgressionRequest(BaseModel):
-    """Request body for disease progression analysis."""
+    """Request body for disease progression analysis with Pydantic validation."""
     patient_id: Any
-    history: list[DiagnosisEntry] = []
+    history: list[DiagnosisEntry] = Field(
+        default=[], max_length=50, description="Patient diagnosis history (max 50 items)."
+    )
     vitals: Optional[VitalsData] = None
-    chronic_conditions: list[str] = []
+    chronic_conditions: list[str] = Field(
+        default=[], max_length=20, description="List of chronic conditions."
+    )
+
+class ConversationTurn(BaseModel):
+    """A single turn in the conversation history."""
+    role: str = Field(..., description="'user' or 'assistant'")
+    content: str = Field(..., max_length=1000)
+
+class ChatRequest(BaseModel):
+    """Request body for conversational AI with Pydantic validation."""
+    message: str = Field(..., min_length=1, max_length=500, description="User message/query.")
+    session_id: Optional[str] = Field(default=None, description="Optional session ID for context.")
+    conversation_history: Optional[list[ConversationTurn]] = Field(
+        default=None, max_length=10, description="Last 10 conversation turns."
+    )
+
+class ChatResponse(BaseModel):
+    """Response body from conversational AI."""
+    reply: str
+    metadata: Optional[dict[str, Any]] = None
+
+# ── Triage schemas ──────────────────────────────────────────────────────────
+
+class TriageRequest(BaseModel):
+    """Request body for quick medical triage assessment."""
+    symptoms: list[str] = Field(..., max_length=30, description="List of symptoms.")
+    age: int = Field(..., ge=1, le=120, description="Patient age.")
+    duration_days: int = Field(..., ge=0, description="How many days symptoms have been present.")
+    severity: Literal["mild", "moderate", "severe"] = Field(..., description="Symptom severity.")
+
+class TriageResponse(BaseModel):
+    """Response body for triage assessment."""
+    triage_level: Literal["HIGH", "MEDIUM", "LOW"]
+    recommendation: str
+    seek_emergency: bool
+    estimated_wait: str
+    matched_symptoms: list[str]
 
 # ─── Model Loading ────────────────────────────────────────────────────────────
 
@@ -94,6 +148,31 @@ def load_models():
         return None, None, None, None, None
 
 seasonal_model, le_season, le_prev, le_disease, progression_rules = load_models()
+
+# ─── Load MedicalChatEngine ────────────────────────────────────────────────────
+try:
+    from utils.medical_chat import chat_engine  # type: ignore
+    logger.info("✓ MedicalChatEngine loaded successfully.")
+except Exception as _chat_import_err:
+    logger.error(f"Failed to load MedicalChatEngine: {_chat_import_err}")
+    chat_engine = None  # type: ignore
+
+# ─── In-memory session store (last 5 messages per session) ────────────────────
+# Key: session_id (str) → deque of ConversationTurn dicts
+_SESSION_STORE: dict[str, deque] = {}
+SESSION_MAX_TURNS = 10  # store per session
+
+
+def _get_session_history(session_id: str) -> list[dict]:
+    if session_id not in _SESSION_STORE:
+        _SESSION_STORE[session_id] = deque(maxlen=SESSION_MAX_TURNS)
+    return list(_SESSION_STORE[session_id])
+
+
+def _push_to_session(session_id: str, role: str, content: str) -> None:
+    if session_id not in _SESSION_STORE:
+        _SESSION_STORE[session_id] = deque(maxlen=SESSION_MAX_TURNS)
+    _SESSION_STORE[session_id].append({"role": role, "content": content})
 
 # ─── Helper: Assess vitals risk ───────────────────────────────────────────────
 
@@ -156,6 +235,40 @@ async def health_check() -> dict:
         "timestamp": datetime.utcnow().isoformat() + "Z"
     }
 
+# Task 4 — New Metrics Endpoint
+@app.get("/ai/metrics")
+async def get_metrics() -> dict[str, Any]:
+    """
+    Returns content of seasonal_metrics.json and progression_metrics.json.
+    If a file does not exist, returns null for that section.
+    No authentication required (internal monitoring endpoint).
+    """
+    models_dir = os.path.join(BASE_DIR, "models")
+    seasonal_path = os.path.join(models_dir, "seasonal_metrics.json")
+    progression_path = os.path.join(models_dir, "progression_metrics.json")
+
+    seasonal_data = None
+    if os.path.exists(seasonal_path):
+        try:
+            with open(seasonal_path, "r", encoding="utf-8") as f:
+                seasonal_data = json.load(f)
+        except Exception as e:
+            logger.error(f"Error reading {seasonal_path}: {e}")
+
+    progression_data = None
+    if os.path.exists(progression_path):
+        try:
+            with open(progression_path, "r", encoding="utf-8") as f:
+                progression_data = json.load(f)
+        except Exception as e:
+            logger.error(f"Error reading {progression_path}: {e}")
+
+    return {
+        "seasonal_model": seasonal_data,
+        "progression_model": progression_data,
+        "generated_at": datetime.utcnow().isoformat() + "Z"
+    }
+
 
 @app.post("/ai/seasonal-prediction")
 async def seasonal_prediction(request: SeasonalPredictionRequest) -> dict[str, Any]:
@@ -183,7 +296,7 @@ async def seasonal_prediction(request: SeasonalPredictionRequest) -> dict[str, A
         season_val = request.season if request.season in known_seasons else "Spring"
         season_encoded = int(le_season.transform([season_val])[0])
 
-        # ── Encode previous disease (first diagnosis in history) ───────
+        # ── Encode previous disease ────────────────────────────────────
         known_prev = list(le_prev.classes_)
         
         # Combine previous_diseases and chronic_conditions for richer context
@@ -194,6 +307,8 @@ async def seasonal_prediction(request: SeasonalPredictionRequest) -> dict[str, A
                 prev_disease = condition
                 break
         
+        if prev_disease not in known_prev:
+            prev_disease = "None"
         prev_encoded = int(le_prev.transform([prev_disease])[0])
 
         # ── Run prediction ─────────────────────────────────────────────
@@ -249,10 +364,9 @@ async def seasonal_prediction(request: SeasonalPredictionRequest) -> dict[str, A
 async def disease_progression(request: DiseaseProgressionRequest) -> dict[str, Any]:
     """
     Analyze disease progression risks based on:
-    - Patient diagnosis history (list of DiagnosisEntry objects)
+    - Patient diagnosis history
     - Latest vital signs
     - Chronic conditions
-    Returns future disease risks via association rules + vital sign risk flags.
     """
     if progression_rules is None:
         raise HTTPException(
@@ -355,6 +469,179 @@ async def disease_progression(request: DiseaseProgressionRequest) -> dict[str, A
     except Exception as e:
         logger.error(f"Disease progression error: {e}")
         raise HTTPException(status_code=500, detail=f"Progression analysis failed: {str(e)}")
+
+
+# ─── POST /ai/chat  (Conversational AI — upgraded with MedicalChatEngine) ─────
+
+# Known emergency symptoms for triage (also used in /ai/triage)
+_EMERGENCY_SYMPTOMS_SET = {
+    "chest pain", "shortness of breath", "unconscious", "severe bleeding",
+    "stroke", "trouble speaking", "facial drooping", "numbness",
+    "heart palpitations", "blurred vision",
+}
+
+
+@app.post("/ai/chat")
+async def ai_chat(request: ChatRequest) -> dict[str, Any]:
+    """
+    Upgraded Conversational AI endpoint.
+    Accepts: { message, session_id?, conversation_history? }
+    Returns:  { reply: str, metadata: { intent, symptoms_detected, emergency, confidence, language } }
+    Node.js backend compatibility: reply field is always present.
+    """
+    message = request.message.strip()
+
+    if not message:
+        return {
+            "reply": "Iltimos, savol yoki simptomlaringizni kiriting.",
+            "metadata": {"intent": "general_info", "symptoms_detected": [], "emergency": False, "confidence": 0.0, "language": "uz"},
+        }
+
+    # ── Resolve session ID ────────────────────────────────────────────────
+    session_id = request.session_id or str(uuid.uuid4())
+
+    # ── Build history from request + server-side session ─────────────────
+    history: list[dict] = []
+    if request.conversation_history:
+        raw_history = list(request.conversation_history)  # type: ignore[arg-type]
+        trimmed = (raw_history[-10:] if len(raw_history) > 10 else raw_history)  # type: ignore[index]
+        history = [t.model_dump() for t in trimmed]
+    else:
+        history = _get_session_history(session_id)
+
+    # ── Run MedicalChatEngine ─────────────────────────────────────────────
+    if chat_engine is not None:
+        result = chat_engine.process(message, history)
+        reply: str = result["reply"]
+        metadata: dict[str, Any] = result["metadata"]
+    else:
+        # Graceful degradation if engine failed to load
+        reply = (
+            "I received your message. For medical advice, please consult a doctor. "
+            "If this is an emergency, call 103 immediately."
+        )
+        metadata = {"intent": "general_info", "symptoms_detected": [], "emergency": False, "confidence": 0.5, "language": "en"}
+
+    # ── Persist turns to session store ────────────────────────────────────
+    _push_to_session(session_id, "user", message)
+    _push_to_session(session_id, "assistant", reply)
+
+    short = (message[:60] + "...") if len(message) > 60 else str(message)  # type: ignore[index]
+    logger.info(
+        f"[AI Chat] session={session_id} intent={metadata.get('intent')} "
+        f"emergency={metadata.get('emergency')} query='{short}'"
+    )
+
+    return {"reply": reply, "metadata": metadata}
+
+
+# ─── POST /ai/triage  (Quick Medical Triage Assessment) ──────────────────────
+
+# Emergency symptom keywords for triage matching
+_TRIAGE_EMERGENCY_KEYWORDS = [
+    "chest pain", "shortness of breath", "difficulty breathing",
+    "unconscious", "unresponsive", "stroke", "severe bleeding",
+    "heart attack", "cardiac arrest", "can't breathe", "not breathing",
+    "facial drooping", "trouble speaking", "numbness",
+]
+
+# All known canonical symptoms (flat list for matching)
+_ALL_CANONICAL_SYMPTOMS = [
+    "fever", "headache", "cough", "fatigue", "chest pain",
+    "shortness of breath", "nausea", "vomiting", "dizziness",
+    "back pain", "joint pain", "sore throat", "runny nose",
+    "stomach pain", "diarrhea", "constipation", "rash", "itching",
+    "swelling", "blurred vision", "heart palpitations", "numbness",
+    "tingling", "confusion", "unconscious", "severe bleeding", "bleeding",
+    "stroke", "trouble speaking", "facial drooping", "loss of appetite",
+    "insomnia", "muscle pain", "migraine", "anxiety", "depression",
+]
+
+
+@app.post("/ai/triage", response_model=TriageResponse)
+async def ai_triage(request: TriageRequest) -> TriageResponse:
+    """
+    Quick medical triage assessment.
+    Accepts: { symptoms: list[str], age: int, duration_days: int, severity: str }
+    Returns: { triage_level, recommendation, seek_emergency, estimated_wait, matched_symptoms }
+    """
+    # ── Normalise & match submitted symptoms ─────────────────────────────
+    matched: list[str] = []
+    submitted_lower = [s.lower().strip() for s in request.symptoms]
+
+    for sym in submitted_lower:
+        # Direct canonical match
+        if sym in _ALL_CANONICAL_SYMPTOMS:
+            matched.append(sym)
+            continue
+        # Partial match against canonical list
+        for canonical in _ALL_CANONICAL_SYMPTOMS:
+            if sym in canonical or canonical in sym:
+                if canonical not in matched:
+                    matched.append(canonical)
+                break
+
+    # ── Determine if any emergency symptom is present ────────────────────
+    has_emergency_sym = bool(
+        set(matched) & _EMERGENCY_SYMPTOMS_SET
+        or any(kw in " ".join(submitted_lower) for kw in _TRIAGE_EMERGENCY_KEYWORDS)
+    )
+
+    # ── Triage logic ─────────────────────────────────────────────────────
+    triage_level: Literal["HIGH", "MEDIUM", "LOW"]
+    seek_emergency: bool
+    estimated_wait: str
+    recommendation: str
+
+    if (
+        has_emergency_sym
+        or request.severity == "severe"
+        or (request.duration_days > 7 and request.severity == "moderate")
+        or (request.age >= 65 and request.severity == "moderate" and request.duration_days >= 3)
+    ):
+        triage_level = "HIGH"
+        seek_emergency = True
+        estimated_wait = "Immediate"
+        recommendation = (
+            "Your symptoms indicate a HIGH priority medical situation. "
+            "Please seek emergency care immediately or call 103. "
+            "Do not wait — have someone take you to the nearest hospital now."
+        )
+    elif (
+        len(matched) >= 2
+        or (3 <= request.duration_days <= 7)
+        or (request.severity == "moderate")
+    ):
+        triage_level = "MEDIUM"
+        seek_emergency = False
+        estimated_wait = "Within 24h"
+        recommendation = (
+            "Your symptoms suggest a MEDIUM priority concern. "
+            "You should see a doctor within 24 hours. "
+            "Monitor your symptoms closely — if they worsen, seek emergency care."
+        )
+    else:
+        triage_level = "LOW"
+        seek_emergency = False
+        estimated_wait = "Within 3 days"
+        recommendation = (
+            "Your symptoms appear to be LOW priority at this time. "
+            "Rest, stay hydrated, and monitor your condition. "
+            "Schedule a non-urgent appointment with your doctor if symptoms persist."
+        )
+
+    logger.info(
+        f"[Triage] level={triage_level} symptoms={matched} "
+        f"age={request.age} duration={request.duration_days}d severity={request.severity}"
+    )
+
+    return TriageResponse.model_validate({
+        "triage_level": triage_level,
+        "recommendation": recommendation,
+        "seek_emergency": seek_emergency,
+        "estimated_wait": estimated_wait,
+        "matched_symptoms": matched,
+    })
 
 
 # ─── Entry Point ──────────────────────────────────────────────────────────────

@@ -1,0 +1,83 @@
+================================================================================
+            MEDSMART0: LOYIHA STRUKTURASI VA FAYLLAR DARAHTI
+================================================================================
+Sana: 2026-03-24
+Tahlilchi: Antigravity AI
+
+Ushbu hujjat loyihaning to'liq iyerarxiyasini va har bir faylning vazifasini 
+tavsiflab beradi.
+
+Med_Smart0/
+├── ai_service/                     # Sun'iy intellekt xizmati (Python FastAPI)
+│   ├── data/                       # ML modellarni o'rgatish uchun ma'lumotlar
+│   ├── models/                     # O'rgatilgan (.pkl) modellar (kasallik bashorati)
+│   ├── prediction/                 # Bashorat qilish algoritmlari mantiqi
+│   ├── training/                   # Modellarni qayta o'rgatish skriptlari
+│   ├── api.py                      # AI API serverining asosiy fayli (FastAPI)
+│   ├── run.py                      # AI xizmatini ishga tushiruvchi skript
+│   ├── requirements.txt            # Kerakli Python kutubxonalari ro'yxati
+│   └── render.yaml                 # Render.com ga deploy qilish sozlamalari
+│
+├── backend/                        # Node.js Backend (Express.js)
+│   ├── config/                     # Ma'lumotlar bazasi sozlamalari
+│   │   ├── db.js                   # SQLite ulanish konfiguratsiyasi
+│   │   └── associations.js         # Modellar o'rtasidagi bog'lanishlar (n:m, 1:n)
+│   ├── controllers/                # Biznes mantiq (Controllers)
+│   │   ├── aiController.js         # AI xizmati bilan aloqa mantiqi
+│   │   ├── medSmartController.js   # Asosiy CRUD (Doctor, Patient, Appt) mantiqi
+│   │   └── userController.js       # Foydalanuvchi auth va profil mantiqi
+│   ├── middlewares/                # Oraliq dasturlar
+│   │   ├── authMiddleware.js       # JWT tokenni tekshirish (xavfsizlik)
+│   │   └── errorHandler.js         # Global xatolarni tutish va qayta ishlash
+│   ├── models/                     # Sequelize ma'lumotlar modellar (Tables)
+│   │   ├── Doctor.js               # Shifokorlar jadvali
+│   │   ├── Patient.js              # Bemorlar jadvali
+│   │   ├── Appointment.js          # Uchrashuvlar jadvali
+│   │   ├── Diagnosis.js            # Tashxislar tarixi
+│   │   ├── VitalSigns.js           # Bemorning hayotiy belgilari (puls, bosim)
+│   │   └── ... (User, Service)      # Boshqa tizim modellari
+│   ├── routes/                     # API marshrutlari (Endpoints)
+│   │   ├── medSmartRoutes.js       # Tibbiy ma'lumotlar API yo'llari
+│   │   ├── aiRoutes.js             # AI bashoratlari uchun API yo'llari
+│   │   └── syncRoutes.js           # Offline/Online sinxronizatsiya yo'llari
+│   ├── tests/                      # Tizimni test qilish skriptlari
+│   │   ├── test_ai_integration.js  # AI bilan bog'lanishni tekshirish
+│   │   └── test_crud.js            # Ma'lumotlar bazasi amallarini tekshirish
+│   ├── .env                        # Maxfiy o'zgaruvchilar (JWT SECRET, PORT)
+│   ├── server.js                   # Backendning kirish nuqtasi (Main Entry)
+│   └── package.json                # Node.js bog'liqliklari va skriptlari
+│
+├── frontend/                       # Foydalanuvchi interfeysi (JS, HTML, CSS)
+│   ├── admin_uchun_sahifa/         # Administrator boshqaruv paneli
+│   │   ├── shifokorlar/            # Shifokorlarni boshqarish sahifalari
+│   │   └── tolovlar/               # To'lovlar monitoringi
+│   ├── bemor_uchun_sahifa/         # Bemorning shaxsiy kabineti
+│   │   ├── navbatlarim/            # Bemorning qabullari ro'yxati
+│   │   └── xabarlar/               # Shifokor bilan yozishmalar
+│   ├── js/                         # Frontend mantiqi
+│   │   ├── apiClient.js            # Backend bilan so'rov almashish (Fetch)
+│   │   ├── sinxronizatsiya.js      # Lokal ma'lumotlarni serverga yuborish
+│   │   └── xavfsizlik.js           # Login/Logout va Token boshqaruvi
+│   ├── css/                        # Dizayn va uslublar (Layouts)
+│   ├── index.html                  # Loyihaning asosiy kirish (Landing) sahifasi
+│   └── ai_predictions.html         # AI tahlillari ko'rsatiladigan maxsus sahifa
+│
+├── .venv/                          # Python virtual muhiti (Kutubxonalar uyi)
+├── .vscode/                        # Visual Studio Code ishchi muhiti sozlamalari
+├── ISHLAR_JURNALI.txt              # Qilingan ishlar tarixi va hisoboti
+├── LOYIHA_TAHLILI.txt              # Loyihaning nazariy va texnik tahlili
+├── README.md                       # Loyiha haqida umumiy tushuncha va yo'riqnoma
+├── START_MEDSMART.bat              # AI + Backendni birga ishga tushirish skripti
+├── start.bat                       # Faqat Backendni ishga tushirish skripti
+├── refactor.js                     # Kodni avtomat optimizatsiya qilish skripti
+├── pyrightconfig.json              # Python kodini tekshirish sozlamalari
+└── .gitignore                      # Git-ga yuklanmaydigan fayllar (node_modules, .env)
+
+================================================================================
+FAYLLARNING ASOSIY VAZIFALARI QISQACHA:
+- .bat fayllar: Loyihani "bir tugma" bilan ishga tushirish uchun.
+- Controllerlar: Tizimning "miyasi" - barcha mantiqiy hisob-kitoblar shu yerda.
+- Modellar: Ma'lumotlar bazasining "skeleti" - qaysi ma'lumot qanday saqlanishi.
+- Routes: "Yo'l ko'rsatkichlar" - frontend qaysi manzilga murojaat qilishini aytadi.
+- JS (Frontend): "Interaktivlik" - tugmalar bosilganda nima sodir bo'lishini boshqaradi.
+================================================================================

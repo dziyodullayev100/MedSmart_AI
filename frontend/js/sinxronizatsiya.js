@@ -1,430 +1,295 @@
 // MED SMART - LocalStorage sinxronizatsiya tizimi
-// Versiya: 1.0.0
+// Versiya: 2.0.0 (Hardened with Priority Queue & Conflict Resolution)
 // Muallif: MED SMART Development Team
 
-// LocalStorage sinxronizatsiya klassi
 class DataSync {
     constructor() {
-        this.syncQueue = [];
+        this.syncQueue = JSON.parse(localStorage.getItem('medsmart_sync_queue') || '[]');
         this.isOnline = navigator.onLine;
         this.syncInProgress = false;
-        this.lastSyncTime = null;
         
-        // Event listenerlarni o'rnatish
+        const status = JSON.parse(localStorage.getItem('medsmart_sync_status') || '{}');
+        this.lastSyncTime = status.lastSyncTime ? new Date(status.lastSyncTime) : null;
+        this.failedCount = status.failedCount || 0;
+        this.pendingCount = this.syncQueue.length;
+
         this.setupEventListeners();
     }
     
-    // Event listenerlarni o'rnatish
     setupEventListeners() {
-        // Online/Offline statusni kuzatish
         window.addEventListener('online', () => {
             this.isOnline = true;
-            console.log('Internet aloqasi tiklandi');
+            console.log('Internet aloqasi tiklandi. Queue ishga tushirildi.');
             this.processSyncQueue();
         });
         
         window.addEventListener('offline', () => {
             this.isOnline = false;
-            console.log('Internet aloqasi uzildi');
         });
         
-        // Sahifa yuklanishida sinxronizatsiyani boshlash
         document.addEventListener('DOMContentLoaded', () => {
             this.initializeSync();
         });
         
-        // Sahifadan chiqishda sinxronizatsiya qilish
         window.addEventListener('beforeunload', () => {
             this.syncToServer();
         });
     }
+
+    updateStatus() {
+        this.pendingCount = this.syncQueue.length;
+        const status = {
+            lastSyncTime: this.lastSyncTime ? this.lastSyncTime.toISOString() : null,
+            pendingCount: this.pendingCount,
+            failedCount: this.failedCount
+        };
+        localStorage.setItem('medsmart_sync_status', JSON.stringify(status));
+    }
     
-    // Sinxronizatsiyani boshlash
     initializeSync() {
-        const lastSync = localStorage.getItem('medsmart_last_sync');
-        if (lastSync) {
-            this.lastSyncTime = new Date(lastSync);
-        }
-        
-        // Avval saqlangan ma'lumotlarni yuklash
         this.loadLocalData();
-        
-        // Agar online bo'lsa, server bilan sinxronizatsiya qilish
         if (this.isOnline) {
             this.syncFromServer();
         }
     }
     
-    // Lokal ma'lumotni yuklash
     loadLocalData() {
         try {
-            const localData = {
+            return {
                 users: JSON.parse(localStorage.getItem('medsmart_users') || '[]'),
                 appointments: JSON.parse(localStorage.getItem('medsmart_appointments') || '[]'),
                 doctors: JSON.parse(localStorage.getItem('medsmart_doctors') || '[]'),
                 services: JSON.parse(localStorage.getItem('medsmart_services') || '[]'),
                 patients: JSON.parse(localStorage.getItem('medsmart_patients') || '[]'),
-                notifications: JSON.parse(localStorage.getItem('medsmart_notifications') || '[]')
+                notifications: JSON.parse(localStorage.getItem('medsmart_notifications') || '[]'),
+                vitals: JSON.parse(localStorage.getItem('medsmart_vitals') || '[]'),
+                diagnoses: JSON.parse(localStorage.getItem('medsmart_diagnoses') || '[]')
             };
-            
-            console.log('Lokal ma\'lumotlar yuklandi:', localData);
-            return localData;
         } catch (error) {
-            console.error('Lokal ma\'lumotlarni yuklashda xatolik:', error);
+            console.error('Lokal yuklashda xatolik:', error);
             return {};
         }
     }
     
-    // Serverdan sinxronizatsiya qilish
+    resolveConflicts(localItems, serverItems) {
+        // Each record has updatedAt timestamp. Higher wins.
+        const resolved = [];
+        const serverMap = new Map();
+        serverItems.forEach(item => serverMap.set(item.id, item));
+
+        localItems.forEach(localItem => {
+            const serverItem = serverMap.get(localItem.id);
+            if (!serverItem) {
+                resolved.push(localItem); // Only exists locally
+            } else {
+                const localTime = new Date(localItem.updatedAt || localItem.createdAt || 0).getTime();
+                const serverTime = new Date(serverItem.updatedAt || serverItem.createdAt || 0).getTime();
+                
+                if (localTime > serverTime) {
+                    resolved.push(localItem); // Local is newer
+                } else {
+                    resolved.push(serverItem); // Server is newer or equal (Server wins)
+                }
+                serverMap.delete(localItem.id);
+            }
+        });
+
+        // Add remaining server items
+        serverMap.forEach(item => resolved.push(item));
+        return resolved;
+    }
+
     async syncFromServer() {
         if (this.syncInProgress) return;
-        
         this.syncInProgress = true;
         
         try {
-            // Real loyihada bu yerda API chaqiruvlari bo'ladi
             const response = await this.realAPICall('/sync/download');
             
-            if (response.success) {
-                // Serverdagi ma'lumotlarni lokal saqlash
-                this.saveLocalData(response.data);
+            if (response && response.success) {
+                const local = this.loadLocalData();
+                const serverData = response.data || {};
+                const mergedData = {};
+
+                // Apply conflict resolution for each category
+                Object.keys(local).forEach(key => {
+                    const localItems = Array.isArray(local[key]) ? local[key] : [];
+                    const serverItems = Array.isArray(serverData[key]) ? serverData[key] : [];
+                    mergedData[key] = this.resolveConflicts(localItems, serverItems);
+                });
+
+                this.saveLocalData(mergedData);
                 this.lastSyncTime = new Date();
-                localStorage.setItem('medsmart_last_sync', this.lastSyncTime.toISOString());
-                
-                console.log('Serverdan ma\'lumotlar muvaffaqiyatli sinxronizatsiya qilindi');
-                this.showNotification('Ma\'lumotlar yangilandi', 'success');
+                this.updateStatus();
+                console.log('Serverdan ma\'lumotlar muvaffaqiyatli tortildi.');
             }
         } catch (error) {
-            console.error('Serverdan sinxronizatsiyada xatolik:', error);
-            this.showNotification('Sinxronizatsiyada xatolik yuz berdi', 'error');
+            console.error('Download xatosi:', error);
         } finally {
             this.syncInProgress = false;
         }
     }
     
-    // Serverga sinxronizatsiya qilish
     async syncToServer() {
         if (!this.isOnline || this.syncInProgress) return;
-        
         this.syncInProgress = true;
         
         try {
             const localData = this.loadLocalData();
-            
-            // Real loyihada bu yerda API chaqiruvlari bo'ladi
             const response = await this.realAPICall('/sync/upload', {
                 method: 'POST',
                 body: JSON.stringify(localData)
             });
             
-            if (response.success) {
-                console.log('Lokal ma\'lumotlar serverga muvaffaqiyatli yuborildi');
+            if (response && response.success) {
                 this.lastSyncTime = new Date();
-                localStorage.setItem('medsmart_last_sync', this.lastSyncTime.toISOString());
+                this.updateStatus();
             }
         } catch (error) {
-            console.error('Serverga sinxronizatsiyada xatolik:', error);
-            // Sinxronizatsiya navbatga qo'shish
-            this.addToSyncQueue(localData);
+            console.error('Serverga yuborish xatosi, navbatga saqlanadi:', error);
+            // Queue full snapshot as LOW priority fallback
+            this.addToSyncQueue('all', localData, 'LOW');
         } finally {
             this.syncInProgress = false;
         }
     }
     
-    // Sinxronizatsiya navbatiga qo'shish
-    addToSyncQueue(data) {
+    getPriorityLevel(category) {
+        if (category === 'HIGH') return 1;
+        if (category === 'MEDIUM') return 2;
+        if (category === 'LOW') return 3;
+
+        if (['vitals', 'diagnoses'].includes(category)) return 1;
+        if (['appointments', 'payments'].includes(category)) return 2;
+        return 3; 
+    }
+
+    addToSyncQueue(category, data, explicitPriority = null) {
         const syncItem = {
-            id: Date.now(),
+            id: Date.now() + Math.random(),
+            category: category,
             data: data,
+            priority: explicitPriority ? this.getPriorityLevel(explicitPriority) : this.getPriorityLevel(category),
             timestamp: new Date().toISOString(),
-            retryCount: 0
+            retryCount: 0,
+            nextRetry: Date.now()
         };
         
         this.syncQueue.push(syncItem);
-        localStorage.setItem('medsmart_sync_queue', JSON.stringify(this.syncQueue));
-        
-        console.log('Ma\'lumot sinxronizatsiya navbatiga qo\'shildi');
+        this.syncQueue.sort((a, b) => a.priority - b.priority); 
+        this.updateStatus();
+        this.saveQueue();
     }
     
-    // Sinxronizatsiya navbatini qayta ishlash
-    async processSyncQueue() {
-        if (this.syncQueue.length === 0 || this.syncInProgress) return;
-        
-        const queue = [...this.syncQueue];
-        this.syncQueue = [];
+    saveQueue() {
         localStorage.setItem('medsmart_sync_queue', JSON.stringify(this.syncQueue));
+        this.updateStatus();
+    }
+
+    async processSyncQueue() {
+        if (this.syncQueue.length === 0 || this.syncInProgress || !this.isOnline) return;
+        this.syncInProgress = true;
         
-        for (const item of queue) {
+        const now = Date.now();
+        const pendingQueue = [];
+        
+        for (const item of this.syncQueue) {
+            if (now < item.nextRetry) {
+                pendingQueue.push(item);
+                continue;
+            }
+
             try {
                 const response = await this.realAPICall('/sync/upload', {
                     method: 'POST',
-                    body: JSON.stringify(item.data)
+                    body: JSON.stringify({ [item.category]: Array.isArray(item.data) ? item.data : [item.data] })
                 });
                 
-                if (response.success) {
-                    console.log(`Navbatdagi ma'lumot sinxronizatsiya qilindi: ${item.id}`);
-                } else {
-                    throw new Error('Server xatosi');
-                }
-            } catch (error) {
-                console.error(`Navbatdagi ma'lumotni sinxronizatsiyalashda xatolik: ${item.id}`, error);
+                if (!response || !response.success) throw new Error('Rad etildi');
                 
-                // Qayta urinishlar sonini tekshirish
+                console.log(`[Sinxronizatsiya] Muvaffaqiyatli: ${item.category}`);
+            } catch (error) {
                 item.retryCount++;
                 if (item.retryCount < 3) {
-                    this.syncQueue.push(item);
+                    // Exponential backoff: 1s, 2s, 4s (1000 * 2^(retry-1))
+                    const delay = 1000 * Math.pow(2, item.retryCount - 1);
+                    item.nextRetry = Date.now() + delay;
+                    pendingQueue.push(item);
+                } else {
+                    this.failedCount++;
+                    if (window.notify) window.notify('error', `Ma'lumot uzatishda xatolik (${item.category}). Server rad etdi.`);
                 }
             }
         }
+
+        this.syncQueue = pendingQueue;
+        this.saveQueue();
+        this.syncInProgress = false;
     }
     
-    // Lokal ma'lumotni saqlash
     saveLocalData(data) {
-        const dataTypes = ['users', 'appointments', 'doctors', 'services', 'patients', 'notifications'];
-        
-        dataTypes.forEach(type => {
+        Object.keys(data).forEach(type => {
             if (data[type]) {
                 localStorage.setItem(`medsmart_${type}`, JSON.stringify(data[type]));
             }
         });
     }
-    
-    // Admin tomonidan kiritilgan navbatlarni saqlash
-    saveAdminAppointment(appointment) {
-        const appointments = JSON.parse(localStorage.getItem('medsmart_appointments') || '[]');
-        const newAppointment = {
-            id: Date.now(),
-            ...appointment,
-            createdBy: 'admin',
-            createdAt: new Date().toISOString(),
-            synced: false
-        };
-        
-        appointments.push(newAppointment);
-        localStorage.setItem('medsmart_appointments', JSON.stringify(appointments));
-        
-        // Bemorlar kabinetida ko'rish uchun
-        this.notifyPatients(newAppointment);
-        
-        // Serverga sinxronizatsiya qilish
-        this.syncToServer();
-        
-        console.log('Admin navbati saqlandi:', newAppointment);
-        return newAppointment;
-    }
-    
-    // Bemorlarni yangi navbat haqida ogohlantirish
-    notifyPatients(appointment) {
-        const patients = JSON.parse(localStorage.getItem('medsmart_patients') || '[]');
-        const relevantPatients = patients.filter(patient => 
-            appointment.patientIds && appointment.patientIds.includes(patient.id)
-        );
-        
-        relevantPatients.forEach(patient => {
-            const notification = {
-                id: Date.now(),
-                patientId: patient.id,
-                type: 'appointment',
-                title: 'Yangi navbat',
-                message: `Sizga ${appointment.date} kuni ${appointment.time} da navbat belgilandi.`,
-                data: appointment,
-                read: false,
-                createdAt: new Date().toISOString()
-            };
-            
-            this.addNotification(notification);
-        });
-    }
-    
-    // Bildirishnomalarni qo'shish
-    addNotification(notification) {
-        const notifications = JSON.parse(localStorage.getItem('medsmart_notifications') || '[]');
-        notifications.push(notification);
-        localStorage.setItem('medsmart_notifications', JSON.stringify(notifications));
-        
-        // Real vaqtda bildirishnomani ko'rsatish
-        this.showRealTimeNotification(notification);
-    }
-    
-    // Real vaqtda bildirishnomani ko'rsatish
-    showRealTimeNotification(notification) {
-        // Browser bildirishnomalari ruxsatini tekshirish
-        if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(notification.title, {
-                body: notification.message,
-                icon: '/rasmlar/logo.jpg',
-                tag: notification.id.toString()
-            });
-        }
-        
-        // Toast bildirishnomasi
-        this.showToast(notification.message, notification.type);
-    }
-    
-    // Toast bildirishnomasi
-    showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `data-sync-toast toast-${type}`;
-        toast.innerHTML = `
-            <div class="toast-content">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                <span>${message}</span>
-            </div>
-        `;
-        
-        document.body.appendChild(toast);
-        
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 100);
-        
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                if (document.body.contains(toast)) {
-                    document.body.removeChild(toast);
-                }
-            }, 300);
-        }, 3000);
-    }
-    
-    // Real API chaqiruvi
+
     async realAPICall(endpoint, options = {}) {
-        const baseUrl = '/api'; // Backend API base URL
+        // Fallback to apiClient if available, otherwise fetch
+        if (window.apiClient) {
+             const method = options.method || 'GET';
+             if (method === 'GET') return window.apiClient.get(endpoint, options.headers, true, true);
+             if (method === 'POST') return window.apiClient.post(endpoint, JSON.parse(options.body), options.headers, true);
+        }
+
+        const baseUrl = window.API_BASE_URL || '/api';
         const url = `${baseUrl}${endpoint}`;
         
         try {
             const response = await fetch(url, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                },
+                headers: { 'Content-Type': 'application/json', ...options.headers },
                 ...options
             });
-            
             const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.message || 'Server xatosi');
-            }
-            
-            return {
-                success: true,
-                data: data,
-                message: 'Muvaffaqiyatli'
-            };
+            if (!response.ok) throw new Error(data.message || 'Server xatosi');
+            return { success: true, data: data };
         } catch (error) {
-            console.error('API chaqiruvida xatolik:', error);
-            return {
-                success: false,
-                message: error.message
-            };
-        }
-    }
-    
-    // Bildirishnomalar uchun ruxsat so'rash
-    requestNotificationPermission() {
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    console.log('Bildirishnomalar uchun ruxsat berildi');
-                }
-            });
+            return { success: false, message: error.message };
         }
     }
 }
 
-// Global sinxronizatsiya obyekti
 const dataSync = new DataSync();
 
-// Export qilinadigan funksiyalar
 const SyncManager = {
-    // Admin navbatini saqlash
-    saveAppointment: (appointment) => dataSync.saveAdminAppointment(appointment),
-    
-    // Bemor ma'lumotlarini yangilash
-    updatePatient: (patientId, data) => {
-        const patients = JSON.parse(localStorage.getItem('medsmart_patients') || '[]');
-        const patientIndex = patients.findIndex(p => p.id === patientId);
-        
-        if (patientIndex !== -1) {
-            patients[patientIndex] = {
-                ...patients[patientIndex],
-                ...data,
-                updatedAt: new Date().toISOString(),
-                synced: false
-            };
-            
-            localStorage.setItem('medsmart_patients', JSON.stringify(patients));
-            dataSync.syncToServer();
-            
-            console.log('Bemor ma\'lumotlari yangilandi:', patients[patientIndex]);
-            return true;
-        }
-        
-        return false;
+    saveAppointment: (appointment) => {
+        appointment.updatedAt = new Date().toISOString();
+        dataSync.addToSyncQueue('appointments', appointment);
     },
-    
-    // Yangi bemor qo'shish
+    updatePatient: (patientId, data) => {
+        const payload = { id: patientId, ...data, updatedAt: new Date().toISOString() };
+        dataSync.addToSyncQueue('patients', payload);
+        return true;
+    },
     addPatient: (patientData) => {
-        const patients = JSON.parse(localStorage.getItem('medsmart_patients') || '[]');
-        const newPatient = {
-            id: Date.now(),
-            ...patientData,
-            createdAt: new Date().toISOString(),
-            synced: false
-        };
-        
-        patients.push(newPatient);
-        localStorage.setItem('medsmart_patients', JSON.stringify(patients));
-        dataSync.syncToServer();
-        
-        console.log('Yangi bemor qo\'shildi:', newPatient);
+        const newPatient = { id: Date.now(), ...patientData, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+        dataSync.addToSyncQueue('patients', newPatient);
         return newPatient;
     },
-    
-    // Bildirishnomalarni olish
-    getNotifications: (patientId = null) => {
-        const notifications = JSON.parse(localStorage.getItem('medsmart_notifications') || '[]');
-        
-        if (patientId) {
-            return notifications.filter(n => n.patientId === patientId);
-        }
-        
-        return notifications;
-    },
-    
-    // Bildirishnomani o'qilgan deb belgilash
-    markNotificationRead: (notificationId) => {
-        const notifications = JSON.parse(localStorage.getItem('medsmart_notifications') || '[]');
-        const notificationIndex = notifications.findIndex(n => n.id === notificationId);
-        
-        if (notificationIndex !== -1) {
-            notifications[notificationIndex].read = true;
-            notifications[notificationIndex].readAt = new Date().toISOString();
-            
-            localStorage.setItem('medsmart_notifications', JSON.stringify(notifications));
-            dataSync.syncToServer();
-        }
-    },
-    
-    // Sinxronizatsiya holatini olish
     getSyncStatus: () => {
         return {
             isOnline: dataSync.isOnline,
             lastSync: dataSync.lastSyncTime,
-            queueLength: dataSync.syncQueue.length,
+            pendingCount: dataSync.pendingCount,
+            failedCount: dataSync.failedCount,
             inProgress: dataSync.syncInProgress
         };
     }
 };
 
-// Sahifa yuklanishida bildirishnomalar uchun ruxsat so'rash
-document.addEventListener('DOMContentLoaded', () => {
-    dataSync.requestNotificationPermission();
-});
-
-// Export qilish (boshqa fayllarda ishlash uchun)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { DataSync, SyncManager, dataSync };
+} else {
+    window.SyncManager = SyncManager;
 }

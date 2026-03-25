@@ -18,6 +18,7 @@ const PatientHistory = require('../models/PatientHistory');
 const VitalSigns = require('../models/VitalSigns');
 const Doctor = require('../models/Doctor');
 const AIPrediction = require('../models/AIPrediction');
+const logger = require('../utils/logger');
 
 // Read AI service URL from environment (fallback to localhost for dev)
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
@@ -120,15 +121,14 @@ exports.getSeasonalPrediction = async (req, res, next) => {
             const aiResponse = await axios.post(
                 `${AI_SERVICE_URL}/ai/seasonal-prediction`,
                 inputPayload,
-                { timeout: 10000 }  // 10 second timeout
+                { timeout: 10000 }
             );
             aiResult = aiResponse.data;
         } catch (aiError) {
             aiStatus = 'error';
             const isOffline = !aiError.response;
-            console.error('[AI Service] Seasonal prediction failed:', aiError.message);
+            logger.error('[AI Service] Seasonal prediction failed', { error: aiError.message });
 
-            // Save failed attempt for observability
             await AIPrediction.create({
                 patientId,
                 predictionType: 'seasonal',
@@ -158,13 +158,13 @@ exports.getSeasonalPrediction = async (req, res, next) => {
             aiServiceStatus: aiStatus
         });
 
-        console.log(`[AI] Seasonal prediction stored for patient ${patientId} — risk: ${riskLevel}`);
+        logger.info(`[AI] Seasonal prediction stored`, { patientId, riskLevel });
 
         // ── 9. Return result ─────────────────────────────────────────────
         res.json(aiResult);
 
     } catch (error) {
-        console.error('[AI Controller] Seasonal prediction error:', error.message);
+        logger.error('[AI Controller] Seasonal prediction error', { error: error.message });
         next(error);
     }
 };
@@ -191,7 +191,7 @@ exports.getDiseaseProgression = async (req, res, next) => {
             return res.status(404).json({ message: 'Patient not found' });
         }
 
-        // ── 2. Fetch full diagnosis timeline (chronological for progression) ──
+        // ── 2. Fetch full diagnosis timeline ────────────────────────────
         const diagnoses = await Diagnosis.findAll({
             where: { patientId },
             include: [{ model: Doctor, attributes: ['name', 'specialization'] }],
@@ -223,12 +223,12 @@ exports.getDiseaseProgression = async (req, res, next) => {
         }));
 
         const latestVitals = vitals.length > 0 ? {
-            bloodPressure: vitals[0].bloodPressure,
-            heartRate: vitals[0].heartRate,
-            temperature: vitals[0].temperature,
+            bloodPressure:    vitals[0].bloodPressure,
+            heartRate:        vitals[0].heartRate,
+            temperature:      vitals[0].temperature,
             oxygenSaturation: vitals[0].oxygenSaturation,
-            weight: vitals[0].weight,
-            recordedAt: vitals[0].recordedAt
+            weight:           vitals[0].weight,
+            recordedAt:       vitals[0].recordedAt
         } : null;
 
         const chronicConditions = (historyEntries.length > 0 && Array.isArray(historyEntries[0].chronicConditions))
@@ -257,7 +257,7 @@ exports.getDiseaseProgression = async (req, res, next) => {
         } catch (aiError) {
             aiStatus = 'error';
             const isOffline = !aiError.response;
-            console.error('[AI Service] Disease progression failed:', aiError.message);
+            logger.error('[AI Service] Disease progression failed', { error: aiError.message });
 
             await AIPrediction.create({
                 patientId,
@@ -288,13 +288,13 @@ exports.getDiseaseProgression = async (req, res, next) => {
             aiServiceStatus: aiStatus
         });
 
-        console.log(`[AI] Progression analysis stored for patient ${patientId} — risk level: ${riskLevel}`);
+        logger.info(`[AI] Progression analysis stored`, { patientId, riskLevel });
 
         // ── 9. Return result ─────────────────────────────────────────────
         res.json(aiResult);
 
     } catch (error) {
-        console.error('[AI Controller] Disease progression error:', error.message);
+        logger.error('[AI Controller] Disease progression error', { error: error.message });
         next(error);
     }
 };
@@ -309,7 +309,6 @@ exports.getPatientPredictions = async (req, res, next) => {
     try {
         const { patientId } = req.params;
 
-        // Validate patient exists
         const patient = await Patient.findByPk(patientId, {
             attributes: ['id', 'name']
         });
@@ -331,7 +330,128 @@ exports.getPatientPredictions = async (req, res, next) => {
         });
 
     } catch (error) {
-        console.error('[AI Controller] Get predictions error:', error.message);
+        logger.error('[AI Controller] Get predictions error', { error: error.message });
+        next(error);
+    }
+};
+
+// ─── POST /api/ai/ask ─────────────────────────────────────────────────────────
+
+/**
+ * Conversational AI diagnostics (legacy mock fallback).
+ * Accepts:  { message: string }
+ * Returns:  { reply: string }
+ */
+exports.askAI = async (req, res) => {
+    try {
+        const { message } = req.body;
+
+        if (!message || typeof message !== 'string' || message.trim() === '') {
+            return res.status(400).json({ reply: 'Iltimos, savol yoki simptomlaringizni kiriting.' });
+        }
+
+        const trimmed = message.trim().toLowerCase();
+        let reply;
+
+        if (trimmed.includes('bosh') || trimmed.includes('boshim') || trimmed.includes("bosh og'riq")) {
+            reply = "Bosh og'riq ko'p sababli bo'lishi mumkin: stress, uyqu yetishmasligi, qon bosimi o'zgarishi yoki migren. Agar og'riq kuchli va uzoq davom etsa, shifokorga murojaat qilishingizni tavsiya qilaman.";
+        } else if (trimmed.includes('harorat') || trimmed.includes('isitma') || trimmed.includes('tem')) {
+            reply = "Yuqori harorat (38°C dan yuqori) odatda infeksion kasallik belgisi. Ko'p suv iching, dam oling va 24 soat ichida pasaymasa shifokorga boring.";
+        } else if (trimmed.includes("yo'tal") || trimmed.includes('nafas')) {
+            reply = "Yo'tal va nafas olish qiyinligi nafas yo'llari infeksiyasi, alleriya yoki boshqa sabablar bo'lishi mumkin. Agar nafas olish juda qiyin bo'lsa — zudlik bilan tibbiy yordam oling.";
+        } else if (trimmed.includes('qorin') || trimmed.includes("qorin og'riq") || trimmed.includes('ich')) {
+            reply = "Qorin og'riq ovqat hazm qilish muammolari, gastrit yoki boshqa holat bo'lishi mumkin. Og'riq o'tkir va uzoq davom etsa yoki qon bilan birga bo'lsa — shifokorga zudlik bilan murojaat qiling.";
+        } else if (trimmed.includes('charchash') || trimmed.includes('holsiz') || trimmed.includes('enerji')) {
+            reply = "Doimiy charchoq anemiya, uyqu buzilishi, qalqonsimon bez muammolari yoki boshqa holat belgisi bo'lishi mumkin. Qon tahlili topshirishni tavsiya qilaman.";
+        } else if (trimmed.includes("bo'g'im") || trimmed.includes('suyak') || trimmed.includes("og'riy")) {
+            reply = "Bo'g'im va suyak og'riqlari artrit, tomir muammolari yoki jarohat belgisi bo'lishi mumkin. Rentgen yoki MRI tavsiya etiladi.";
+        } else if (trimmed.includes('salom') || trimmed.includes('assalomu')) {
+            reply = 'Assalomu alaykum! Men MedSmart AI yordamchisiman. Qanday simptom yoki savol bilan murojaat qilyapsiz?';
+        } else {
+            reply = `Simptomlaringizni tushundim: "${message.trim()}". Aniqroq tashxis qo'yish uchun shifokor ko'rigidan o'tishni maslahat beraman. Agar belgilar kuchaysa, zudlik bilan tibbiy yordam oling. Men sizga faqat dastlabki ma'lumot bera olaman — shifokor o'rnini bosa olmayman.`;
+        }
+
+        logger.info('[AI Ask] Mock reply generated');
+        return res.json({ reply });
+
+    } catch (error) {
+        logger.error('[AI Controller] Ask endpoint error', { error: error.message });
+        return res.status(500).json({ reply: "Serverda xatolik yuz berdi. Iltimos, qayta urinib ko'ring." });
+    }
+};
+
+// ─── POST /api/ai/chat ────────────────────────────────────────────────────────
+
+/**
+ * Forwards user message to the Python AI service /ai/chat endpoint.
+ * Accepts:  { message: string, patientId?: string }
+ * Returns:  { reply: string }
+ *
+ * - patientId is optional context for the AI service
+ * - Saves result to AIPrediction with predictionType: 'chat'
+ * - Returns 503 if AI service is offline
+ * - 10-second timeout
+ */
+exports.chatAI = async (req, res, next) => {
+    try {
+        const { message, patientId } = req.body;
+
+        if (!message || typeof message !== 'string' || message.trim() === '') {
+            return res.status(400).json({ reply: 'Iltimos, savol yoki simptomlaringizni kiriting.' });
+        }
+
+        const payload = { message: message.trim() };
+        if (patientId) payload.patientId = patientId;
+
+        let aiResult;
+        try {
+            const aiResponse = await axios.post(
+                `${AI_SERVICE_URL}/ai/chat`,
+                payload,
+                { timeout: 10000 }
+            );
+            aiResult = aiResponse.data;
+        } catch (aiError) {
+            const isOffline = !aiError.response;
+            logger.error('[AI Service] Chat endpoint failed', { error: aiError.message });
+
+            // Save failed attempt if we have a patientId for traceability
+            if (patientId) {
+                await AIPrediction.create({
+                    patientId,
+                    predictionType: 'chat',
+                    inputData: payload,
+                    resultData: { error: aiError.message },
+                    riskLevel: 'Unknown',
+                    aiServiceStatus: 'error'
+                }).catch(() => {}); // non-fatal
+            }
+
+            return res.status(503).json({
+                message: isOffline
+                    ? 'AI service is offline. Please start the Python AI service on port 8000.'
+                    : 'AI service returned an error.',
+                detail: aiError.response ? aiError.response.data : aiError.message
+            });
+        }
+
+        // Optionally persist chat result for patients
+        if (patientId) {
+            await AIPrediction.create({
+                patientId,
+                predictionType: 'chat',
+                inputData: payload,
+                resultData: aiResult,
+                riskLevel: 'Unknown',
+                aiServiceStatus: 'success'
+            }).catch(err => logger.warn('Failed to persist chat result', { error: err.message }));
+        }
+
+        logger.info('[AI Chat] Message forwarded to AI service', { patientId: patientId || 'anonymous' });
+        return res.json(aiResult);
+
+    } catch (error) {
+        logger.error('[AI Controller] Chat endpoint error', { error: error.message });
         next(error);
     }
 };

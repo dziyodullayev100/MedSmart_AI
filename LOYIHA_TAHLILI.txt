@@ -1,0 +1,101 @@
+===============================================================
+                    MEDSMART LOYIHA TAHLILI
+===============================================================
+
+Ushbu hujjat MedSmart tibbiyot boshqaruv tizimining to'liq tahlilini, 
+fayllar tarkibini va kelajakdagi rivojlanish rejalarini o'z ichiga oladi.
+
+===============================================================
+1. LOYIHA FAYLLARARA DARAHTI (TREE) VA VAZIFALARI
+===============================================================
+
+Med_Smart0/
+├── backend/                        # Tizimning asosiy server qismi (Node.js)
+│   ├── config/                     # Konfiguratsiya: DB ulanishi va model aloqalari
+│   │   ├── db.js                   # SQLite ma'lumotlar bazasiga ulanish
+│   │   └── associations.js         # Modellar o'rtasidagi munosabatlar (Relationship)
+│   ├── controllers/                # Biznes mantiq (Logic)
+│   │   ├── aiController.js         # AI xizmati bilan integratsiya mantiqi
+│   │   ├── medSmartController.js   # Asosiy CRUD amallari (Doctor, Patient, Appt)
+│   │   └── userController.js       # Foydalanuvchi profili va auth mantiqi
+│   ├── models/                     # Ma'lumotlar bazasi jadvallari (Sequelize)
+│   │   ├── Doctor.js               # Shifokorlar jadvali
+│   │   ├── Patient.js              # Bemorlar jadvali
+│   │   ├── Appointment.js          # Uchrashuvlar jadvali
+│   │   ├── Service.js              # Tibbiy xizmatlar jadvali
+│   │   └── ... (Diagnosis, Vitals)  # Qo'shimcha tibbiy ma'lumotlar
+│   ├── routes/                     # API manzillari (Endpoints)
+│   │   ├── medSmartRoutes.js       # Asosiy tibbiy API marshrutlari
+│   │   ├── aiRoutes.js             # AI prognozlari uchun marshrutlar
+│   │   └── syncRoutes.js           # Ma'lumotlarni sinxronizatsiya qilish
+│   ├── server.js                   # Tizimning asosiy kirish nuqtasi
+│   └── .env                        # Maxfiy sozlamalar (Port, Database URL)
+│
+├── frontend/                       # Foydalanuvchi interfeysi (HTML/CSS/JS)
+│   ├── admin_uchun_sahifa/         # Administrator boshqaruv paneli
+│   ├── bemor_uchun_sahifa/         # Bemorning shaxsiy kabineti
+│   ├── css/                        # Umumiy dizayn uslublari
+│   ├── js/                         # Frontend mantiqi va API bilan aloqa
+│   │   ├── apiClient.js            # Backend bilan muloqot qiluvchi umumiy klient
+│   │   └── sinxronizatsiya.js      # Offline rejimdan ma'lumotlarni yuklash
+│   ├── index.html                  # Asosiy kirish sahifasi
+│   └── ai_predictions.html         # AI tahlillarini ko'rish sahifasi
+│
+├── ai_service/                     # Sun'iy intellekt xizmati (Python FastAPI)
+│   ├── models/                     # O'rgatilgan ML modellar (.pkl fayllar)
+│   ├── prediction/                 # Bashorat qilish mantiqi
+│   ├── api.py                      # AI API serverning asosiy fayli
+│   └── requirements.txt            # Python kutubxonalari ro'yxati
+│
+├── ISHLAR_JURNALI.txt              # Loyiha ustida bajarilgan ishlar tarixi
+├── README.md                       # Loyiha haqida umumiy qo'llanma
+└── start.bat                       # Loyihani bir vaqtda ishga tushirish skripti
+
+===============================================================
+2. HAR BIR FAYLNING VAZIFASI (BATAFSIL)
+===============================================================
+
+--- BACKEND ---
+- server.js: Express serverini sozlaydi, middlewarelarni ulaydi va bazani ishga tushiradi.
+- controllers/medSmartController.js: Shifokor qo'shish, bemorni ro'yxatdan o'tkazish kabilar.
+- models/AIPrediction.js: AI tomonidan berilgan bashoratlarni bazada saqlash uchun model.
+- routes/syncRoutes.js: Lokal ma'lumotlarni serverga yuborish va serverdan yuklab olish.
+
+--- FRONTEND ---
+- index.html: Foydalanuvchilarni qarshilaydigan Landing Page.
+- js/apiClient.js: Barcha frontend sahifalari uchun backendga so'rov yuborish funksiyalari.
+- admin_uchun_sahifa/admin_dashboard.html: Statistika va boshqaruv markazi.
+
+--- AI SERVICE ---
+- api.py: FastAPI yordamida '/ai/seasonal-prediction' va '/ai/disease-progression' endpointlarini taqdim etadi.
+- models/*.pkl: Mavsumiy kasalliklar va kasallikning rivojlanishini bashorat qiluvchi "aqlli" modellar.
+
+===============================================================
+3. KELAJAKDAGI REJALAR VA VAZIFALAR (ROADMAP)
+===============================================================
+
+*** 1-BOSQICH: Xavfsizlik va Auth ***
+- JWT (JSON Web Token) tizimini to'liq integratsiya qilish (hozirda tayyorgarlik ketmoqda).
+- Role-Based Access Control (RBAC): Admin, Shifokor va Bemor huquqlarini ajratish.
+
+*** 2-BOSQICH: Bildirishnomalar Tizimi ***
+- E-mail va SMS xabarnomalar: Bemorga navbati kelganini eslatish.
+- Telegram Bot: Navbatga yozilish va AI tahlillarini bot orqali olish.
+
+*** 3-BOSQICH: Analitika va Dashboard ***
+- Klinikaga kelayotgan daromadlar va bemorlar oqimi haqida vizual grafiklar.
+- AI bashoratlarini grafik ko'rinishida chiqarish.
+
+*** 4-BOSQICH: Mobil Ilova ***
+- Flutter yoki React Native yordamida mobil ilova yaratish.
+- Offline ishlash imkoniyatini (PWA) kengaytirish.
+
+*** 5-BOSQICH: Telemeditsina ***
+- Shifokor bilan onlayn video muloqot (WebRTC orqali).
+- Onlayn chat tizimi.
+
+===============================================================
+Tahlil yakunlandi. MedSmart loyihasi to'liq barqaror holatda.
+Muallif: Antigravity AI
+Sana: 2026-03-23
+===============================================================

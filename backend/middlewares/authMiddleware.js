@@ -3,12 +3,20 @@ const User = require('../models/User');
 const Patient = require('../models/Patient');
 const Doctor = require('../models/Doctor');
 
+const tokenBlacklist = new Set();
+const blacklistToken = (token) => tokenBlacklist.add(token);
+
 const protect = async (req, res, next) => {
     let token;
 
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
             token = req.headers.authorization.split(' ')[1];
+            
+            if (tokenBlacklist.has(token)) {
+                return res.status(401).json({ success: false, message: 'Not authorized, token revoked' });
+            }
+
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'medsmart_secret_key');
 
             let user = await User.findByPk(decoded.id, { attributes: { exclude: ['password'] } });
@@ -25,7 +33,7 @@ const protect = async (req, res, next) => {
             }
 
             if (!user) {
-                return res.status(401).json({ message: 'Not authorized, user not found' });
+                return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
             }
 
             req.user = user;
@@ -34,11 +42,20 @@ const protect = async (req, res, next) => {
             next();
         } catch (error) {
             console.error('Auth middleware error:', error);
-            res.status(401).json({ message: 'Not authorized, token failed' });
+            res.status(401).json({ success: false, message: 'Not authorized, token failed' });
         }
     } else {
-        res.status(401).json({ message: 'Not authorized, no token' });
+        res.status(401).json({ success: false, message: 'Not authorized, no token' });
     }
 };
 
-module.exports = { protect };
+const requireRole = (...roles) => {
+    return (req, res, next) => {
+        if (!roles.includes(req.userRole)) {
+            return res.status(403).json({ success: false, message: 'Forbidden: Insufficient privileges' });
+        }
+        next();
+    };
+};
+
+module.exports = { protect, requireRole, blacklistToken };

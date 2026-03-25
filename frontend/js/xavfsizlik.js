@@ -254,6 +254,61 @@ class SecurityManager {
 // Global xavfsizlik obyekti
 const securityManager = new SecurityManager();
 
+// --- NEW TOKEN MANAGER LOGIC ---
+let currentAccessToken = null;
+
+const tokenManager = {
+    setAccessToken(token) { currentAccessToken = token; },
+    getAccessToken() { return currentAccessToken; },
+    getTokenExpiry(token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return new Date(payload.exp * 1000);
+        } catch (e) {
+            return new Date(0);
+        }
+    },
+    isTokenExpired(token) {
+        if (!token) return true;
+        return Date.now() >= this.getTokenExpiry(token).getTime();
+    },
+    willExpireSoon(token) {
+        if (!token) return true;
+        return (this.getTokenExpiry(token).getTime() - Date.now()) < 60000;
+    },
+    async refreshAccessToken() {
+        const refreshToken = localStorage.getItem('medsmart_refresh_token');
+        if (!refreshToken) {
+            secureLogout();
+            return false;
+        }
+        try {
+            const baseUrl = window.API_BASE_URL || '/api';
+            const response = await fetch(`${baseUrl}/users/refresh-token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refreshToken })
+            });
+            const data = await response.json();
+            
+            if (!response.ok) throw new Error(data.message);
+            
+            currentAccessToken = data.accessToken || data.token;
+            return true;
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            secureLogout();
+            window.location.href = '/'; 
+            return false;
+        }
+    }
+};
+
+window.addEventListener('unload', () => {
+    // Clear accessToken from memory on tab close
+    currentAccessToken = null;
+});
+
 // Login funksiyasi bilan xavfsizlik integratsiyasi
 async function secureLogin(username, password, rememberMe = false) {
     const cleanUsername = securityManager.sanitizeInput(username);
@@ -262,9 +317,9 @@ async function secureLogin(username, password, rememberMe = false) {
         throw new Error('Hisobingiz vaqtincha bloklangan. Iltimos, keyinroq urinib ko\'ring.');
     }
     
-    // Backendga login so'rovi yuborish
     try {
-        const response = await fetch('/api/users/login', {
+        const baseUrl = window.API_BASE_URL || '/api';
+        const response = await fetch(`${baseUrl}/users/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -279,11 +334,18 @@ async function secureLogin(username, password, rememberMe = false) {
             throw new Error(data.message || 'Login yoki parol noto\'g\'ri!');
         }
         
-        // Muvaffaqiyatli login
         securityManager.clearFailedAttempts(cleanUsername);
         securityManager.refreshSession(cleanUsername);
         
-        // Tokenni saqlash (backend JWT qaytarsa)
+        // Tokenlarni saqlash (NEW)
+        if (data.accessToken || data.token) {
+            tokenManager.setAccessToken(data.accessToken || data.token);
+        }
+        if (data.refreshToken) {
+            localStorage.setItem('medsmart_refresh_token', data.refreshToken);
+        }
+        
+        // Preserve backward compatibility
         if (data.token) {
             localStorage.setItem('medsmart_token', data.token);
         }
@@ -311,7 +373,10 @@ function secureLogout() {
     
     localStorage.removeItem('medsmart_session');
     localStorage.removeItem('medsmart_user');
+    localStorage.removeItem('medsmart_token');
+    localStorage.removeItem('medsmart_refresh_token');
     securityManager.activeTokens.clear();
+    tokenManager.setAccessToken(null);
     
     console.log('Foydalanuvchi xavfsiz chiqarildi');
 }
@@ -359,7 +424,9 @@ setInterval(() => {
 
 // Export qilish (brauzer va node muhiti uchun)
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { SecurityManager, securityManager, secureLogin, secureLogout };
+    module.exports = { SecurityManager, securityManager, secureLogin, secureLogout, tokenManager };
+} else {
+    window.tokenManager = tokenManager;
 }
 
 

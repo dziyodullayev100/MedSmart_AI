@@ -1,0 +1,121 @@
+{
+  "algorithm": "Apriori (mlxtend)",
+  "total_transactions": 545,
+  "unique_diseases": 16,
+  "min_support": 0.05,
+  "min_confidence": 0.3,
+  "total_rules_found": 12,
+  "top_10_rules_by_confidence": [
+    {
+      "antecedents": [
+        "Stroke"
+      ],
+      "consequents": [
+        "Hypertension"
+      ],
+      "confidence": 1.0,
+      "lift": 3.9781,
+      "support": 0.0624
+    },
+    {
+      "antecedents": [
+        "Heart Disease"
+      ],
+      "consequents": [
+        "Hypertension"
+      ],
+      "confidence": 0.9423,
+      "lift": 3.7486,
+      "support": 0.0899
+    },
+    {
+      "antecedents": [
+        "Gastritis"
+      ],
+      "consequents": [
+        "nan"
+      ],
+      "confidence": 0.9259,
+      "lift": 1.4799,
+      "support": 0.1376
+    },
+    {
+      "antecedents": [
+        "Influenza"
+      ],
+      "consequents": [
+        "nan"
+      ],
+      "confidence": 0.907,
+      "lift": 1.4496,
+      "support": 0.1431
+    },
+    {
+      "antecedents": [
+        "Allergy"
+      ],
+      "consequents": [
+        "nan"
+      ],
+      "confidence": 0.8687,
+      "lift": 1.3884,
+      "support": 0.1578
+    },
+    {
+      "antecedents": [
+        "Pneumonia"
+      ],
+      "consequents": [
+        "Bronchitis"
+      ],
+      "confidence": 0.7111,
+      "lift": 4.037,
+      "support": 0.0587
+    },
+    {
+      "antecedents": [
+        "Asthma"
+      ],
+      "consequents": [
+        "nan"
+      ],
+      "confidence": 0.5873,
+      "lift": 0.9386,
+      "support": 0.1358
+    },
+    {
+      "antecedents": [
+        "Bronchitis"
+      ],
+      "consequents": [
+        "nan"
+      ],
+      "confidence": 0.4792,
+      "lift": 0.7658,
+      "support": 0.0844
+    },
+    {
+      "antecedents": [
+        "Bronchitis"
+      ],
+      "consequents": [
+        "Asthma"
+      ],
+      "confidence": 0.4271,
+      "lift": 1.8473,
+      "support": 0.0752
+    },
+    {
+      "antecedents": [
+        "Hypertension"
+      ],
+      "consequents": [
+        "Heart Disease"
+      ],
+      "confidence": 0.3577,
+      "lift": 3.7486,
+      "support": 0.0899
+    }
+  ],
+  "trained_at": "2026-03-24T14:56:08.814313"
+}

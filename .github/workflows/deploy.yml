@@ -1,0 +1,22 @@
+name: Notify Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+    
+jobs:
+  notify-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 2
+    - name: List changed files
+      run: git diff --name-only HEAD^ HEAD
+    - name: Document Deployment Handover
+      run: |
+        echo "==========================================="
+        echo "🚀 DEPLOYMENT SUMMARY"
+        echo "Auto-Deploy to Render triggered via git push!"
+        echo "Note: Render.com handles actual rollout."
+        echo "==========================================="

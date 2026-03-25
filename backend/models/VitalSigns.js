@@ -59,7 +59,7 @@ const VitalSigns = sequelize.define('VitalSigns', {
     timestamps: true,  // Adds createdAt and updatedAt
     indexes: [
         { fields: ['patientId'] },
-        { fields: ['appointmentId'] }
+        { fields: ['recordedAt'] }
     ]
 });
 

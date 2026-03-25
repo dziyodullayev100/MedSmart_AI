@@ -53,7 +53,8 @@ const Appointment = sequelize.define('Appointment', {
     indexes: [
         { fields: ['patientId'] },
         { fields: ['doctorId'] },
-        { fields: ['serviceId'] }
+        { fields: ['date'] },
+        { fields: ['status'] }
     ]
 });
 

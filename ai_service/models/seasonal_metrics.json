@@ -1,0 +1,35 @@
+{
+  "model": "RandomForestClassifier",
+  "dataset_rows": 520,
+  "num_classes": 11,
+  "disease_classes": [
+    "Allergy",
+    "Asthma",
+    "Bronchitis",
+    "Diabetes",
+    "Gastritis",
+    "Heart Disease",
+    "Hypertension",
+    "Influenza",
+    "Obesity",
+    "Pneumonia",
+    "Stroke"
+  ],
+  "train_samples": 416,
+  "test_samples": 104,
+  "accuracy": 0.75,
+  "precision_weighted": 0.7322,
+  "recall_weighted": 0.75,
+  "f1_weighted": 0.7372,
+  "cv_5fold_scores": [
+    0.7308,
+    0.7404,
+    0.8173,
+    0.7788,
+    0.8077
+  ],
+  "cv_mean": 0.775,
+  "cv_std": 0.0347,
+  "n_estimators": 200,
+  "trained_at": "2026-03-24T17:13:51.070319"
+}

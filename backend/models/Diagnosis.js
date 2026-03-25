@@ -64,7 +64,8 @@ const Diagnosis = sequelize.define('Diagnosis', {
     timestamps: true,  // Adds createdAt and updatedAt automatically
     indexes: [
         { fields: ['patientId'] },
-        { fields: ['doctorId'] }
+        { fields: ['dateDiagnosed'] },
+        { fields: ['condition'] }
     ]
 });
 

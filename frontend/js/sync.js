@@ -8,52 +8,49 @@
  */
 
 const initSyncModule = () => {
-    // Hardcoded verification requested
-    console.log("SYNC LOADED");
-    alert("SYNC WORKING");
-
-    // 1. Environment Detection (Ishonaq ishlash muhitini aniqlash)
-    const isLocalhost = 
-        window.location.hostname === 'localhost' || 
-        window.location.hostname === '127.0.0.1' || 
+    // 1. Environment Detection
+    const isLocalhost =
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
         window.location.protocol === 'file:';
 
-    // 2. Core Service Registry (Skelable microservislar ulanmasi)
+    // 2. Core Service Registry
     const SERVICES = {
         BACKEND: {
             LOCAL: 'http://localhost:5000/api',
-            PROD: 'https://medsmart-backend.onrender.com/api' // Qat'iy manzil
+            PROD:  'https://medsmart-backend.onrender.com/api'
         },
         AI: {
-            LOCAL: 'http://localhost:8000/api',
-            PROD: 'https://medsmart-ai-service.onrender.com/api'
+            LOCAL: 'http://localhost:8000',
+            PROD:  'https://medsmart-ai-service.onrender.com'
         }
     };
 
-    // 3. Dynamic Assignment (Dinamik taqsimot)
-    const API_BASE_URL = isLocalhost ? SERVICES.BACKEND.LOCAL : SERVICES.BACKEND.PROD;
-    const AI_MODEL_URL = isLocalhost ? SERVICES.AI.LOCAL : SERVICES.AI.PROD;
+    // 3. Respect config.js if already loaded (avoids conflicts)
+    const API_BASE_URL = window.API_BASE_URL || (isLocalhost ? SERVICES.BACKEND.LOCAL : SERVICES.BACKEND.PROD);
+    const AI_MODEL_URL = (window.CONFIG && window.CONFIG.AI_SERVICE_URL) || (isLocalhost ? SERVICES.AI.LOCAL : SERVICES.AI.PROD);
 
-    // 🚨 4. Critical Defensive Check (Qat'iy himoya qatlami)
+    // 4. Critical defensive check
     if (!API_BASE_URL) {
-        console.error('❌ CRITICAL ERROR: API_BASE_URL ulana olmadi. Sync moduli bekor qilindi.');
-        return; // Sessiyani portlab ketishdan avval o'chiradi
+        console.error('❌ CRITICAL: API_BASE_URL could not be resolved. Sync module aborted.');
+        return;
     }
 
-    // 5. Global Export (Yagona ishonchli manba sifatida ro'yxatdan o'tkazish)
+    // 5. Global Export
     window.API_BASE_URL = API_BASE_URL;
     window.AI_MODEL_URL = AI_MODEL_URL;
 
-    // 6. Senior-Level Diagnostics (Yuqori darajadagi monitoring)
-    console.group('🌍 MedSmart Frontend Diagnostics');
-    console.log(`Environment: %c${isLocalhost ? 'LOCAL DEV' : 'PRODUCTION'}`, 'color: #00ff00; font-weight: bold;');
-    console.log(`API URL: %c${API_BASE_URL}`, 'color: #00ccff;');
-    console.log('✅ Sync muvaffaqiyatli ishga tushdi');
+    // 6. Diagnostics
+    console.group('🌍 MedSmart Sync Diagnostics');
+    console.log(`Environment : %c${isLocalhost ? 'LOCAL DEV' : 'PRODUCTION'}`, 'color:#00ff00;font-weight:bold');
+    console.log(`Backend URL : %c${API_BASE_URL}`, 'color:#00ccff');
+    console.log(`AI URL      : %c${AI_MODEL_URL}`, 'color:#f59e0b');
+    console.log('✅ Sync module ready');
     console.groupEnd();
 };
 
-// Modulni darhol ishga tushirish (IIFE o'rniga chaqiruv)
 initSyncModule();
+
 
 /**
  * Serverdan ma'lumotlarni yuklab olib LocalStorage'ga yozadi

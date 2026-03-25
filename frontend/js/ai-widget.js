@@ -1,10 +1,22 @@
-// Floating AI Widget for MedSmart
+// Floating AI Widget for MedSmart – upgraded with session context, emergency alerts, and metadata tags
 document.addEventListener('DOMContentLoaded', () => {
-  // Widget Container yaratish
+  // ── Session ID (UUID v4, persisted in localStorage) ──────────────────────
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = (Math.random() * 16) | 0;
+      return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    });
+  }
+  let sessionId = localStorage.getItem('medsmart_ai_session_id');
+  if (!sessionId) {
+    sessionId = generateUUID();
+    localStorage.setItem('medsmart_ai_session_id', sessionId);
+  }
+
+  // ── Widget Container ──────────────────────────────────────────────────────
   const widgetContainer = document.createElement('div');
   widgetContainer.id = 'medsmart-ai-widget';
-  
-  // Widget HTML & CSS (Ichiga o'rnatilgan)
+
   widgetContainer.innerHTML = `
     <style>
       #medsmart-ai-widget {
@@ -70,8 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
         gap: 15px;
       }
       .ai-chat-header-info .avatar {
-        width: 45px; height: 45px; border-radius: 50%; 
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+        width: 45px; height: 45px; border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
         border: 2px solid rgba(255,255,255,0.3);
       }
@@ -91,6 +103,57 @@ document.addEventListener('DOMContentLoaded', () => {
       .ai-msg { max-width: 82%; padding: 14px 18px; border-radius: 20px; font-size: 15px; line-height: 1.5; word-wrap: break-word; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
       .ai-msg-bot { background: rgba(255,255,255,0.95); border: 1px solid rgba(140, 158, 255, 0.2); align-self: flex-start; border-bottom-left-radius: 5px; color: #333;}
       .ai-msg-user { background: linear-gradient(90deg, #667eea, #764ba2); color: white; align-self: flex-end; border-bottom-right-radius: 5px; }
+      /* Emergency alert styling (JS-injected) */
+      .ai-msg-emergency {
+        background: linear-gradient(135deg, #ff1744, #d50000) !important;
+        border: 2px solid #ff6d00 !important;
+        color: white !important;
+        animation: emergencyPulse 1.5s ease-in-out infinite;
+      }
+      @keyframes emergencyPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(255, 23, 68, 0); }
+      }
+      /* Intent badge */
+      .ai-intent-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+        opacity: 0.85;
+      }
+      .badge-symptom_check { background: #e8f5e9; color: #2e7d32; }
+      .badge-emergency { background: #ffebee; color: #c62828; }
+      .badge-greeting { background: #e3f2fd; color: #1565c0; }
+      .badge-appointment { background: #f3e5f5; color: #6a1b9a; }
+      .badge-medication_info { background: #fff3e0; color: #e65100; }
+      .badge-general_info { background: #f5f5f5; color: #424242; }
+      /* Symptom tags */
+      .ai-symptom-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 8px;
+      }
+      .ai-symptom-tag {
+        display: inline-block;
+        background: rgba(102, 126, 234, 0.12);
+        color: #3949ab;
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        border-radius: 12px;
+        font-size: 11px;
+        padding: 2px 9px;
+        font-weight: 600;
+      }
+      .ai-symptom-tag.emergency-tag {
+        background: rgba(255, 23, 68, 0.12);
+        color: #c62828;
+        border-color: rgba(255, 23, 68, 0.3);
+      }
       .ai-chat-input-area {
         padding: 15px 20px;
         background: rgba(255,255,255,0.95);
@@ -110,20 +173,19 @@ document.addEventListener('DOMContentLoaded', () => {
         display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: transform 0.2s;
       }
       .ai-chat-input-area button:hover { transform: scale(1.1); }
-      
-      /* Dots animation for generic loading */
+      /* Typing indicator */
       .typing-indicator { display: flex; gap: 4px; padding: 5px 10px; }
       .typing-indicator span { width: 8px; height: 8px; background: #667eea; border-radius: 50%; animation: blink 1.4s infinite both; }
       .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
       .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
       @keyframes blink { 0% { opacity: 0.2; transform: scale(0.8); } 20% { opacity: 1; transform: scale(1); } 100% { opacity: 0.2; transform: scale(0.8); } }
     </style>
-    
+
     <!-- Dumaloq chaqiruv tugmasi -->
     <button class="ai-chat-btn" id="aiChatToggle">
       <i class="fas fa-robot"></i>
     </button>
-    
+
     <!-- Chat Oynasi -->
     <div class="ai-chat-window" id="aiChatWindow">
       <div class="ai-chat-header">
@@ -154,28 +216,75 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInput = document.getElementById('aiChatInput');
   const chatBody = document.getElementById('aiChatBody');
 
-  // Oynani ochish/yopish 
+  // ── Open / close window ───────────────────────────────────────────────────
   toggleBtn.addEventListener('click', () => {
     chatWindow.classList.toggle('open');
-    if (chatWindow.classList.contains('open')) {
-      chatInput.focus();
-    }
+    if (chatWindow.classList.contains('open')) chatInput.focus();
   });
-
   closeBtn.addEventListener('click', () => {
     chatWindow.classList.remove('open');
   });
 
-  // Xabarni UI ga joylash funksiyasi
+  // ── Append a plain message bubble ────────────────────────────────────────
   const appendMessage = (text, sender) => {
     const msgDiv = document.createElement('div');
     msgDiv.className = `ai-msg ${sender === 'user' ? 'ai-msg-user' : 'ai-msg-bot'}`;
     msgDiv.textContent = text;
     chatBody.appendChild(msgDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
+    return msgDiv;
   };
-  
-  // Kutish animatsiyasi
+
+  // ── Append a bot response with metadata (intent badge + symptom tags) ────
+  const appendBotResponse = (text, metadata) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'display:flex;flex-direction:column;align-self:flex-start;max-width:82%;gap:4px;';
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'ai-msg ai-msg-bot';
+
+    // Emergency override: apply red alert styling
+    const isEmergency = metadata && metadata.emergency === true;
+    if (isEmergency) {
+      msgDiv.classList.add('ai-msg-emergency');
+    }
+
+    // Intent badge (insert above message text)
+    if (metadata && metadata.intent) {
+      const badge = document.createElement('span');
+      badge.className = `ai-intent-badge badge-${metadata.intent}`;
+      badge.textContent = metadata.intent.replace('_', ' ');
+      msgDiv.appendChild(badge);
+      msgDiv.appendChild(document.createElement('br'));
+    }
+
+    // Message text node
+    const textNode = document.createTextNode(text);
+    msgDiv.appendChild(textNode);
+
+    wrapper.appendChild(msgDiv);
+
+    // Symptom tags (rendered below the bubble)
+    const symptoms = metadata && Array.isArray(metadata.symptoms_detected)
+      ? metadata.symptoms_detected : [];
+    if (symptoms.length > 0) {
+      const tagsDiv = document.createElement('div');
+      tagsDiv.className = 'ai-symptom-tags';
+      symptoms.forEach(sym => {
+        const tag = document.createElement('span');
+        tag.className = `ai-symptom-tag${isEmergency ? ' emergency-tag' : ''}`;
+        tag.textContent = sym;
+        tagsDiv.appendChild(tag);
+      });
+      wrapper.appendChild(tagsDiv);
+    }
+
+    chatBody.appendChild(wrapper);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    return wrapper;
+  };
+
+  // ── Typing indicator ──────────────────────────────────────────────────────
   const showTypingIndicator = () => {
     const msgDiv = document.createElement('div');
     msgDiv.className = 'ai-msg ai-msg-bot typing';
@@ -184,58 +293,66 @@ document.addEventListener('DOMContentLoaded', () => {
     chatBody.appendChild(msgDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
   };
-  
   const removeTypingIndicator = () => {
     const el = document.getElementById('typing-elem');
-    if(el) el.remove();
+    if (el) el.remove();
+  };
+
+  // ── Determine API base URL (supports local and production) ───────────────
+  function getApiBase() {
+    if (typeof window.API_BASE_URL === 'string' && window.API_BASE_URL) {
+      return window.API_BASE_URL;
+    }
+    const hostname = window.location.hostname;
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1'
+      || window.location.protocol === 'file:';
+    return isLocal
+      ? 'http://localhost:5000/api'
+      : 'https://med-smart-backend.onrender.com/api';
   }
 
-  // Jo'natish jarayoni
+  // ── Send handler: calls /api/ai/chat with session_id ─────────────────────
   const handleSend = async () => {
     const text = chatInput.value.trim();
-    if(!text) return;
-    
+    if (!text) return;
+
     appendMessage(text, 'user');
     chatInput.value = '';
-    
     showTypingIndicator();
 
-    // Keyinchalik /api/ai/disease-progression va /api/ai/seasonal-prediction ga so'rov jo'natish:
-    setTimeout(async () => {
+    try {
+      const baseUrl = getApiBase();
+      const res = await fetch(`${baseUrl}/ai/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          session_id: sessionId,
+        }),
+      });
+
       removeTypingIndicator();
-      let response = "Tibbiy tarixingiz tahlil qilinmoqda, natijani tez orada etkazaman.";
-      
-      try {
-        if(text.toLowerCase().includes('bashorat') || text.toLowerCase().includes('kasallik')) {
-           // Asl API orqali test qilish 
-           /* 
-           // Fallback if window.API_BASE_URL is missing
-           const baseUrl = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:' ? 'http://localhost:5000/api' : 'https://med-smart-backend.onrender.com/api');
-           
-           const req = await fetch(`${baseUrl}/ai/disease-progression`, {
-               // body params
-           });
-           const data = await req.json();
-           response = data.message || "Tahlil natijalari tayyor";
-           */
-           response = "Bashorat natijasi: Sizning tibbiy tarixingiz asosida qish mavsumida ehtiyotkorligingizni oshirish tavsiya etiladi.";
-        } else if(text.toLowerCase().includes('salom')) {
-          response = "Assalomu alaykum! Sizga qanday yordam ko'rsata olaman?";
-        } else if(text.toLowerCase().includes('rahmat')) {
-          response = "Sog' bo'ling! MedSmart har doim yordamga shay.";
-        } else {
-             response = "Sizning xabaringiz tizimga qayd etildi. To'liq tibbiy xizmat uchun xizmatlar bo'limidan foydalaning.";
-        }
-      } catch (err) {
-        response = "Serverda vaqtinchalik muammo mavjud.";
+
+      if (!res.ok) {
+        appendMessage('Serverda xatolik yuz berdi. Iltimos qayta urinib ko\'ring.', 'bot');
+        return;
       }
-      
-      appendMessage(response, 'bot');
-    }, 1200);
+
+      const data = await res.json();
+      const reply = data.reply || 'Javob olishda xatolik yuz berdi.';
+      const metadata = data.metadata || null;
+
+      appendBotResponse(reply, metadata);
+
+    } catch (err) {
+      removeTypingIndicator();
+      appendMessage('Serverga ulanib bo\'lmadi. Internet aloqangizni tekshiring.', 'bot');
+      console.error('[MedSmart AI Widget] Fetch error:', err);
+    }
   };
 
   sendBtn.addEventListener('click', handleSend);
-  chatInput.addEventListener('keypress', (e) => {
-    if(e.key === 'Enter') handleSend();
+  chatInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') handleSend();
   });
 });

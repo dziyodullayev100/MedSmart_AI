@@ -1,0 +1,102 @@
+================================================================================
+            MEDSMART0: LOYIHA TO'LIQ TAHLILI VA BARCHA VAZIFALAR
+================================================================================
+Sana: 2026-03-24
+Tahlilchi: Antigravity AI
+
+Ushbu hujjat MedSmart0 loyihasining barcha qismlarini (Frontend, Backend, AI 
+Service va boshqa yordamchi fayllar) chuqur tahlilini va loyihadagi barcha 
+vazifalarni o'z ichiga oladi.
+
+--------------------------------------------------------------------------------
+1. LOYIHA MAQSADI VA UMUMIY TAVSIFI
+--------------------------------------------------------------------------------
+MedSmart0 - bu tibbiyot muassasalari uchun mo'ljallangan kompleks boshqaruv 
+tizimi. Loyiha nafaqat ma'lumotlarni saqlash, balki sun'iy intellekt (AI) 
+yordamida bemorlar salomatligini bashorat qilish imkoniyatiga ham ega.
+
+--------------------------------------------------------------------------------
+2. ASOSIY BO'LMALAR (CORE SERVICES)
+--------------------------------------------------------------------------------
+- FRONTEND: Foydalanuvchi interfeysi (HTML, CSS, JS). Admin va Bemorlar uchun 
+  alohida panellar mavjud.
+- BACKEND: Node.js/Express asosidagi server. Ma'lumotlar bazasi (SQLite) bilan 
+  ishlaydi va API endpointlarini taqdim etadi.
+- AI SERVICE: Python/FastAPI asosidagi servis. Mashinali o'rganish (ML) modellari 
+  yordamida kasalliklarni bashorat qiladi.
+
+--------------------------------------------------------------------------------
+3. YORDAMCHI PAPKALAR VA FAYLLAR TAHLILI (CHUQUR DARADA)
+--------------------------------------------------------------------------------
+Quyidagi fayllar loyihaning barqaror ishlashi, hujjatlashtirilishi va 
+boshqarilishini ta'minlaydi:
+
+A) HUJJATLASHTIRISH VA JURNALLAR:
+- ISHLAR_JURNALI.txt: Loyihaning yaratilish tarixi. Har bir qilingan ish (fayl 
+  ko'chirish, model yaratish, test qilish) xronologik tartibda yozilgan.
+- LOYIHA_TAHLILI.txt: Loyihaning arxitekturaviy tuzilishi, fayllar daraxti va 
+  kelajakdagi rivojlanish rejalarini (Roadmap) belgilaydi.
+- VS_CODE_TERMINAL_QOLLANMASI.txt: Dasturchi yoki foydalanuvchi uchun terminal 
+  bilan ishlash bo'yicha to'liq qo'llanma (Node.js, Git, CMD komandalari).
+- MED_SMART_FINAL_COMPLETE_ARCHIVE.txt: Boshqa AI tizimlari uchun "topshirish 
+  hujjati". Loyihaning texnik standarti (ISO 25010) va sifat ko'rsatkichlarini 
+  bayon qiladi.
+- README.md: Loyihani tezkor ishga tushirish va o'rnatish bo'yicha asosiy qo'llanma.
+
+B) ISHGA TUSHIRISH SKRIPTLARI (ORCHESTRATION):
+- START_MEDSMART.bat: Loyihaning eng muhim skripti. U bir vaqtning o'zida ham 
+  Python AI servisni, ham Node.js backendni ishga tushiradi.
+- start.bat: Faqat Node.js backendni ishga tushirish uchun soddalashtirilgan skript.
+
+V) TEXNIK VA KONFIGURATSIYA FAYLLARI:
+- refactor.js: Avtomatlashtirilgan utilita. Backend kontrollerlaridagi xatolarni 
+  boshqarish (Error Handling) kodini yangilash uchun ishlatiladi.
+- pyrightconfig.json & .pyre_configuration: Python kodini tahlil qilish va 
+  tipizatsiyasini tekshirish uchun sozlamalar.
+- .venv/: Python muhiti, barcha kerakli kutubxonalar (FastAPI, NumPy, Joblib) 
+  shu yerda saqlanadi.
+- .vscode/: Visual Studio Code muhiti uchun maxsus sozlamalar va debug konfiguratsiyasi.
+- .gitignore: Git tizimi tomonidan kuzatib borilmaydigan fayllar ro'yxati.
+
+--------------------------------------------------------------------------------
+4. LOYIHADAGI BARCHA VAZIFALAR (FUNCTIONAL RESPONSIBILITIES)
+--------------------------------------------------------------------------------
+Loyiha quyidagi asosiy vazifalarni bajaradi:
+
+1. Bemorlarni boshqarish (Patient Management):
+   - Ro'yxatdan o'tish va profil yaratish.
+   - Tibbiy tarixni saqlash.
+
+2. Shifokorlar boshqaruvi (Doctor Management):
+   - Shifokorlar ro'yxatini shakllantirish.
+   - Ish jadvalini (schedule) boshqarish.
+
+3. Navbatlar va Uchrashuvlar (Appointments):
+   - Shifokor qabuliga yozilish.
+   - Uchrashuv holatini (scheduled, completed, cancelled) o'zgartirish.
+
+4. Xizmatlar katalogi (Services):
+   - Klinikadagi xizmatlar va ularning narxlari ro'yxati.
+
+5. Sun'iy Intellekt Tahlili (AI Diagnostics):
+   - Mavsumiy kasalliklarni bashorat qilish.
+   - Bemor ma'lumotlari asosida kasallik rivojlanishini tahlil qilish.
+
+6. Sinxronizatsiya (Data Synchronization):
+   - Offline qilingan ishlarni serverga yuklash.
+   - Ma'lumotlarni turli qurilmalar o'rtasida yangilab turish.
+
+7. Xavfsizlik va Nazorat:
+   - Parollarni xeshlash (bcrypt).
+   - Foydalanuvchi huquqlarini tekshirish (auth).
+
+8. Tizim Monitoringi va Loglash:
+   - ISHLAR_JURNALI orqali barcha o'zgarishlarni kuzatib borish.
+
+--------------------------------------------------------------------------------
+XULOSA:
+MedSmart0 loyihasi nafaqat koddan, balki uni tushuntiruvchi juda boy 
+dokumentatsiyadan iborat. Root papkadagi barcha yordamchi fayllar tizimning 
+mustahkamligini va uni boshqa dasturchillar tomonidan oson o'zlashtirilishini 
+ta'minlaydi.
+================================================================================

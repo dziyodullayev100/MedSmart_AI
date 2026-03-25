@@ -141,6 +141,97 @@
             color: #6b7280;
         }
 
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .chat-message {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .chat-message.user {
+            background: var(--emerald-soft);
+            color: var(--emerald-dark);
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.ai {
+            background: white;
+            color: var(--text);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: none;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--emerald);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .chat-btn {
+            background: var(--emerald);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-btn:hover { background: var(--emerald-dark); }
+        .chat-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+        
+        .chat-btn-clear {
+            background: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 8px 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            align-self: flex-end;
+        }
+        .chat-btn-clear:hover { background: #e5e7eb; }
+
         @media (max-width: 600px) {
             .hero h1 { font-size: 1.6rem; }
             .container { margin: 15px; }
@@ -162,6 +253,30 @@
             <p>Eng ilg'or sun'iy intellekt tahlili yordamida shakllantirilgan.</p>
         </section>
 
+        <!-- YANTA SUN'IY INTELLEKT CHAT KARTASI -->
+        <div id="ai-chat-card" class="card" style="border-top-color: #3b82f6;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="color: #1d4ed8; margin: 0;">🤖 AI Diagnostika (Konsultatsiya)</h2>
+                <button id="ai-clear-btn" class="chat-btn-clear">Xabarlarni tozalash</button>
+            </div>
+            
+            <div id="ai-chat-container" class="chat-container">
+                <div class="chat-message ai">
+                    Assalomu alaykum! Men MedSmart sun'iy intellekt tizimiman. Sizni nima bezovta qilyapti? Belgilaringiz haqida batafsil yozing.
+                </div>
+            </div>
+
+            <form id="ai-chat-form" class="chat-input-wrapper">
+                <input type="text" id="ai-chat-input" class="chat-input" placeholder="Simptomlaringizni kiriting..." required autocomplete="off">
+                <button type="submit" id="ai-submit-btn" class="chat-btn">
+                    Yuborish
+                </button>
+            </form>
+            <div style="font-size: 0.8rem; color: #6b7280; margin-top: 8px; text-align: center;">
+                * Eslatma: AI maslahatlari shifokor ko'rigini o'rnini bosa olmaydi. Kelajakda bu tizim bevosita FastAPI AI servisi bilan ishlaydi.
+            </div>
+        </div>
+
         <div id="seasonal-card" class="card">
             <h2>📅 Mavsumiy Kasalliklar Bashorati</h2>
             <div id="seasonal-content">
@@ -177,33 +292,121 @@
         </div>
     </main>
 
+    <script src="js/config.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/apiClient.js"></script>
     <script>
+        'use strict';
         async function loadAI() {
             // Login ma'lumotlarini olish
             const userData = JSON.parse(localStorage.getItem('medsmart_user') || '{}');
             const patientId = userData.id || '1'; // Agar login qilmagan bo'lsa default '1'
             const token = localStorage.getItem('token') || '';
+            const headers = { 'Authorization': `Bearer ${token}` };
 
             try {
-                // Seasonal API
-                const sRes = await fetch('/api/ai/seasonal-prediction', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ patientId })
-                });
-                const sData = await sRes.json();
-                renderSeasonal(sData);
+                // Seasonal API replaced using apiClient
+                const sData = await apiClient.post('/ai/seasonal-prediction', { patientId }, headers, true);
+                if (sData) renderSeasonal(sData);
+                else renderSeasonal({ message: true, error: "Xatolik" });
 
-                // Progression API
-                const pRes = await fetch('/api/ai/disease-progression', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ patientId })
-                });
-                const pData = await pRes.json();
-                renderProgression(pData);
+                // Progression API replaced using apiClient
+                const pData = await apiClient.post('/ai/disease-progression', { patientId }, headers, true);
+                if (pData) renderProgression(pData);
+                else renderProgression({ message: true, error: "Xatolik" });
             } catch (err) {
-                console.error(err);
+                console.error("AI yuklashda xatolik:", err);
+            }
+        }
+
+        // --- AI DIAGNOSTIC CHAT LOGIC ---
+        const chatForm = document.getElementById('ai-chat-form');
+        const chatInput = document.getElementById('ai-chat-input');
+        const chatContainer = document.getElementById('ai-chat-container');
+        const submitBtn = document.getElementById('ai-submit-btn');
+        const clearBtn = document.getElementById('ai-clear-btn');
+
+        function appendMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-message ${sender}`;
+            msgDiv.innerText = text;
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // ── localStorage persistence ──────────────────────────────────
+        const CHAT_STORAGE_KEY = 'medsmart_ai_chat_history';
+
+        function saveChatHistory() {
+            const messages = [...chatContainer.querySelectorAll('.chat-message')].map(el => ({
+                sender: el.classList.contains('user') ? 'user' : 'ai',
+                text: el.innerText
+            }));
+            try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages)); } catch (_) {}
+        }
+
+        function loadChatHistory() {
+            try {
+                const stored = JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY) || 'null');
+                if (Array.isArray(stored) && stored.length > 0) {
+                    chatContainer.innerHTML = '';
+                    stored.forEach(m => appendMessage(m.text, m.sender));
+                }
+            } catch (_) {}
+        }
+
+        async function handleChatSubmit(e) {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            appendMessage(message, 'user');
+            chatInput.value = '';
+            
+            // Disable button during loading
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Kutilmoqda...';
+
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-message ai';
+            typingDiv.id = 'ai-typing-indicator';
+            typingDiv.innerText = 'AI yozmoqda...';
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                const token = localStorage.getItem('token') || '';
+                const headers = { 'Authorization': `Bearer ${token}` };
+                
+                // FUTURE_UPGRADE_NOTE: /api/ai/ask endpoint
+                // When switching to FastAPI, it will be transparent if synced via config.js/sync.js/apiClient.js
+                // The backend Node server will act as a proxy or we can update API_BASE_URL.
+                const response = await apiClient.post('/ai/ask', { message }, headers);
+                
+                // Remove typing
+                const indicator = document.getElementById('ai-typing-indicator');
+                if (indicator) indicator.remove();
+
+                if (response && response.reply) {
+                    appendMessage(response.reply, 'ai');
+                } else {
+                    if (!response) {
+                        appendMessage("Uzr, xatolik yuz berdi. Iltimos qayta urinib ko'ring (Server yoki Tarmoq muammosi).", 'ai');
+                    } else {
+                        appendMessage("Noma'lum javob xatosi.", 'ai');
+                    }
+                }
+                saveChatHistory();
+            } catch (error) {
+                const indicator = document.getElementById('ai-typing-indicator');
+                if (indicator) indicator.remove();
+                appendMessage("Tizimda xatolik yuz berdi. " + error.message, 'ai');
+            } finally {
+                // Always stop loading in finally
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Yuborish';
             }
         }
 
@@ -254,6 +457,25 @@
             container.innerHTML = html;
         }
 
+        // ── CHAT: Bind event listeners after DOM is ready ──────────────────
+        chatForm.addEventListener('submit', handleChatSubmit);
+
+        clearBtn.addEventListener('click', () => {
+            chatContainer.innerHTML = '<div class="chat-message ai">Assalomu alaykum! Men MedSmart sun\'iy intellekt tizimiman. Sizni nima bezovta qilyapti? Belgilaringiz haqida batafsil yozing.</div>';
+            try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch (_) {}
+            chatInput.focus();
+        });
+
+        // Allow Enter key to submit (but Shift+Enter for newline)
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!submitBtn.disabled) chatForm.requestSubmit();
+            }
+        });
+
+        // ── Load AI prediction cards on page init ────────────────────
+        loadChatHistory();
         loadAI();
     </script>
 </body>
