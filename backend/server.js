@@ -51,28 +51,28 @@ applyProductionConfig(app);
 
 // ─── Rate limiters ────────────────────────────────────────────────────────────
 
-/** General API: 100 requests per 15 minutes per IP */
+/** General API: 1500 requests per 15 minutes per IP (Safe for hospital WiFi) */
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 1500,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Too many requests from this IP. Please try again in 15 minutes.' }
 });
 
-/** Auth endpoints: 10 requests per 15 minutes per IP */
+/** Auth endpoints: 50 requests per 15 minutes per IP (Allows full staff login) */
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 50,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Too many login/register attempts. Please try again in 15 minutes.' }
 });
 
-/** AI endpoints: 20 requests per 15 minutes per IP */
+/** AI endpoints: 200 requests per 15 minutes per IP */
 const aiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+    max: 200,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'AI request limit reached. Please try again in 15 minutes.' }
