@@ -298,19 +298,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) el.remove();
   };
 
-  // ── Determine API base URL (supports local and production) ───────────────
-  function getApiBase() {
-    if (typeof window.API_BASE_URL === 'string' && window.API_BASE_URL) {
-      return window.API_BASE_URL;
-    }
-    const hostname = window.location.hostname;
-    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1'
-      || window.location.protocol === 'file:';
-    return isLocal
-      ? 'http://localhost:5000/api'
-      : 'https://med-smart-backend.onrender.com/api';
-  }
-
   // ── Send handler: calls /api/ai/chat with session_id ─────────────────────
   const handleSend = async () => {
     const text = chatInput.value.trim();
@@ -320,25 +307,29 @@ document.addEventListener('DOMContentLoaded', () => {
     chatInput.value = '';
     showTypingIndicator();
 
+    if (!window.apiClient) {
+      removeTypingIndicator();
+      console.error('[MedSmart AI Widget] apiClient mavjud emas. Skriptlar to\'g\'ri ulanganini tekshiring.');
+      appendMessage('Tizim sozlamalarida xatolik yuz berdi.', 'bot');
+      return;
+    }
+
     try {
-      const baseUrl = getApiBase();
-      const res = await fetch(`${baseUrl}/ai/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          session_id: sessionId,
-        }),
-      });
+      // 🚀 Global apiClient ishlatamiz. 'true' argumenti orqali Global Spinner'ni o'chiramiz,
+      // chunki widget'ning o'zida ".typing-indicator" nuqtali animatsiyasi bor!
+      const data = await window.apiClient.post('/ai/chat', {
+        message: text,
+        session_id: sessionId,
+      }, {}, true);
 
       removeTypingIndicator();
 
-      if (!res.ok) {
-        appendMessage('Serverda xatolik yuz berdi. Iltimos qayta urinib ko\'ring.', 'bot');
+      if (!data) {
+        // apiClient server xato bersa (500) yoki timeout bo'lsa darhol 'null' qaytaradi
+        appendMessage('Kechirasiz, sun\'iy intellekt xizmati uxlab qolgan yoki javob bermayapti (Timeout). Iltimos, qayta urinib ko\'ring.', 'bot');
         return;
       }
 
-      const data = await res.json();
       const reply = data.reply || 'Javob olishda xatolik yuz berdi.';
       const metadata = data.metadata || null;
 
@@ -346,8 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       removeTypingIndicator();
-      appendMessage('Serverga ulanib bo\'lmadi. Internet aloqangizni tekshiring.', 'bot');
-      console.error('[MedSmart AI Widget] Fetch error:', err);
+      appendMessage('Internet tarmog\'i uzildi yoki server ishlamayapti.', 'bot');
+      console.error('[MedSmart AI Widget] Global Request error:', err);
     }
   };
 
