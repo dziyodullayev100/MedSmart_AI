@@ -36,4 +36,23 @@
         `%c[MedSmart Config] ENV: ${window.CONFIG.ENV} | API: ${BACKEND_URL}`,
         'color: #10b981; font-weight: bold;'
     );
+
+    // ─── Global Fetch Interceptor (Security & Synchronization) ──────
+    // Automatically heals legacy code calling "fetch('/api/...')" or "localhost"
+    if (!window.originalFetch) {
+        window.originalFetch = window.fetch;
+        window.fetch = async function(url, options) {
+            if (typeof url === 'string') {
+                // 1. Kill any hardcoded localhosts
+                url = url.replace('http://localhost:5000', BACKEND_URL.replace('/api', ''));
+                url = url.replace('http://localhost:8000', AI_SERVICE_URL);
+
+                // 2. Fix relative /api/ paths bypassing cross-origin
+                if (url.startsWith('/api/')) {
+                    url = BACKEND_URL + url.substring(4);
+                }
+            }
+            return window.originalFetch(url, options);
+        };
+    }
 })();

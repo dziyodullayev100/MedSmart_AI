@@ -131,50 +131,33 @@ app.use('/api/demo', demoRoutes);
 
 const axios = require('axios');
 app.get('/api/health/full', async (req, res) => {
+    const health = {
+        backend: 'ok',
+        database: 'ok',
+        ai: 'ok'
+    };
+
+    // 1. Check PostgreSQL Database Connection
     try {
-        const start = Date.now();
-        await sequelize.query('SELECT 1');
-        const dbTime = Date.now() - start;
-
-        let aiStatus = 'down', aiTime = 0;
-        try {
-            const aiStart = Date.now();
-            await axios.get(`${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/health`, { timeout: 3000 });
-            aiTime = Date.now() - aiStart;
-            aiStatus = 'healthy';
-        } catch (e) {
-            aiStatus = 'down';
-        }
-
-        const counts = {
-            totalPatients: await Patient.count(),
-            totalDoctors: await Doctor.count(),
-            totalAppointments: await Appointment.count(),
-            totalPredictions: await AIPrediction.count(),
-            todayAppointments: await Appointment.count({
-                where: { date: new Date().toISOString().split('T')[0] }
-            })
-        };
-
-        const backupsDir = path.join(__dirname, 'data', 'backups');
-        const backupCount = fs.existsSync(backupsDir) ? fs.readdirSync(backupsDir).length : 0;
-        
-        const status = aiStatus === 'healthy' && dbTime < 1000 ? 'healthy' : 'degraded';
-
-        res.json({
-            status,
-            timestamp: new Date().toISOString(),
-            services: {
-                database: { status: 'healthy', responseTimeMs: dbTime, tableCount: 11 },
-                aiService: { status: aiStatus, responseTimeMs: aiTime, modelsLoaded: 3 },
-                backup: { lastBackupTime: new Date().toISOString(), backupCount }
-            },
-            stats: counts,
-            uptime: Math.floor(process.uptime())
-        });
-    } catch (e) {
-         res.status(500).json({ status: 'down', error: e.message });
+        await sequelize.authenticate(); // More standard than SELECT 1
+    } catch (error) {
+        logger.error('[SRE Monitor] Database connection failed', error);
+        health.database = 'down';
     }
+
+    // 2. Check Python FastAPI AI Service
+    try {
+        const aiUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+        // 4 sec timeout so monitoring doesn't hang indefinitely
+        await axios.get(`${aiUrl}/health`, { timeout: 4000 }); 
+    } catch (error) {
+        logger.error('[SRE Monitor] AI Service is unreachable', error.message);
+        health.ai = 'down';
+    }
+
+    // 3. Return Combined Status (503 if any dependency is down)
+    const isHealthy = health.database === 'ok' && health.ai === 'ok';
+    res.status(isHealthy ? 200 : 503).json(health);
 });
 
 // Admin endpoints
