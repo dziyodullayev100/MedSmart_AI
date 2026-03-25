@@ -121,7 +121,7 @@ exports.getSeasonalPrediction = async (req, res, next) => {
             const aiResponse = await axios.post(
                 `${AI_SERVICE_URL}/ai/seasonal-prediction`,
                 inputPayload,
-                { timeout: 10000 }
+                { timeout: 25000 }
             );
             aiResult = aiResponse.data;
         } catch (aiError) {
@@ -251,7 +251,7 @@ exports.getDiseaseProgression = async (req, res, next) => {
             const aiResponse = await axios.post(
                 `${AI_SERVICE_URL}/ai/disease-progression`,
                 inputPayload,
-                { timeout: 10000 }
+                { timeout: 25000 }
             );
             aiResult = aiResponse.data;
         } catch (aiError) {
@@ -408,7 +408,7 @@ exports.chatAI = async (req, res, next) => {
             const aiResponse = await axios.post(
                 `${AI_SERVICE_URL}/ai/chat`,
                 payload,
-                { timeout: 10000 }
+                { timeout: 25000 }
             );
             aiResult = aiResponse.data;
         } catch (aiError) {
