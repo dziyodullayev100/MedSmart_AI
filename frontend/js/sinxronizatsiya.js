@@ -243,7 +243,7 @@ class DataSync {
              if (method === 'POST') return window.apiClient.post(endpoint, JSON.parse(options.body), options.headers, true);
         }
 
-        const baseUrl = window.API_BASE_URL || '/api';
+        const baseUrl = window.API_BASE_URL || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:5000/api' : 'https://medsmart-backend.onrender.com/api');
         const url = `${baseUrl}${endpoint}`;
         
         try {

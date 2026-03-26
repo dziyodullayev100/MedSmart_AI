@@ -283,7 +283,7 @@ const tokenManager = {
             return false;
         }
         try {
-            const baseUrl = window.API_BASE_URL || '/api';
+            const baseUrl = window.API_BASE_URL || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:5000/api' : 'https://medsmart-backend.onrender.com/api');
             const response = await fetch(`${baseUrl}/users/refresh-token`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -318,7 +318,7 @@ async function secureLogin(username, password, rememberMe = false) {
     }
     
     try {
-        const baseUrl = window.API_BASE_URL || '/api';
+        const baseUrl = window.API_BASE_URL || ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:5000/api' : 'https://medsmart-backend.onrender.com/api');
         const response = await fetch(`${baseUrl}/users/login`, {
             method: 'POST',
             headers: {
