@@ -380,10 +380,8 @@
                 const token = localStorage.getItem('token') || '';
                 const headers = { 'Authorization': `Bearer ${token}` };
                 
-                // FUTURE_UPGRADE_NOTE: /api/ai/ask endpoint
-                // When switching to FastAPI, it will be transparent if synced via config.js/sync.js/apiClient.js
-                // The backend Node server will act as a proxy or we can update API_BASE_URL.
-                const response = await apiClient.post('/ai/ask', { message }, headers);
+                // Upgraded to connect directly to the real FastAPI Python service
+                const response = await apiClient.post('/ai/chat', { message }, headers);
                 
                 // Remove typing
                 const indicator = document.getElementById('ai-typing-indicator');
