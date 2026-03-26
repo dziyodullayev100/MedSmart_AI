@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="uz">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +30,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             border-bottom: 3px solid var(--emerald);
             position: sticky;
             top: 0;
@@ -45,7 +46,10 @@
             gap: 12px;
         }
 
-        .logo img { width: 35px; filter: hue-rotate(90deg); }
+        .logo img {
+            width: 35px;
+            filter: hue-rotate(90deg);
+        }
 
         .back-btn {
             background: var(--emerald-soft);
@@ -58,7 +62,10 @@
             border: 1px solid var(--emerald);
         }
 
-        .back-btn:hover { background: var(--emerald); color: white; }
+        .back-btn:hover {
+            background: var(--emerald);
+            color: white;
+        }
 
         .container {
             max-width: 800px;
@@ -76,15 +83,24 @@
             margin-bottom: 30px;
         }
 
-        .hero h1 { margin: 0; font-size: 1.6rem; }
-        .hero p { opacity: 0.9; margin-top: 5px; font-size: 0.9rem; font-weight: 300; }
+        .hero h1 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+
+        .hero p {
+            opacity: 0.9;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
 
         .card {
             background: white;
             padding: 20px;
             border-radius: 16px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.02);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.02);
             border-top: 6px solid var(--emerald);
         }
 
@@ -175,7 +191,7 @@
             align-self: flex-start;
             border-bottom-left-radius: 4px;
             border: 1px solid #e5e7eb;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
         }
 
         .chat-input-wrapper {
@@ -214,9 +230,15 @@
             justify-content: center;
         }
 
-        .chat-btn:hover { background: var(--emerald-dark); }
-        .chat-btn:disabled { background: #9ca3af; cursor: not-allowed; }
-        
+        .chat-btn:hover {
+            background: var(--emerald-dark);
+        }
+
+        .chat-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
         .chat-btn-clear {
             background: #f3f4f6;
             color: #4b5563;
@@ -230,14 +252,23 @@
             margin-top: 10px;
             align-self: flex-end;
         }
-        .chat-btn-clear:hover { background: #e5e7eb; }
+
+        .chat-btn-clear:hover {
+            background: #e5e7eb;
+        }
 
         @media (max-width: 600px) {
-            .hero h1 { font-size: 1.6rem; }
-            .container { margin: 15px; }
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+
+            .container {
+                margin: 15px;
+            }
         }
     </style>
 </head>
+
 <body>
     <header class="header">
         <div class="logo">
@@ -259,21 +290,24 @@
                 <h2 style="color: #1d4ed8; margin: 0;">🤖 AI Diagnostika (Konsultatsiya)</h2>
                 <button id="ai-clear-btn" class="chat-btn-clear">Xabarlarni tozalash</button>
             </div>
-            
+
             <div id="ai-chat-container" class="chat-container">
                 <div class="chat-message ai">
-                    Assalomu alaykum! Men MedSmart sun'iy intellekt tizimiman. Sizni nima bezovta qilyapti? Belgilaringiz haqida batafsil yozing.
+                    Assalomu alaykum! Men MedSmart sun'iy intellekt tizimiman. Sizni nima bezovta qilyapti?
+                    Belgilaringiz haqida batafsil yozing.
                 </div>
             </div>
 
             <form id="ai-chat-form" class="chat-input-wrapper">
-                <input type="text" id="ai-chat-input" class="chat-input" placeholder="Simptomlaringizni kiriting..." required autocomplete="off">
+                <input type="text" id="ai-chat-input" class="chat-input" placeholder="Simptomlaringizni kiriting..."
+                    required autocomplete="off">
                 <button type="submit" id="ai-submit-btn" class="chat-btn">
                     Yuborish
                 </button>
             </form>
             <div style="font-size: 0.8rem; color: #6b7280; margin-top: 8px; text-align: center;">
-                * Eslatma: AI maslahatlari shifokor ko'rigini o'rnini bosa olmaydi. Kelajakda bu tizim bevosita FastAPI AI servisi bilan ishlaydi.
+                * Eslatma: AI maslahatlari shifokor ko'rigini o'rnini bosa olmaydi. Kelajakda bu tizim bevosita FastAPI
+                AI servisi bilan ishlaydi.
             </div>
         </div>
 
@@ -342,7 +376,7 @@
                 sender: el.classList.contains('user') ? 'user' : 'ai',
                 text: el.innerText
             }));
-            try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages)); } catch (_) {}
+            try { localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages)); } catch (_) { }
         }
 
         function loadChatHistory() {
@@ -352,7 +386,7 @@
                     chatContainer.innerHTML = '';
                     stored.forEach(m => appendMessage(m.text, m.sender));
                 }
-            } catch (_) {}
+            } catch (_) { }
         }
 
         async function handleChatSubmit(e) {
@@ -363,7 +397,7 @@
             // Add user message
             appendMessage(message, 'user');
             chatInput.value = '';
-            
+
             // Disable button during loading
             submitBtn.disabled = true;
             submitBtn.innerText = 'Kutilmoqda...';
@@ -379,10 +413,10 @@
             try {
                 const token = localStorage.getItem('token') || '';
                 const headers = { 'Authorization': `Bearer ${token}` };
-                
+
                 // Upgraded to connect directly to the real FastAPI Python service
                 const response = await apiClient.post('/ai/chat', { message }, headers);
-                
+
                 // Remove typing
                 const indicator = document.getElementById('ai-typing-indicator');
                 if (indicator) indicator.remove();
@@ -414,7 +448,7 @@
 
             const forecast = data["Patient Forecast"];
             let html = `<div class="history-badge">Hozirgi mavsum: ${forecast.Season}</div>`;
-            
+
             forecast["Top Risks"].forEach(r => {
                 html += `
                     <div class="risk-item">
@@ -436,7 +470,7 @@
             const analysis = data["Patient Risk Analysis"];
             let text = analysis["History Found"].join(', ') || "Ma'lumot topilmadi";
             let html = `<div class="history-badge" style="background: #f0fdf4;">${text} aniqlangan</div>`;
-            
+
             if (analysis["Future Risks"].length === 0) {
                 html += "<p style='color: #6b7280; text-align: center;'>Hozircha qo'shimcha risklar aniqlanmadi.</p>";
             } else {
@@ -460,7 +494,7 @@
 
         clearBtn.addEventListener('click', () => {
             chatContainer.innerHTML = '<div class="chat-message ai">Assalomu alaykum! Men MedSmart sun\'iy intellekt tizimiman. Sizni nima bezovta qilyapti? Belgilaringiz haqida batafsil yozing.</div>';
-            try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch (_) {}
+            try { localStorage.removeItem(CHAT_STORAGE_KEY); } catch (_) { }
             chatInput.focus();
         });
 
@@ -477,4 +511,5 @@
         loadAI();
     </script>
 </body>
+
 </html>

@@ -12,22 +12,27 @@ from typing import Optional
 
 def _detect_language(text: str) -> str:
     """Return 'uz' if Uzbek is detected, else 'en'."""
-    try:
-        from langdetect import detect  # type: ignore
-        lang = detect(text)
-        return "uz" if lang in ("uz", "tr") else "en"
-    except Exception:
-        pass
-    # Fallback: check for Uzbek-specific characters / common UZ words
-    uz_markers = [
-        "salom", "assalomu", "isitma", "bosh", "og'riq", "yo'tal",
-        "holsiz", "charchaq", "ko'ngil", "nafas", "qorin", "iltimos",
-        "rahmat", "shifokor", "kasallik", "dori", "og'riqni", "og'riqim"
-    ]
     text_lower = text.lower()
+    
+    # 1. Primary Check: Look for common Uzbek medical markers FIRST
+    uz_markers = [
+        "salom", "assalomu", "isitma", "bosh", "og'riq", "yo'tal", "og'riyapti", "mening",
+        "holsiz", "charchaq", "ko'ngil", "nafas", "qorin", "iltimos", "qattiq", "qilay",
+        "rahmat", "shifokor", "kasallik", "dori", "og'riqni", "og'riqim", "nima"
+    ]
+    
     for marker in uz_markers:
         if marker in text_lower:
             return "uz"
+            
+    # 2. Secondary Check: Langdetect package
+    try:
+        from langdetect import detect  # type: ignore
+        lang = detect(text)
+        return "uz" if lang in ("uz", "tr", "az", "tk", "ky", "kk") else "en"
+    except Exception:
+        pass
+        
     return "en"
 
 
