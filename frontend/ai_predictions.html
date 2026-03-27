@@ -335,7 +335,7 @@
             // Login ma'lumotlarini olish
             const userData = JSON.parse(localStorage.getItem('medsmart_user') || '{}');
             const patientId = userData.id || '1'; // Agar login qilmagan bo'lsa default '1'
-            const token = localStorage.getItem('token') || '';
+            const token = localStorage.getItem('medsmart_token') || localStorage.getItem('token') || '';
             const headers = { 'Authorization': `Bearer ${token}` };
 
             try {
@@ -411,7 +411,7 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             try {
-                const token = localStorage.getItem('token') || '';
+                const token = localStorage.getItem('medsmart_token') || localStorage.getItem('token') || '';
                 const headers = { 'Authorization': `Bearer ${token}` };
 
                 // Upgraded to connect directly to the real FastAPI Python service

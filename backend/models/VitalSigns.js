@@ -1,72 +1,115 @@
+/**
+ * VitalSigns.js — Module C: Medical Database
+ * BMI auto-calculated: weight(kg) / (height(cm)/100)^2
+ */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 
 const VitalSigns = sequelize.define('VitalSigns', {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        allowNull: false,
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true
     },
     patientId: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-            model: 'Patients',
-            key: 'id'
-        }
+        references: { model: 'Patients', key: 'id' }
+    },
+    doctorId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: 'Doctors', key: 'id' }
     },
     appointmentId: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         allowNull: true,
-        references: {
-            model: 'Appointments',
-            key: 'id'
-        }
-        // Optional: link vitals to a specific visit for time-series tracking
+        references: { model: 'Appointments', key: 'id' }
     },
-    height: {
-        type: DataTypes.FLOAT, // Height in cm
-        allowNull: true
+    bloodPressureSystolic: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        comment: 'mmHg, e.g. 120',
+        validate: { min: 50, max: 300 }
     },
-    weight: {
-        type: DataTypes.FLOAT, // Weight in kg
-        allowNull: true
-    },
-    bloodPressure: {
-        type: DataTypes.STRING, // e.g., '120/80'
-        allowNull: true
+    bloodPressureDiastolic: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        comment: 'mmHg, e.g. 80',
+        validate: { min: 20, max: 200 }
     },
     heartRate: {
-        type: DataTypes.INTEGER, // bpm
-        allowNull: true
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        comment: 'Beats per minute',
+        validate: { min: 20, max: 300 }
     },
     temperature: {
-        type: DataTypes.FLOAT, // Celsius
-        allowNull: true
+        type: DataTypes.DECIMAL(4, 2),
+        allowNull: true,
+        comment: 'Celsius',
+        validate: { min: 25.0, max: 45.0 }
     },
     oxygenSaturation: {
-        type: DataTypes.FLOAT, // SpO2 percentage, e.g., 98.5
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: true,
+        comment: 'SpO2 %',
+        validate: { min: 50.0, max: 100.0 }
+    },
+    weight: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: true,
+        comment: 'kg',
+        validate: { min: 0.5 }
+    },
+    height: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: true,
+        comment: 'cm',
+        validate: { min: 30.0 }
+    },
+    bmi: {
+        type: DataTypes.DECIMAL(5, 2),
+        allowNull: true,
+        comment: 'Auto-calculated: weight(kg) / (height(m))^2'
+    },
+    glucoseLevel: {
+        type: DataTypes.DECIMAL(6, 2),
+        allowNull: true,
+        comment: 'Blood glucose mmol/L'
+    },
+    cholesterolLevel: {
+        type: DataTypes.DECIMAL(6, 2),
+        allowNull: true,
+        comment: 'Total cholesterol mmol/L'
+    },
+    notes: {
+        type: DataTypes.TEXT,
         allowNull: true
     },
     recordedAt: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW
-        // Explicit timestamp for time-series AI analysis
     }
 }, {
-    timestamps: true,  // Adds createdAt and updatedAt
+    timestamps: true,
+    tableName: 'VitalSigns',
     indexes: [
         { fields: ['patientId'] },
-        { fields: ['recordedAt'] }
-    ]
+        { fields: ['appointmentId'] },
+        { fields: ['recordedAt'] },
+        { fields: ['patientId', 'recordedAt'] }
+    ],
+    hooks: {
+        beforeSave: (vitals) => {
+            // Auto-calculate BMI if weight and height are provided
+            if (vitals.weight && vitals.height && vitals.height > 0) {
+                const hM = parseFloat(vitals.height) / 100;
+                vitals.bmi = parseFloat((parseFloat(vitals.weight) / (hM * hM)).toFixed(2));
+            }
+        }
+    }
 });
-
-// Define associations
-VitalSigns.associate = (models) => {
-    VitalSigns.belongsTo(models.Patient, { foreignKey: 'patientId' });
-    VitalSigns.belongsTo(models.Appointment, { foreignKey: 'appointmentId' });
-};
 
 module.exports = VitalSigns;

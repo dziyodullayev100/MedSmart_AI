@@ -1,30 +1,31 @@
+/**
+ * RefreshToken.js — Module A: JWT Refresh Tokens
+ * - On logout: isRevoked = true
+ * - On password change: ALL tokens for userId revoked
+ * - Expired tokens cleaned on request or by cron
+ */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 
-/**
- * RefreshToken
- * Stores refresh tokens issued at login.
- * Tokens are revoked on logout and automatically expire after 7 days.
- */
 const RefreshToken = sequelize.define('RefreshToken', {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        allowNull: false,
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true
+    },
+    userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        comment: 'ID of the user (User, Doctor, or Patient table)'
+    },
+    userRole: {
+        type: DataTypes.ENUM('admin', 'doctor', 'patient'),
+        allowNull: false
     },
     token: {
         type: DataTypes.STRING(512),
         allowNull: false,
         unique: true
-    },
-    userId: {
-        type: DataTypes.STRING,   // UUID or integer depending on model
-        allowNull: false
-    },
-    role: {
-        type: DataTypes.ENUM('admin', 'bemor', 'doctor'),
-        allowNull: false
     },
     expiresAt: {
         type: DataTypes.DATE,
@@ -37,10 +38,14 @@ const RefreshToken = sequelize.define('RefreshToken', {
     }
 }, {
     timestamps: true,
+    updatedAt: false,
+    tableName: 'RefreshTokens',
     indexes: [
         { unique: true, fields: ['token'] },
         { fields: ['userId'] },
-        { fields: ['expiresAt'] }
+        { fields: ['userRole'] },
+        { fields: ['expiresAt'] },
+        { fields: ['isRevoked'] }
     ]
 });
 

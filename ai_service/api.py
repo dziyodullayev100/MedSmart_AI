@@ -307,9 +307,10 @@ async def seasonal_prediction(request: SeasonalPredictionRequest) -> dict[str, A
                 prev_disease = condition
                 break
         
-        if prev_disease not in known_prev:
-            prev_disease = "None"
-        prev_encoded = int(le_prev.transform([prev_disease])[0])
+        if prev_disease in known_prev:
+            prev_encoded = int(le_prev.transform([prev_disease])[0])
+        else:
+            prev_encoded = 0  # Safe fallback for unseen or missing diseases
 
         # ── Run prediction ─────────────────────────────────────────────
         X = np.array([[request.age, request.month, season_encoded, prev_encoded]])

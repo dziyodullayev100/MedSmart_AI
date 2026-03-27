@@ -13,29 +13,39 @@ const medSmartRoutes = require('./routes/medSmartRoutes');
 const syncRoutes = require('./routes/syncRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 
-// Import models to ensure they're registered with Sequelize
-const Doctor = require('./models/Doctor');
-const Patient = require('./models/Patient');
-const Appointment = require('./models/Appointment');
-const Service = require('./models/Service');
-const Payment = require('./models/Payment');
-const Diagnosis = require('./models/Diagnosis');
-const PatientHistory = require('./models/PatientHistory');
-const VitalSigns = require('./models/VitalSigns');
-const AIPrediction = require('./models/AIPrediction');
-const RefreshToken = require('./models/RefreshToken');
+// Import all 15 models via the central associations module
 const { setupAssociations } = require('./config/associations');
 
-// Connect to SQLite DB
-connectDB();
+// ─── Boot: connect → associations → sync → list tables ───────────────────────
+(async () => {
+    await connectDB();
+    setupAssociations();
 
-// Setup model associations
-setupAssociations();
+    // Sync: creates any missing tables without dropping existing data
+    await sequelize.sync({ alter: false });
+    logger.info('✅ Database synchronized — all 15 tables ready');
 
-// Automatically sync models to create tables if they don't exist
-sequelize.sync().then(() => {
-    logger.info('Database synchronized');
-});
+    // List every table currently in the database
+    try {
+        let tables = [];
+        const dialect = sequelize.options.dialect;
+        if (dialect === 'sqlite') {
+            const [rows] = await sequelize.query(
+                `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name`
+            );
+            tables = rows.map(r => r.name);
+        } else {
+            const [rows] = await sequelize.query(
+                `SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename`
+            );
+            tables = rows.map(r => r.tablename);
+        }
+        logger.info(`📋 Tables found (${tables.length}): ${tables.join(', ')}`);
+        console.log(`\n📋 Tables found (${tables.length}): ${tables.join(', ')}\n`);
+    } catch (err) {
+        logger.warn('Could not list tables:', err.message);
+    }
+})();
 
 const { scheduleBackup } = require('./utils/backup');
 scheduleBackup();
@@ -124,6 +134,25 @@ const userRoutes = require('./routes/userRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 app.use('/api/users', userRoutes);
 app.use('/api/ai', aiRoutes);
+
+// ─── Module F: CRUD API Routes ────────────────────────────────────────────────
+const patientRoutes     = require('./routes/patientRoutes');
+const doctorRoutes      = require('./routes/doctorRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const diagnosisRoutes   = require('./routes/diagnosisRoutes');
+const vitalsRoutes      = require('./routes/vitalsRoutes');
+const historyRoutes     = require('./routes/historyRoutes');
+const serviceRoutes     = require('./routes/serviceRoutes');
+const paymentRoutes     = require('./routes/paymentRoutes');
+
+app.use('/api/patients',     patientRoutes);
+app.use('/api/doctors',      doctorRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/diagnoses',    diagnosisRoutes);
+app.use('/api/vitals',       vitalsRoutes);
+app.use('/api/history',      historyRoutes);
+app.use('/api/services',     serviceRoutes);
+app.use('/api/payments',     paymentRoutes);
 
 // Demo & Health Routes
 const demoRoutes = require('./routes/demoRoutes');

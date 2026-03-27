@@ -26,7 +26,8 @@ const generateRefreshToken = async (userId, role) => {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + REFRESH_TOKEN_EXPIRY_DAYS);
 
-    await RefreshToken.create({ token, userId, role, expiresAt, isRevoked: false });
+    const dbRole = role === 'bemor' ? 'patient' : role;
+    await RefreshToken.create({ token, userId, userRole: dbRole, expiresAt, isRevoked: false });
     return token;
 };
 

@@ -1,68 +1,81 @@
+/**
+ * Appointment.js — Module B: Clinic Appointments
+ * Status flow: scheduled → confirmed → in-progress → completed
+ *              or → cancelled / no-show
+ */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 
 const Appointment = sequelize.define('Appointment', {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        allowNull: false,
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
         primaryKey: true
     },
     patientId: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-            model: 'Patients',
-            key: 'id'
-        }
+        references: { model: 'Patients', key: 'id' }
     },
     doctorId: {
-        type: DataTypes.UUID,
+        type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-            model: 'Doctors',
-            key: 'id'
-        }
+        references: { model: 'Doctors', key: 'id' }
     },
-    date: {
-        type: DataTypes.DATE,
+    serviceId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: 'Services', key: 'id' }
+    },
+    appointmentDate: {
+        type: DataTypes.DATEONLY,
         allowNull: false
     },
-    time: {
-        type: DataTypes.STRING,
-        allowNull: false
+    appointmentTime: {
+        type: DataTypes.STRING(10),
+        allowNull: false,
+        comment: 'e.g. "10:30"'
     },
     status: {
-        type: DataTypes.ENUM('scheduled', 'completed', 'cancelled'),
+        type: DataTypes.ENUM('scheduled', 'confirmed', 'in-progress', 'completed', 'cancelled', 'no-show'),
+        allowNull: false,
         defaultValue: 'scheduled'
+    },
+    chiefComplaint: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: 'Why the patient came'
+    },
+    symptoms: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        comment: 'Initial reported symptoms'
     },
     notes: {
         type: DataTypes.TEXT,
-        allowNull: true
-    },
-    serviceId: {
-        type: DataTypes.UUID,
         allowNull: true,
-        references: {
-            model: 'Services',
-            key: 'id'
-        }
+        comment: 'Doctor notes after visit'
+    },
+    followUpDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+        comment: 'Recommended follow-up appointment date'
+    },
+    createdBy: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        comment: 'userId who created this appointment'
     }
 }, {
     timestamps: true,
+    tableName: 'Appointments',
     indexes: [
         { fields: ['patientId'] },
         { fields: ['doctorId'] },
-        { fields: ['date'] },
-        { fields: ['status'] }
+        { fields: ['status'] },
+        { fields: ['appointmentDate'] },
+        { fields: ['doctorId', 'appointmentDate'] }
     ]
 });
-
-// Define associations
-Appointment.associate = (models) => {
-    Appointment.belongsTo(models.Doctor, { foreignKey: 'doctorId' });
-    Appointment.belongsTo(models.Patient, { foreignKey: 'patientId' });
-    Appointment.belongsTo(models.Service, { foreignKey: 'serviceId' });
-};
 
 module.exports = Appointment;
