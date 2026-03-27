@@ -108,8 +108,7 @@ exports.createPatient = async (req, res) => {
     try {
         const { password, ...rest } = req.body;
         if (!password) return res.status(400).json({ success: false, message: 'Password is required' });
-        const hashedPassword = await bcrypt.hash(password, 12);
-        const patient = await Patient.create({ ...rest, password: hashedPassword });
+        const patient = await Patient.create({ ...rest, password });
         const { password: _pw, ...safeData } = patient.toJSON();
         res.status(201).json({ success: true, data: safeData });
     } catch (err) {
@@ -127,10 +126,7 @@ exports.updatePatient = async (req, res) => {
         if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
         // Prevent email re-use as password field
         const { password, ...updateData } = req.body;
-        if (password) {
-            updateData.password = await bcrypt.hash(password, 12);
-        }
-        await patient.update(updateData);
+        await patient.update({ ...updateData, ...(password && { password }) });
         const { password: _pw, ...safeData } = patient.toJSON();
         res.json({ success: true, data: safeData });
     } catch (err) {

@@ -7,6 +7,15 @@ const rateLimit = require('express-rate-limit');
 // Load env vars first so logger + DB can read them
 dotenv.config();
 
+// Strict Environment Variable Check
+const requiredEnvVars = ['PORT', 'JWT_SECRET'];
+const missingVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+if (missingVars.length > 0) {
+    console.error(`❌ CRITICAL ERROR: Missing required environment variables: ${missingVars.join(', ')}`);
+    console.error(`Please make sure you have a .env file configured correctly.`);
+    process.exit(1);
+}
+
 const logger = require('./utils/logger');
 const { sequelize, connectDB } = require('./config/db');
 const medSmartRoutes = require('./routes/medSmartRoutes');

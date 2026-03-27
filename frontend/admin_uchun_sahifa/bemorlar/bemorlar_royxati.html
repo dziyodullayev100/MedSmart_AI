@@ -285,9 +285,10 @@
 
   </main>
 
-<!-- JS KODI - Boshqalar tomonidan yozilgan logika UMUMAN buzilmasdan saqlanib qoldi -->
+<!-- JS KODI -->
+<script src="../../js/config.js"></script>
+<script src="../../js/apiClient.js"></script>
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwVPQEFQI78Tr6XHggbaHHCkIYepmJR9y_DvXy6qTBHVcvNowDv0qsbX8kIr7MNdFKn/exec";
 
 let ALL_BEMORLAR = [];
 
@@ -322,18 +323,18 @@ function chiqish() {
 
 // DATA LOAD
 async function loadBemorlar() {
-  showLoading();
-
   try {
-    const res = await fetch(API_URL);
-    ALL_BEMORLAR = await res.json();
-    render(ALL_BEMORLAR);
-    updateStats(ALL_BEMORLAR);
+    const res = await window.apiClient.get('/patients');
+    if (res && res.data) {
+        ALL_BEMORLAR = res.data;
+        render(ALL_BEMORLAR);
+        updateStats(ALL_BEMORLAR);
+    } else {
+        render([]);
+        updateStats([]);
+    }
   } catch (err) {
-    alert("Maʼlumot yuklashda xatolik yuz berdi");
     console.error(err);
-  } finally {
-    hideLoading();
   }
 }
 
@@ -354,22 +355,22 @@ function render(list) {
 
   let rowsHTML = "";
   list.forEach((b, i) => {
-    let jinsB = b.jins === "Ayol" ? "badge-pink" : "badge-primary";
+    let jinsB = b.gender === "Ayol" ? "badge-pink" : "badge-primary";
     rowsHTML += `
       <tr>
         <td style="color: #64748b; font-weight: 600;">${i + 1}</td>
         <td>
-          <strong style="white-space: nowrap;">${b.fio || "Ismi kiritilmagan"}</strong><br>
-          <span style="font-size: 0.8rem; color: #64748b;">${b.pasport || "-"}</span>
+          <strong style="white-space: nowrap;">${b.name || "Ismi kiritilmagan"}</strong><br>
+          <span style="font-size: 0.8rem; color: #64748b;">${b.passport || "-"}</span>
         </td>
-        <td style="font-weight: 500; white-space: nowrap;">${b.telefon || "-"}</td>
-        <td><span class="badge-styled badge-info" style="white-space: nowrap;">${yoshHisobla(b.tugilgan)} yosh</span></td>
+        <td style="font-weight: 500; white-space: nowrap;">${b.phone || "-"}</td>
+        <td><span class="badge-styled badge-info" style="white-space: nowrap;">${yoshHisobla(b.dateOfBirth)} yosh</span></td>
         <td>
           <span class="badge-styled ${jinsB}">
-            ${b.jins || "-"}
+            ${b.gender || "-"}
           </span>
         </td>
-        <td style="color: #64748b; white-space: nowrap;"><i class="far fa-calendar-alt me-1"></i> ${b.created_at ? new Date(b.created_at).toLocaleDateString("uz-UZ") : "-"}</td>
+        <td style="color: #64748b; white-space: nowrap;"><i class="far fa-calendar-alt me-1"></i> ${b.createdAt ? new Date(b.createdAt).toLocaleDateString("uz-UZ") : "-"}</td>
         <td style="text-align: right; white-space: nowrap;" class="action-btns">
           <a href="bemor_kartasi.html?id=${b.id}" class="btn btn-view"><i class="fas fa-eye"></i></a>
           <a href="bemor_tahrirlash.html?id=${b.id}" class="btn btn-edit"><i class="fas fa-pen"></i></a>
@@ -384,12 +385,7 @@ function render(list) {
 // DELETE
 async function ochir(id) {
   if (!confirm("Bemor ma'lumotlari butunlay o'chirilsinmi?")) return;
-
-  await fetch(API_URL, {
-    method: "POST",
-    body: JSON.stringify({ action: "delete", id })
-  });
-
+  await window.apiClient.delete(`/patients/${id}`);
   loadBemorlar();
 }
 
@@ -403,9 +399,9 @@ function qidiruvFunksiya() {
   }
 
   const natija = ALL_BEMORLAR.filter(b =>
-    (b.fio && b.fio.toLowerCase().includes(text)) ||
-    (b.telefon && b.telefon.includes(text)) ||
-    (b.pasport && b.pasport.toLowerCase().includes(text))
+    (b.name && b.name.toLowerCase().includes(text)) ||
+    (b.phone && b.phone.includes(text)) ||
+    (b.passport && b.passport.toLowerCase().includes(text))
   );
 
   render(natija);
@@ -414,12 +410,12 @@ function qidiruvFunksiya() {
 // STATS
 function updateStats(list) {
   setText("totalBemorlar", list.length);
-  setText("erkakBemorlar", list.filter(b => b.jins === "Erkak").length);
-  setText("ayolBemorlar", list.filter(b => b.jins === "Ayol").length);
+  setText("erkakBemorlar", list.filter(b => b.gender === "Erkak").length);
+  setText("ayolBemorlar", list.filter(b => b.gender === "Ayol").length);
 
   const today = new Date().toDateString();
   const yangi = list.filter(b =>
-    new Date(b.created_at).toDateString() === today
+    new Date(b.createdAt).toDateString() === today
   ).length;
 
   setText("yangiBemorlar", yangi);

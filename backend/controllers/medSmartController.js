@@ -40,9 +40,8 @@ const getDoctorById = async (req, res, next) => {
 const createDoctor = async (req, res, next) => {
     try {
         const { name, email, password, specialization, experience, phone, schedule } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
         const doctor = await Doctor.create({
-            name, email, password: hashedPassword,
+            name, email, password,
             specialization, experience, phone, schedule
         });
         res.status(201).json({
@@ -66,7 +65,7 @@ const updateDoctor = async (req, res, next) => {
         if (experience) doctor.experience = experience;
         if (phone) doctor.phone = phone;
         if (schedule) doctor.schedule = schedule;
-        if (password) doctor.password = await bcrypt.hash(password, 10);
+        if (password) doctor.password = password;
         await doctor.save();
         res.json({
             id: doctor.id, name: doctor.name, email: doctor.email,
@@ -119,9 +118,8 @@ const getPatientById = async (req, res, next) => {
 const createPatient = async (req, res, next) => {
     try {
         const { name, email, password, phone, dateOfBirth, address, medicalHistory } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
         const patient = await Patient.create({
-            name, email, password: hashedPassword,
+            name, email, password,
             phone, dateOfBirth, address, medicalHistory
         });
         res.status(201).json({
@@ -145,7 +143,7 @@ const updatePatient = async (req, res, next) => {
         if (dateOfBirth) patient.dateOfBirth = dateOfBirth;
         if (address) patient.address = address;
         if (medicalHistory !== undefined) patient.medicalHistory = medicalHistory;
-        if (password) patient.password = await bcrypt.hash(password, 10);
+        if (password) patient.password = password;
         await patient.save();
         res.json({
             id: patient.id, name: patient.name, email: patient.email,

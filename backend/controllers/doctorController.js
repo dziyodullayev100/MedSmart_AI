@@ -65,8 +65,7 @@ exports.createDoctor = async (req, res) => {
     try {
         const { password, ...rest } = req.body;
         if (!password) return res.status(400).json({ success: false, message: 'Password is required' });
-        const hashedPassword = await bcrypt.hash(password, 12);
-        const doctor = await Doctor.create({ ...rest, password: hashedPassword });
+        const doctor = await Doctor.create({ ...rest, password });
         const { password: _pw, ...safeData } = doctor.toJSON();
         res.status(201).json({ success: true, data: safeData });
     } catch (err) {
@@ -83,8 +82,7 @@ exports.updateDoctor = async (req, res) => {
         const doctor = await Doctor.findByPk(req.params.id);
         if (!doctor) return res.status(404).json({ success: false, message: 'Doctor not found' });
         const { password, ...updateData } = req.body;
-        if (password) updateData.password = await bcrypt.hash(password, 12);
-        await doctor.update(updateData);
+        await doctor.update({ ...updateData, ...(password && { password }) });
         const { password: _pw, ...safeData } = doctor.toJSON();
         res.json({ success: true, data: safeData });
     } catch (err) {

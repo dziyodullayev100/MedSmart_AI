@@ -220,32 +220,32 @@ function chiqish() {
 }
 
 // Bemorlarni selectga joylash via API
-function bemorlarYukla() {
+async function bemorlarYukla() {
     const select = document.getElementById('bemor_id');
     if (!select) return;
     
     select.innerHTML = '<option value="">— Bemor yuklanmoqda... —</option>';
     
-    fetch('/api/patients')
-        .then(res => res.json())
-        .then(bemorlar => {
-            select.innerHTML = '<option value="">— Bemor tanlang —</option>';
-            if (bemorlar.length === 0) {
-                select.innerHTML = '<option value="">— Bemorlar tizimda yo\'q —</option>';
-                return;
-            }
-            
-            bemorlar.forEach(b => {
-                let opt = document.createElement('option');
-                opt.value = b.id;
-                opt.textContent = `${b.name} (${b.phone || 'tel yo‘q'})`;
-                select.appendChild(opt);
-            });
-        })
-        .catch(err => {
-            console.error(err);
-            select.innerHTML = '<option value="">— Xatolik yuz berdi —</option>';
+    try {
+        const res = await window.apiClient.get('/patients');
+        const bemorlar = (res && res.data) ? res.data : [];
+        
+        select.innerHTML = '<option value="">— Bemor tanlang —</option>';
+        if (bemorlar.length === 0) {
+            select.innerHTML = '<option value="">— Bemorlar tizimda yo\'q —</option>';
+            return;
+        }
+        
+        bemorlar.forEach(b => {
+            let opt = document.createElement('option');
+            opt.value = b.id;
+            opt.textContent = `${b.name} (${b.phone || 'tel yo‘q'})`;
+            select.appendChild(opt);
         });
+    } catch (err) {
+        console.error(err);
+        select.innerHTML = '<option value="">— Xatolik yuz berdi —</option>';
+    }
 }
 
 // Boshlang'ich sana va vaqtni belgilash
@@ -301,15 +301,8 @@ async function navbatSaqlash() {
             notes: izohInput ? izohInput.value.trim() : ''
         };
 
-        const res = await fetch('/api/appointments', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-            throw new Error("Server xatosi: " + (await res.text()));
-        }
+        const res = await window.apiClient.post('/appointments', payload);
+        if(!res) return;
 
         natijaEl.innerHTML = 
             '<span class="text-success"><i class="fas fa-check-circle me-2"></i>Navbat tizimga bron qilindi!</span>';
@@ -322,7 +315,7 @@ async function navbatSaqlash() {
     } catch (err) {
         console.error(err);
         natijaEl.innerHTML = 
-            `<span class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Xatolik yuz berdi: ${err.message}</span>`;
+            `<span class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Xatolik yuz berdi</span>`;
     }
 }
 
@@ -332,31 +325,31 @@ function setText(id, value) {
 }
 
 // Selectni to‘ldirish funksiyasi via API
-function loadShifokorSelect() {
+async function loadShifokorSelect() {
   const selectEl = document.getElementById("shifokor");
   if (!selectEl) return;
 
   selectEl.innerHTML = '<option value="">— Shifokor yuklanmoqda... —</option>';
 
-  fetch('/api/doctors')
-    .then(res => res.json())
-    .then(shifokorlar => {
-        selectEl.innerHTML = '<option value="">— Shifokor tanlang —</option>';
-        if (shifokorlar.length === 0) {
-            selectEl.innerHTML = '<option value="">— Shifokorlar tizimda yo\'q —</option>';
-            return;
-        }
-        shifokorlar.forEach(s => {
-            const opt = document.createElement("option");
-            opt.value = s.id;
-            opt.textContent = `${s.name} (${s.specialization})`;
-            selectEl.appendChild(opt);
-        });
-    })
-    .catch(err => {
-        console.error(err);
-        selectEl.innerHTML = '<option value="">— Xatolik yuz berdi —</option>';
-    });
+  try {
+      const res = await window.apiClient.get('/doctors');
+      const shifokorlar = (res && res.data) ? res.data : [];
+      
+      selectEl.innerHTML = '<option value="">— Shifokor tanlang —</option>';
+      if (shifokorlar.length === 0) {
+          selectEl.innerHTML = '<option value="">— Shifokorlar tizimda yo\'q —</option>';
+          return;
+      }
+      shifokorlar.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s.id;
+          opt.textContent = `${s.name} (${s.specialization})`;
+          selectEl.appendChild(opt);
+      });
+  } catch (err) {
+      console.error(err);
+      selectEl.innerHTML = '<option value="">— Xatolik yuz berdi —</option>';
+  }
 }
 
 // DOM yuklanganda ishlatamiz
@@ -368,6 +361,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loadShifokorSelect();
 });
 </script>
+<script src="../../js/config.js"></script>
+<script src="../../js/apiClient.js"></script>
 <script src="../../js/sync.js"></script>
 </body>
 </html>

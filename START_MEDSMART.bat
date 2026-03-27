@@ -1,27 +1,17 @@
 @echo off
-title MedSmart Integrated System - AI + Backend
-color 0A
+setlocal
+cd /d "%~dp0"
 
-echo ==================================================
-echo      MEDSMART MEDICAL SYSTEM - INITIALIZING
-echo ==================================================
-echo.
+echo 1. Backend...
+start "MedSmart Backend" cmd /c "cd /d "%~dp0backend" && node server.js"
 
-:: 1. AI Service Start (Python FastAPI on port 8000)
-echo [1/2] AI xizmati (Python FastAPI) fonda ishga tushirilmoqda...
-echo       URL: http://localhost:8000
-echo       Docs: http://localhost:8000/docs
-start "MedSmart AI Service" cmd /k "cd /d %~dp0ai_service && python run.py"
+echo 2. AI Service...
+start "MedSmart AI" cmd /c "cd /d "%~dp0ai_service" && uvicorn api:app --reload --port 8000"
 
-:: Wait 3 seconds for AI service to initialize
-timeout /t 3 /nobreak > nul
+echo 3. Frontend...
+start "MedSmart Frontend" cmd /c "cd /d "%~dp0frontend" && node server.js"
 
 echo.
-:: 2. Node.js Backend Start  
-echo [2/2] Backend server (Node.js) ishga tushirilmoqda...
-echo       URL: http://localhost:5000
-echo.
-cd /d %~dp0backend
-npm start
-
+echo All services started. 
+echo URL: http://localhost:3000
 pause

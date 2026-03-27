@@ -48,9 +48,6 @@ const seed = async (exitProcess = true) => {
         await sequelize.sync({ force: true });   // WIPE + recreate all 15 tables
         console.log('✅  Tables recreated.\n');
 
-        // Pre-hash password once
-        const hash = await bcrypt.hash('Demo1234!', 12);
-
         // ── 1. Admin Users ────────────────────────────────────────────────────
         console.log('👤  Creating 3 admins...');
         const adminData = [
@@ -59,7 +56,7 @@ const seed = async (exitProcess = true) => {
             { name: 'Klinika Direktori',       email: 'director@medsmart.uz',     phone: '+998901234569' }
         ];
         for (const a of adminData) {
-            await User.create({ ...a, password: hash, role: 'admin', isActive: true });
+            await User.create({ ...a, password: 'Demo1234!', role: 'admin', isActive: true });
             console.log(`   ✅ ${a.email} / Demo1234!`);
         }
 
@@ -121,7 +118,7 @@ const seed = async (exitProcess = true) => {
         for (const d of doctorData) {
             const doc = await Doctor.create({
                 ...d,
-                password: hash,
+                password: 'Demo1234!',
                 isActive: true,
                 rating: parseFloat((3.5 + Math.random() * 1.5).toFixed(2))
             });
@@ -147,7 +144,7 @@ const seed = async (exitProcess = true) => {
         for (const p of patientData) {
             const pat = await Patient.create({
                 ...p,
-                password: hash,
+                password: 'Demo1234!',
                 isActive: true,
                 address: `${p.city} shahri, Mustaqillik ko'chasi ${rndInt(1, 100)}`,
                 emergencyContactName:  `${p.name.split(' ')[0]} oilasi`,

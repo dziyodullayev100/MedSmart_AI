@@ -423,6 +423,8 @@
 
   <!-- QRCode.js kutubxonasini ulash -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="../../js/config.js"></script>
+  <script src="../../js/apiClient.js"></script>
 
   <script>
     // Global o'zgaruvchilar
@@ -520,14 +522,14 @@
     async function loadTolovlar() {
         try {
             const [appRes, payRes] = await Promise.all([
-                fetch('/api/appointments'),
-                fetch('/api/payments')
+                window.apiClient.get('/appointments'),
+                window.apiClient.get('/payments')
             ]);
             
-            if (!appRes.ok || !payRes.ok) throw new Error("API serverdan xatolik");
+            if (!appRes || !payRes) throw new Error("API serverdan xatolik");
 
-            const allAppointments = await appRes.json();
-            const allPayments = await payRes.json();
+            const allAppointments = appRes.data || [];
+            const allPayments = payRes.data || [];
             
             // Statusi bekor qilinmagan faqat joriy bemorga tegishli navbatlarni olish
             const myAppointments = allAppointments.filter(x => 
@@ -668,11 +670,11 @@
     async function openPaymentModal(paymentId) {
         try {
             const [appRes, payRes] = await Promise.all([
-                fetch('/api/appointments'),
-                fetch('/api/payments')
+                window.apiClient.get('/appointments'),
+                window.apiClient.get('/payments')
             ]);
-            const allAppointments = await appRes.json();
-            const allPayments = await payRes.json();
+            const allAppointments = (appRes && appRes.data) ? appRes.data : [];
+            const allPayments = (payRes && payRes.data) ? payRes.data : [];
 
             let targetAptId = String(paymentId).replace("new_", "");
             
@@ -734,11 +736,7 @@
                 paymentDate: new Date().toISOString()
             };
             
-            await fetch('/api/payments', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
+            await window.apiClient.post('/payments', payload);
             
             closePaymentModal();
             alert("Offline to'lov tanlandi. Kassaga murojaat qiling. To'lov tasdiqlangach chek yuklanadi.");
@@ -784,11 +782,7 @@
                 paymentDate: new Date().toISOString()
             };
             
-            await fetch('/api/payments', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            });
+            await window.apiClient.post('/payments', payload);
             
             closeOnlineModal();
             closePaymentModal();
@@ -846,11 +840,7 @@
         
         try {
             if (currentPaymentData.dbPaymentId) {
-                await fetch('/api/payments/' + currentPaymentData.dbPaymentId + '/status', {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ status: "to'langan" })
-                });
+                await window.apiClient.put(`/payments/${currentPaymentData.dbPaymentId}/status`, { status: "to'langan" });
             } else {
                 // If confirming a payment that didn't go through "tekshirilmoqda" directly here
                 const payload = {
@@ -862,11 +852,7 @@
                     receiptId: document.getElementById("receiptId").textContent,
                     paymentDate: new Date().toISOString()
                 };
-                await fetch('/api/payments', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(payload)
-                });
+                await window.apiClient.post('/payments', payload);
             }
             
             document.getElementById("receiptStatus").textContent = "To'landi ✅";
@@ -887,11 +873,11 @@
     async function viewReceipt(paymentId) {
         try {
             const [appRes, payRes] = await Promise.all([
-                fetch('/api/appointments'),
-                fetch('/api/payments')
+                window.apiClient.get('/appointments'),
+                window.apiClient.get('/payments')
             ]);
-            const allAppointments = await appRes.json();
-            const allPayments = await payRes.json();
+            const allAppointments = (appRes && appRes.data) ? appRes.data : [];
+            const allPayments = (payRes && payRes.data) ? payRes.data : [];
 
             let targetPayId = String(paymentId).replace("new_", "");
             const payment = allPayments.find(p => String(p.id) === targetPayId) || {};

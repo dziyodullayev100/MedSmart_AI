@@ -99,13 +99,10 @@ const register = async (req, res, next) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
         const patient = await Patient.create({
             name,
             email,
-            password: hashedPassword,
+            password,
             phone: phone || null
         });
 
@@ -238,11 +235,7 @@ const updateProfile = async (req, res, next) => {
         if (name)  user.name  = name;
         if (email) user.email = email;
         if (phone) user.phone = phone;
-
-        if (password) {
-            const salt = await bcrypt.genSalt(10);
-            user.password = await bcrypt.hash(password, salt);
-        }
+        if (password) user.password = password;
 
         await user.save();
 

@@ -207,10 +207,9 @@
         </div>
     </div>
 
+<script src="../../js/config.js"></script>
+<script src="../../js/apiClient.js"></script>
 <script>
-const API_URL =
-"https://script.google.com/macros/s/AKfycbwVPQEFQI78Tr6XHggbaHHCkIYepmJR9y_DvXy6qTBHVcvNowDv0qsbX8kIr7MNdFKn/exec";
-
 const bemorId = new URLSearchParams(location.search).get("id");
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -239,40 +238,34 @@ function chiqish() {
 
 // ================= LOAD BEMOR =================
 async function loadBemorData() {
-  showLoading(); // 🔵 LOADING BOSHLANDI
+  if (!bemorId) {
+    alert("Bemor ID ko'rsatilmagan!");
+    location.href = "../bemorlar/bemorlar_royxati.html";
+    return;
+  }
 
   try {
-    const res = await fetch(API_URL);
-    const list = await res.json();
+    const res = await window.apiClient.get(`/patients/${bemorId}`);
+    if (!res || !res.success) throw new Error("Yuklab bo'lmadi");
+    
+    const bemor = res.data;
 
-    const bemor = list.find(b => String(b.id) === String(bemorId));
-    if (!bemor) {
-      alert("Bemor topilmadi!");
-      location.href = "../bemorlar/bemorlar_royxati.html";
-      return;
+    setText("bemor_fio", bemor.name);
+    setText("fio", bemor.name);
+    setText("telefon", bemor.phone || "-");
+    setText("tugilgan", formatDate(bemor.dateOfBirth));
+    setText("jins", bemor.gender || "Aniqlanmagan");
+    setText("pasport", bemor.passport || "-");
+    setText("manzil", bemor.address || "-");
+    setText("eslatma", bemor.allergies || "Yo‘q");
+
+    if (bemor.dateOfBirth) {
+      setText("yosh", hisoblaYosh(bemor.dateOfBirth));
     }
 
-    setText("bemor_fio", bemor.fio);
-    setText("fio", bemor.fio);
-    setText("telefon", bemor.telefon || "-");
-    setText("tugilgan", formatDate(bemor.tugilgan));
-    setText("jins", bemor.jins || "Aniqlanmagan");
-    setText("pasport", bemor.pasport || "-");
-    setText("manzil", bemor.manzil || "-");
-    setText("eslatma", bemor.eslatma || "Yo‘q");
-
-    if (bemor_rasm)
-      bemor_rasm.src = bemor.rasm || "../assets/images/avatar.jpg";
-
-    if (bemor.tugilgan)
-      setText("yosh", hisoblaYosh(bemor.tugilgan));
-
   } catch (err) {
-    alert("Maʼlumot yuklashda xatolik!");
     console.error(err);
-  } finally {
-    hideLoading(); // 🟢 LOADING TUGADI
-  }
+  } 
 }
 
 // ================= HELPERS =================
