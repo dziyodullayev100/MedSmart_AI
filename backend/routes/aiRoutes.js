@@ -14,11 +14,12 @@ router.post('/disease-progression', protect, validateRequest(schemas.diseaseProg
 router.get('/predictions/:patientId', protect, aiController.getPatientPredictions);
 
 // POST /api/ai/ask — Conversational AI diagnostics (mock, public)
-// Accepts: { message: string } | Returns: { reply: string }
 router.post('/ask', validateRequest(schemas.aiChat), aiController.askAI);
 
-// POST /api/ai/chat — Conversational AI forwarded to Python AI service
-// Accepts: { message: string, patientId?: string } | Returns: { reply: string }
+// POST /api/ai/chat — Conversational AI forwarded to Python AI service (public)
 router.post('/chat', validateRequest(schemas.aiChat), aiController.chatAI);
+
+// POST /api/ai/triage — Quick medical triage assessment (public)
+router.post('/triage', aiController.triageAI);
 
 module.exports = router;

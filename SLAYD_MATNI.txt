@@ -1,0 +1,55 @@
+****Slayd 1: MedSmart AI — Kelajak Tibbiyoti
+Kirim / Asosiy shior: MedSmart — bu shunchaki ro'yxatga olish tizimi emas. Bu bemor, shifokor va tibbiy ma'lumotlarni yagona aqlli ekotizimga birlashtiruvchi raqamli platformadir. U sun'iy intellekt (AI) yordamida tibbiy jarayonlarni avtomatlashtiradi va optimallashtiradi. Uning asosiy maqsadi — bemorlarning tibbiy tarixi, yoshi, kasalliklari, mavsum va hayotiy ko'rsatkichlariga asoslanib, ehtimoliy kasalliklarni bashorat qilish hamda bemor kelajagidagi tibbiy xavflarni tahlil qilib berishdir.
+
+****Slayd 2: Bugungi kundagi mavjud muammolar
+Tibbiyot tizimi oldida turgan 3 ta asosiy muammo:
+
+1. Qog'ozbozlik va Fragmentatsiya: Bemor ma'lumotlari turli daftarlarda sochilib yotadi, kasallik tarixini qidirish qiyin va ma'lumot yo'qolish xavfi juda yuqori.
+2. Samarasiz Vaqt Boshqaruvi: Bemorlarning navbatlarda uzoq kutib qolishi hamda shifokorlarning qimmatli vaqti bemorni eshitishga emas, balki ma'muriy ishlarga va qog'oz to'ldirishga sarflanishi.
+3. Inson Omili Xatoliklari: Noto'g'ri tashxis qo'yish yoki dori tayinlashda inson omiliga bog'liq bo'lgan (charchoq, e'tiborsizlik) xatolar ehtimoli har doim mavjud.
+
+****Slayd 3: MedSmart Yechimi
+Muammolarni bartaraf etish uchun MedSmart 3 bosqichli kompleks yechim taklif qiladi:
+
+1. Yagona Raqamli Baza (Big Data): Barcha shaxsiy va tibbiy ma'lumotlar xavfsiz, markazlashgan bulutli tizimda (SQL/SQLite) saqlanadi va darhol topiladi.
+2. AI Yordamchi & Avtomatlashtirish: Sun'iy intellekt algoritmlari shifokorga tashxisda yordam beradi va klinik ma'muriy vazifalarni to'liq avtomatlashtiradi.
+3. Real-vaqt Monitoringi: Bemorning hayotiy ko'rsatkichlari (vitals) va holatini masofadan kuzatib borish imkonini beruvchi tezkor ogohlantirish (Notification) tizimi.
+
+****Slayd 4: Tizim Imkoniyatlari — Asosiy Funksiyalar
+MedSmart ekotizimi 3 ta asosiy moduldagi foydalanuvchilar o'rtasida ishlaydi:
+
+- 👩‍⚕️ Shifokor & Admin Paneli: Qabul rejalari, tahlillarni kuzatish (Lab), Power BI statistik hisobotlar hamda elektron tibbiy karta (EMR).
+- 🙋‍♂️ Bemor Paneli: Onlayn navbatga yozilish, tibbiy tarix va retseptlarni ko'rish, to'lovlar tarixi, hamda dori qabul qilish eslatmalari.
+- 🧠 AI Yordamchi (Core): Simptomlar asosida tavsiyalar berish, bemorning oldingi tarixi asosida kasallik xavf darajasini baholash va avtomatik hisobotlar generatsiyasi.
+
+****Slayd 5: 🧠 Qanday qilib MedSmart AI ishlaydi?
+Loyihaning asosiy yuragi bo'lgan MedSmart Sun'iy Intellekti (AI) mashinali o'qitish algoritmlari yordamida quyidagi mustaqil vazifalarni bajaradi:
+- Diagnostik Yordamchi
+- Ma'lumotlar Tahlilchisi
+- Avtonom Assistent (Triage va Chatbot)
+
+****Slayd 6: ⚙️ AI Integratsiyasi va Ma'lumotlar Oqimi (Pipeline)
+Sun'iy intellekt modulimiz (Python & Machine Learning Core) 3 bosqichli Data Pipeline orqali ishlaydi:
+
+- Ma'lumotlar (Input): SQL ma'lumotlar bazasidan bemorning xom ma'lumotlari (yosh, qon bosimi, oila tarixi) olinadi.
+- Qayta ishlash: Python (Pandas) yordamida bu ma'lumotlar tozalanadi, normallashtiriladi va AI tushunadigan vektor qiyofasiga tayyorlanadi.
+- AI Modullari (Core Inference): Diagnostika (Scikit-learn) va Predictive Analytics. Barcha modellar pikllangan (Serialization .pkl) va REST API (FastAPI) orqali yozilgan.
+- Natija (UI): Frontendda xavf darajasi va ogohlantirishlar vizual ko'rsatiladi.
+
+ESLATMA: Quyidagi 4 ta slayd (Slayd 7 - Slayd 10) to'g'ridan to'g'ri AI ning 4 ta asosiy vazifasini texnik algoritmik yoritib berishga qaratilgan!
+
+****Slayd 7: 🍂 AI Moduli 1: Mavsumiy kasalliklarni bashorat qilish (Seasonal Prediction)
+- Vazifasi: Bemorlarning tarixiy ma'lumotlari (yoshi, qon bosimi, oldingi kasalliklari) va joriy mavsumga qarab, qaysi kasalliklarga chalinish xavfi baland ekanligini bashorat qiladi (Top-3 xavf).
+- Texnologiya: Random Forest (Tasodifiy o'rmon) mashinali o'qitish algoritmi yordamida ishlaydi. Bu orqali qarorlar daraxti bemor ma'lumotlarini qadam-baqadam saralab o'tadi.
+
+****Slayd 8: 📈 AI Moduli 2: Kasallikning rivojlanish xavfini aniqlash (Disease Progression)
+- Vazifasi: Bemorning hozirgi holati va hayot tarziga qarab kelajakda qanday yashirin yoki surunkali kasalliklar kelib chiqishi mumkinligini (masalan, diabet yoki yurak kasalliklari) oldindan aniqlaydi va foiz (RiskScore) da o'lchaydi.
+- Texnologiya: Apriori algoritmi orqali ishlaydi (Lift va Confidence matematik ko'rsatkichlariga tayanadi). Ya'ni kasalliklar orasidagi munosabat va aloqani o'rganadi.
+
+****Slayd 9: 💬 AI Moduli 3: Tibbiy Aqlli Chatbot (NLP Chat Engine)
+- Vazifasi: Bemor o'z shikoyatlarini (masalan, "Boshim og'riyapti, isitma chiqyapti") chatga yozganda, AI matnni tahlil qilib, asosiy simptomlarni (belgilarni) avtomatik ajratib oladi va aniqroq ma'lumot yig'ish uchun savollar beradi. Shifokor joyiga vaqtinchalik maslahatchi vazifasini o'taydi.
+- Texnologiya: Natural Language Processing (NLP - Tabiiy tilni qayta ishlash) bo'yicha maxsus modellar asosida ishlaydi. 
+
+****Slayd 10: 🚨 AI Moduli 4: Avtomatik Triage (Saralash va shoshilinchlikni baholash)
+- Vazifasi: Bemorning kiritgan simptomlari va og'riq muddatiga tayanib, holat qanchalik og'irligini baholaydi (HIGH - yuqori, MEDIUM - o'rta, LOW - past). 
+- Natijasi: Bu xili hisoblash orqali shifokorlar eng og'ir ahvoldagi (HIGH) bemorlarni aniqlab oladi va birinchi bo'lib qabul qilishlari ta'minlanadi. Navbat va reanimatsiya ehtiyojini saralashning ajralmas qismi.

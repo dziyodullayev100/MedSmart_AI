@@ -9,12 +9,12 @@
  */
 const { Op } = require('sequelize');
 const Appointment = require('../models/Appointment');
-const Patient     = require('../models/Patient');
-const Doctor      = require('../models/Doctor');
-const Service     = require('../models/Service');
-const Diagnosis   = require('../models/Diagnosis');
-const VitalSigns  = require('../models/VitalSigns');
-const Payment     = require('../models/Payment');
+const Patient = require('../models/Patient');
+const Doctor = require('../models/Doctor');
+const Service = require('../models/Service');
+const Diagnosis = require('../models/Diagnosis');
+const VitalSigns = require('../models/VitalSigns');
+const Payment = require('../models/Payment');
 
 // GET /api/appointments
 exports.listAppointments = async (req, res) => {
@@ -35,7 +35,7 @@ exports.listAppointments = async (req, res) => {
             where,
             include: [
                 { model: Patient, as: 'patient', attributes: ['id', 'name', 'phone', 'email'] },
-                { model: Doctor,  as: 'doctor',  attributes: ['id', 'name', 'specialization'] },
+                { model: Doctor, as: 'doctor', attributes: ['id', 'name', 'specialization'] },
                 { model: Service, as: 'service', attributes: ['id', 'name', 'price', 'duration'] }
             ],
             limit: parseInt(limit),
@@ -53,14 +53,14 @@ exports.getTodayAppointments = async (req, res) => {
     try {
         const today = new Date().toISOString().split('T')[0];
         const where = { appointmentDate: today };
-        if (req.user?.role === 'doctor')  where.doctorId  = req.user.id;
+        if (req.user?.role === 'doctor') where.doctorId = req.user.id;
         if (req.user?.role === 'patient') where.patientId = req.user.id;
 
         const rows = await Appointment.findAll({
             where,
             include: [
                 { model: Patient, as: 'patient', attributes: ['id', 'name', 'phone', 'bloodType'] },
-                { model: Doctor,  as: 'doctor',  attributes: ['id', 'name', 'specialization'] },
+                { model: Doctor, as: 'doctor', attributes: ['id', 'name', 'specialization'] },
                 { model: Service, as: 'service', attributes: ['id', 'name', 'duration'] }
             ],
             order: [['appointmentTime', 'ASC']]
@@ -76,12 +76,12 @@ exports.getAppointment = async (req, res) => {
     try {
         const appt = await Appointment.findByPk(req.params.id, {
             include: [
-                { model: Patient,   as: 'patient',   attributes: { exclude: ['password'] } },
-                { model: Doctor,    as: 'doctor',    attributes: { exclude: ['password'] } },
-                { model: Service,   as: 'service' },
-                { model: Payment,   as: 'payment' },
+                { model: Patient, as: 'patient', attributes: { exclude: ['password'] } },
+                { model: Doctor, as: 'doctor', attributes: { exclude: ['password'] } },
+                { model: Service, as: 'service' },
+                { model: Payment, as: 'payment' },
                 { model: Diagnosis, as: 'diagnoses' },
-                { model: VitalSigns,as: 'vitalSigns' }
+                { model: VitalSigns, as: 'vitalSigns' }
             ]
         });
         if (!appt) return res.status(404).json({ success: false, message: 'Appointment not found' });

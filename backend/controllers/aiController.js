@@ -1,51 +1,46 @@
 /**
- * aiController.js
- * Integrates Node.js backend with the Python FastAPI AI service.
+ * aiController.js — MVP Upgraded
  *
- * Flow for each prediction:
- *  1. Fetch relevant patient data from the SQLite database
- *  2. Send data to the AI service (URL from env: AI_SERVICE_URL)
- *  3. Persist the full result to the AIPrediction table
- *  4. Return the result to the API caller
- *
- * On AI service failure → returns HTTP 503 with a clear message instead of crashing.
+ * All AI endpoints now:
+ *  1. Use buildPatientDataForAI() for rich multi-table patient context
+ *  2. Log every request/response to AILog table
+ *  3. Save results to AIPrediction table
+ *  4. Create Notifications when risk is High or Critical
+ *  5. getDiseaseProgression also upserts RiskScore table
+ *  6. Return HTTP 503 on AI offline — never crashes server
  */
 
-const axios = require('axios');
-const Patient = require('../models/Patient');
-const Diagnosis = require('../models/Diagnosis');
-const PatientHistory = require('../models/PatientHistory');
-const VitalSigns = require('../models/VitalSigns');
-const Doctor = require('../models/Doctor');
+const axios        = require('axios');
+const Patient      = require('../models/Patient');
 const AIPrediction = require('../models/AIPrediction');
-const logger = require('../utils/logger');
+const AILog        = require('../models/AILog');
+const RiskScore    = require('../models/RiskScore');
+const Notification = require('../models/Notification');
+const logger       = require('../utils/logger');
+const { buildPatientDataForAI } = require('../utils/aiDataBuilder');
 
-// Read AI service URL from environment (fallback to localhost for dev)
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
-// ─── Helper: Resilient Axios POST with Request Retry (Cold Start Fix) ───────
+// ─── Helper: Resilient Axios POST with one retry (cold-start fix) ─────────────
 async function aiPostWithRetry(endpoint, payload, retries = 1) {
     const url = `${AI_SERVICE_URL}${endpoint}`;
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-            // 25000ms is the optimal max-wait for Render free-tier cold starts
             return await axios.post(url, payload, { timeout: 25000 });
         } catch (error) {
             const isTimeout = error.code === 'ECONNABORTED' || error.message.includes('timeout');
             const isOffline = !error.response;
-            
             if (attempt < retries && (isTimeout || isOffline)) {
-                logger.warn(`[AI Service] Cold start detected. Retrying request... (${attempt + 1}/${retries})`);
-                await new Promise(resolve => setTimeout(resolve, 2000)); // wait 2s before retry
+                logger.warn(`[AI Service] Retrying... (${attempt + 1}/${retries})`);
+                await new Promise(r => setTimeout(r, 2000));
                 continue;
             }
-            throw error; // Throw to the main catch block if out of retries
+            throw error;
         }
     }
 }
 
-// ─── Helper: determine current season ─────────────────────────────────────────
-
+// ─── Helper: current season ───────────────────────────────────────────────────
 function getSeason(month) {
     if ([12, 1, 2].includes(month)) return 'Winter';
     if ([3, 4, 5].includes(month))  return 'Spring';
@@ -53,138 +48,115 @@ function getSeason(month) {
     return 'Autumn';
 }
 
-// ─── Helper: extract top-level risk string from AI response ───────────────────
-
-function extractRiskLevel(predictionType, resultData) {
+// ─── Helper: extract risk level string ───────────────────────────────────────
+function extractRiskLevel(type, data) {
     try {
-        if (predictionType === 'seasonal') {
-            const forecast = resultData['Patient Forecast'];
-            const top = forecast && forecast['Top Risks'] && forecast['Top Risks'][0];
+        if (type === 'seasonal') {
+            const top = data?.['Patient Forecast']?.['Top Risks']?.[0];
             return top ? top.disease : 'Unknown';
         }
-        if (predictionType === 'progression') {
-            const analysis = resultData['Patient Risk Analysis'];
-            return analysis ? analysis['Overall Risk Level'] : 'Unknown';
+        if (type === 'progression') {
+            return data?.['Patient Risk Analysis']?.['Overall Risk Level'] || 'Unknown';
         }
     } catch (_) {}
     return 'Unknown';
 }
 
-// ─── POST /api/ai/seasonal-prediction ─────────────────────────────────────────
+// ─── Helper: write to AILog table ─────────────────────────────────────────────
+async function logAI({ patientId, endpoint, requestData, responseData, responseTimeMs, status, errorMessage }) {
+    try {
+        await AILog.create({ patientId, endpoint, requestData, responseData, responseTimeMs, status, errorMessage });
+    } catch (e) {
+        logger.warn('[AILog] Failed to write log entry', { error: e.message });
+    }
+}
 
-/**
- * Pulls real patient data from DB, sends to AI service,
- * stores result in AIPrediction table, returns result.
- */
+// ─── Helper: create notification for doctor ───────────────────────────────────
+async function createHighRiskNotification(patientId, patientName, riskValue, type) {
+    try {
+        await Notification.create({
+            patientId,
+            type: 'alert',
+            priority: 'high',
+            title: `Yuqori xavf darajasi aniqlandi`,
+            message: `Bemor ${patientName} xavf darajasi yuqori: ${riskValue}/100 (${type})`,
+            isRead: false
+        });
+        logger.info(`[AI] High-risk notification created for patient ${patientId}`);
+    } catch (e) {
+        logger.warn('[AI] Failed to create notification', { error: e.message });
+    }
+}
+
+// ─── POST /api/ai/seasonal-prediction ─────────────────────────────────────────
 exports.getSeasonalPrediction = async (req, res, next) => {
+    const startTime = Date.now();
     try {
         const { patientId } = req.body;
+        if (!patientId) return res.status(400).json({ message: 'patientId is required' });
 
-        if (!patientId) {
-            return res.status(400).json({ message: 'patientId is required' });
+        // ── 1. Build rich patient data ────────────────────────────────────────
+        let patientData;
+        try {
+            patientData = await buildPatientDataForAI(patientId);
+        } catch (e) {
+            return res.status(404).json({ message: e.message });
         }
 
-        // ── 1. Load patient from DB ──────────────────────────────────────
-        const patient = await Patient.findByPk(patientId, {
-            attributes: { exclude: ['password'] }
-        });
-        if (!patient) {
-            return res.status(404).json({ message: 'Patient not found' });
-        }
-
-        // ── 2. Calculate age ─────────────────────────────────────────────
-        const birthDate = new Date(patient.dateOfBirth);
-        const today = new Date();
-        const age = today.getFullYear() - birthDate.getFullYear() -
-            ((today.getMonth() < birthDate.getMonth() ||
-              (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) ? 1 : 0);
-
-        // ── 3. Season & month ────────────────────────────────────────────
-        const month = today.getMonth() + 1;
+        const month  = new Date().getMonth() + 1;
         const season = getSeason(month);
 
-        // ── 4. Pull diagnosis history from DB ────────────────────────────
-        const diagnoses = await Diagnosis.findAll({
-            where: { patientId },
-            attributes: ['condition', 'severity', 'symptoms', 'dateDiagnosed', 'status'],
-            order: [['dateDiagnosed', 'DESC']]
-        });
-        const previous_diseases = diagnoses.length > 0
-            ? diagnoses.map(d => d.condition).filter(Boolean)
-            : ['None'];
-
-        // ── 5. Pull chronic conditions from PatientHistory ───────────────
-        const historyEntries = await PatientHistory.findAll({
-            where: { patientId },
-            attributes: ['chronicConditions'],
-            order: [['recordedAt', 'DESC']],
-            limit: 1
-        });
-        const chronic_conditions = (historyEntries.length > 0 && Array.isArray(historyEntries[0].chronicConditions))
-            ? historyEntries[0].chronicConditions
-            : [];
-
-        // ── 6. Build input payload ───────────────────────────────────────
+        // ── 2. Build rich AI payload ──────────────────────────────────────────
         const inputPayload = {
-            patient_id: patient.id,
-            age,
+            patient_id:          patientData.patient.id,
+            age:                 patientData.patient.age,
             month,
             season,
-            previous_diseases,
-            chronic_conditions
+            previous_diseases:   patientData.currentConditions.map(c => c.disease).filter(Boolean),
+            chronic_conditions:  patientData.chronicConditions || [],
+            family_history:      patientData.familyHistory || [],
+            lifestyle:           patientData.riskFactors || {},
+            vitals_bmi:          patientData.vitals?.latest?.bmi || null,
+            current_medications: patientData.currentMedications || []
         };
 
-        // ── 7. Call AI service ───────────────────────────────────────────
-        let aiResult;
-        let aiStatus = 'success';
-
+        // ── 3. Call AI service ────────────────────────────────────────────────
+        let aiResult, aiStatus = 'success', errorMessage = null;
         try {
-            // Use the new resilient retry function
             const aiResponse = await aiPostWithRetry('/ai/seasonal-prediction', inputPayload);
             aiResult = aiResponse.data;
         } catch (aiError) {
             aiStatus = 'error';
+            errorMessage = aiError.message;
+            const responseTimeMs = Date.now() - startTime;
+
+            await logAI({ patientId, endpoint: '/ai/seasonal-prediction', requestData: inputPayload, responseData: { error: aiError.message }, responseTimeMs, status: 'error', errorMessage });
+            await AIPrediction.create({ patientId, predictionType: 'seasonal', inputData: inputPayload, resultData: { error: aiError.message }, riskLevel: 'Unknown', aiServiceStatus: 'error' });
+
             const isTimeout = aiError.code === 'ECONNABORTED' || aiError.message.includes('timeout');
-            const isOffline = !aiError.response;
-            
-            logger.error('[AI Service] Seasonal prediction failed', { error: aiError.message });
-
-            await AIPrediction.create({
-                patientId,
-                predictionType: 'seasonal',
-                inputData: inputPayload,
-                resultData: { error: aiError.message },
-                riskLevel: 'Unknown',
-                aiServiceStatus: 'error'
-            });
-
-            // 🎯 Fallback Response
             return res.status(503).json({
-                message: isTimeout 
-                    ? 'AI xizmati hozircha band yoki uxlab qolgan (Kutish vaqti tugadi). Iltimos, birozdan so\'ng qayta urinib ko\'ring.' 
-                    : isOffline
-                        ? 'AI xizmati vaqtincha o\'chiq holatda.'
-                        : 'AI xizmatidan xatolik qaytdi.',
+                message: isTimeout ? 'AI xizmati band (timeout). Birozdan so\'ng urinib ko\'ring.' : !aiError.response ? 'AI xizmati o\'chiq.' : 'AI xizmatidan xatolik.',
                 detail: aiError.response ? aiError.response.data : aiError.message
             });
         }
 
-        // ── 8. Persist result to database ────────────────────────────────
+        const responseTimeMs = Date.now() - startTime;
+
+        // ── 4. Log to AILog ───────────────────────────────────────────────────
+        await logAI({ patientId, endpoint: '/ai/seasonal-prediction', requestData: inputPayload, responseData: aiResult, responseTimeMs, status: 'success' });
+
+        // ── 5. Save to AIPrediction ───────────────────────────────────────────
         const riskLevel = extractRiskLevel('seasonal', aiResult);
+        await AIPrediction.create({ patientId, predictionType: 'seasonal', inputData: inputPayload, resultData: aiResult, riskLevel, aiServiceStatus: 'success' });
 
-        await AIPrediction.create({
-            patientId,
-            predictionType: 'seasonal',
-            inputData: inputPayload,
-            resultData: aiResult,
-            riskLevel,
-            aiServiceStatus: aiStatus
-        });
+        // ── 6. Notify if risk is high ─────────────────────────────────────────
+        const topRisk = aiResult?.['Patient Forecast']?.['Top Risks']?.[0];
+        if (topRisk && topRisk.risk >= 75) {
+            await createHighRiskNotification(patientId, patientData.patient.name, topRisk.risk, 'Seasonal');
+        }
 
-        logger.info(`[AI] Seasonal prediction stored`, { patientId, riskLevel });
-
-        // ── 9. Return result ─────────────────────────────────────────────
-        res.json(aiResult);
+        logger.info(`[AI] Seasonal prediction stored`, { patientId, riskLevel, responseTimeMs });
+        res.json({ ...aiResult, _meta: { responseTimeMs, patientName: patientData.patient.name } });
 
     } catch (error) {
         logger.error('[AI Controller] Seasonal prediction error', { error: error.message });
@@ -193,128 +165,102 @@ exports.getSeasonalPrediction = async (req, res, next) => {
 };
 
 // ─── POST /api/ai/disease-progression ─────────────────────────────────────────
-
-/**
- * Pulls diagnosis history, vitals, and chronic conditions from DB,
- * sends to AI service, stores result, returns result.
- */
 exports.getDiseaseProgression = async (req, res, next) => {
+    const startTime = Date.now();
     try {
         const { patientId } = req.body;
+        if (!patientId) return res.status(400).json({ message: 'patientId is required' });
 
-        if (!patientId) {
-            return res.status(400).json({ message: 'patientId is required' });
+        // ── 1. Build rich patient data ────────────────────────────────────────
+        let patientData;
+        try {
+            patientData = await buildPatientDataForAI(patientId);
+        } catch (e) {
+            return res.status(404).json({ message: e.message });
         }
 
-        // ── 1. Validate patient exists ───────────────────────────────────
-        const patient = await Patient.findByPk(patientId, {
-            attributes: { exclude: ['password'] }
-        });
-        if (!patient) {
-            return res.status(404).json({ message: 'Patient not found' });
-        }
-
-        // ── 2. Fetch full diagnosis timeline ────────────────────────────
-        const diagnoses = await Diagnosis.findAll({
-            where: { patientId },
-            include: [{ model: Doctor, attributes: ['name', 'specialization'] }],
-            order: [['dateDiagnosed', 'ASC']]
-        });
-
-        // ── 3. Fetch latest vital signs ──────────────────────────────────
-        const vitals = await VitalSigns.findAll({
-            where: { patientId },
-            order: [['recordedAt', 'DESC']],
-            limit: 5
-        });
-
-        // ── 4. Fetch patient history (chronic conditions) ────────────────
-        const historyEntries = await PatientHistory.findAll({
-            where: { patientId },
-            order: [['recordedAt', 'DESC']],
-            limit: 1
-        });
-
-        // ── 5. Format for AI service ─────────────────────────────────────
-        const diagnosisHistory = diagnoses.map(d => ({
-            disease: d.condition,
-            severity: d.severity,
-            symptoms: d.symptoms,
-            date: d.dateDiagnosed,
-            status: d.status,
-            doctor: d.Doctor ? d.Doctor.name : null
-        }));
-
-        const latestVitals = vitals.length > 0 ? {
-            bloodPressure:    vitals[0].bloodPressure,
-            heartRate:        vitals[0].heartRate,
-            temperature:      vitals[0].temperature,
-            oxygenSaturation: vitals[0].oxygenSaturation,
-            weight:           vitals[0].weight,
-            recordedAt:       vitals[0].recordedAt
-        } : null;
-
-        const chronicConditions = (historyEntries.length > 0 && Array.isArray(historyEntries[0].chronicConditions))
-            ? historyEntries[0].chronicConditions
-            : [];
-
-        // ── 6. Build input payload ───────────────────────────────────────
+        // ── 2. Build rich AI payload for progression ──────────────────────────
         const inputPayload = {
-            patient_id: patient.id,
-            history: diagnosisHistory,
-            vitals: latestVitals,
-            chronic_conditions: chronicConditions
+            patient_id:         patientData.patient.id,
+            history:            patientData.currentConditions.map(c => ({
+                disease:  c.disease,
+                severity: c.severity,
+                status:   c.status,
+                date:     c.dateDiagnosed
+            })),
+            vitals:             patientData.vitals?.latest || null,
+            chronic_conditions: patientData.chronicConditions || [],
+            family_history:     patientData.familyHistory || [],
+            lifestyle:          patientData.riskFactors || {},
+            past_surgeries:     patientData.history || [],
+            allergies:          patientData.allergies || []
         };
 
-        // ── 7. Call AI service ───────────────────────────────────────────
-        let aiResult;
-        let aiStatus = 'success';
-
+        // ── 3. Call AI service ────────────────────────────────────────────────
+        let aiResult, aiStatus = 'success';
         try {
             const aiResponse = await aiPostWithRetry('/ai/disease-progression', inputPayload);
             aiResult = aiResponse.data;
         } catch (aiError) {
             aiStatus = 'error';
+            const responseTimeMs = Date.now() - startTime;
+
+            await logAI({ patientId, endpoint: '/ai/disease-progression', requestData: inputPayload, responseData: { error: aiError.message }, responseTimeMs, status: 'error', errorMessage: aiError.message });
+            await AIPrediction.create({ patientId, predictionType: 'progression', inputData: inputPayload, resultData: { error: aiError.message }, riskLevel: 'Unknown', aiServiceStatus: 'error' });
+
             const isTimeout = aiError.code === 'ECONNABORTED' || aiError.message.includes('timeout');
-            const isOffline = !aiError.response;
-            
-            logger.error('[AI Service] Disease progression failed', { error: aiError.message });
-
-            await AIPrediction.create({
-                patientId,
-                predictionType: 'progression',
-                inputData: inputPayload,
-                resultData: { error: aiError.message },
-                riskLevel: 'Unknown',
-                aiServiceStatus: 'error'
-            });
-
             return res.status(503).json({
-                message: isTimeout 
-                    ? 'AI xizmati hozircha band yoki uxlab qolgan (Kutish vaqti tugadi). Iltimos, birozdan so\'ng qayta urinib ko\'ring.' 
-                    : isOffline
-                        ? 'AI xizmati vaqtincha o\'chiq holatda.'
-                        : 'AI xizmatidan xatolik qaytdi.',
+                message: isTimeout ? 'AI xizmati band (timeout). Birozdan so\'ng urinib ko\'ring.' : !aiError.response ? 'AI xizmati o\'chiq.' : 'AI xizmatidan xatolik.',
                 detail: aiError.response ? aiError.response.data : aiError.message
             });
         }
 
-        // ── 8. Persist result to database ────────────────────────────────
+        const responseTimeMs = Date.now() - startTime;
+
+        // ── 4. Log to AILog ───────────────────────────────────────────────────
+        await logAI({ patientId, endpoint: '/ai/disease-progression', requestData: inputPayload, responseData: aiResult, responseTimeMs, status: 'success' });
+
+        // ── 5. Save to AIPrediction ───────────────────────────────────────────
         const riskLevel = extractRiskLevel('progression', aiResult);
+        await AIPrediction.create({ patientId, predictionType: 'progression', inputData: inputPayload, resultData: aiResult, riskLevel, aiServiceStatus: 'success' });
 
-        await AIPrediction.create({
-            patientId,
-            predictionType: 'progression',
-            inputData: inputPayload,
-            resultData: aiResult,
-            riskLevel,
-            aiServiceStatus: aiStatus
-        });
+        // ── 6. Upsert RiskScore ───────────────────────────────────────────────
+        try {
+            const analysis = aiResult?.['Patient Risk Analysis'];
+            const overallRiskText = analysis?.['Overall Risk Level'] || 'Low';
+            const overallRisk = overallRiskText === 'High' ? 88 : overallRiskText === 'Moderate' ? 55 : 25;
 
-        logger.info(`[AI] Progression analysis stored`, { patientId, riskLevel });
+            // Check existing score to determine trend
+            const existing = await RiskScore.findOne({ where: { patientId } });
+            let trend = 'stable';
+            if (existing) {
+                if (overallRisk > existing.overallRisk + 5) trend = 'worsening';
+                else if (overallRisk < existing.overallRisk - 5) trend = 'improving';
+            }
 
-        // ── 9. Return result ─────────────────────────────────────────────
-        res.json(aiResult);
+            await RiskScore.upsert({
+                patientId,
+                overallRisk,
+                cardiovascularRisk: patientData.currentConditions.some(c => /heart|cardiac|cardio/i.test(c.disease)) ? Math.min(overallRisk + 10, 100) : overallRisk,
+                diabetesRisk:       patientData.chronicConditions?.some(c => /diabetes|diabet/i.test(c)) ? Math.min(overallRisk + 5, 100) : Math.max(overallRisk - 10, 0),
+                respiratoryRisk:    patientData.riskFactors?.smoking === 'current' ? Math.min(overallRisk + 15, 100) : Math.max(overallRisk - 15, 0),
+                lastCalculated:     new Date(),
+                trend,
+                calculationBasis:   { source: 'ai-progression', conditionsCount: patientData.currentConditions.length }
+            });
+            logger.info(`[AI] RiskScore upserted`, { patientId, overallRisk, trend });
+        } catch (rsErr) {
+            logger.warn('[AI] RiskScore upsert failed', { error: rsErr.message });
+        }
+
+        // ── 7. Notify if overall risk > 70 ───────────────────────────────────
+        const riskText = aiResult?.['Patient Risk Analysis']?.['Overall Risk Level'];
+        if (riskText === 'High' || riskText === 'Critical') {
+            await createHighRiskNotification(patientId, patientData.patient.name, patientData.currentRiskScore?.overall || 88, 'Progression');
+        }
+
+        logger.info(`[AI] Progression analysis stored`, { patientId, riskLevel, responseTimeMs });
+        res.json({ ...aiResult, _meta: { responseTimeMs, patientName: patientData.patient.name } });
 
     } catch (error) {
         logger.error('[AI Controller] Disease progression error', { error: error.message });
@@ -322,100 +268,9 @@ exports.getDiseaseProgression = async (req, res, next) => {
     }
 };
 
-// ─── GET /api/ai/predictions/:patientId ───────────────────────────────────────
-
-/**
- * Returns all stored AI prediction results for a specific patient,
- * ordered newest first.
- */
-exports.getPatientPredictions = async (req, res, next) => {
-    try {
-        const { patientId } = req.params;
-
-        const patient = await Patient.findByPk(patientId, {
-            attributes: ['id', 'name']
-        });
-        if (!patient) {
-            return res.status(404).json({ message: 'Patient not found' });
-        }
-
-        const predictions = await AIPrediction.findAll({
-            where: { patientId },
-            attributes: ['id', 'predictionType', 'riskLevel', 'aiServiceStatus', 'resultData', 'inputData', 'createdAt'],
-            order: [['createdAt', 'DESC']]
-        });
-
-        res.json({
-            patientId,
-            patientName: patient.name,
-            totalPredictions: predictions.length,
-            predictions
-        });
-
-    } catch (error) {
-        logger.error('[AI Controller] Get predictions error', { error: error.message });
-        next(error);
-    }
-};
-
-// ─── POST /api/ai/ask ─────────────────────────────────────────────────────────
-
-/**
- * Conversational AI diagnostics (legacy mock fallback).
- * Accepts:  { message: string }
- * Returns:  { reply: string }
- */
-exports.askAI = async (req, res) => {
-    try {
-        const { message } = req.body;
-
-        if (!message || typeof message !== 'string' || message.trim() === '') {
-            return res.status(400).json({ reply: 'Iltimos, savol yoki simptomlaringizni kiriting.' });
-        }
-
-        const trimmed = message.trim().toLowerCase();
-        let reply;
-
-        if (trimmed.includes('bosh') || trimmed.includes('boshim') || trimmed.includes("bosh og'riq")) {
-            reply = "Bosh og'riq ko'p sababli bo'lishi mumkin: stress, uyqu yetishmasligi, qon bosimi o'zgarishi yoki migren. Agar og'riq kuchli va uzoq davom etsa, shifokorga murojaat qilishingizni tavsiya qilaman.";
-        } else if (trimmed.includes('harorat') || trimmed.includes('isitma') || trimmed.includes('tem')) {
-            reply = "Yuqori harorat (38°C dan yuqori) odatda infeksion kasallik belgisi. Ko'p suv iching, dam oling va 24 soat ichida pasaymasa shifokorga boring.";
-        } else if (trimmed.includes("yo'tal") || trimmed.includes('nafas')) {
-            reply = "Yo'tal va nafas olish qiyinligi nafas yo'llari infeksiyasi, alleriya yoki boshqa sabablar bo'lishi mumkin. Agar nafas olish juda qiyin bo'lsa — zudlik bilan tibbiy yordam oling.";
-        } else if (trimmed.includes('qorin') || trimmed.includes("qorin og'riq") || trimmed.includes('ich')) {
-            reply = "Qorin og'riq ovqat hazm qilish muammolari, gastrit yoki boshqa holat bo'lishi mumkin. Og'riq o'tkir va uzoq davom etsa yoki qon bilan birga bo'lsa — shifokorga zudlik bilan murojaat qiling.";
-        } else if (trimmed.includes('charchash') || trimmed.includes('holsiz') || trimmed.includes('enerji')) {
-            reply = "Doimiy charchoq anemiya, uyqu buzilishi, qalqonsimon bez muammolari yoki boshqa holat belgisi bo'lishi mumkin. Qon tahlili topshirishni tavsiya qilaman.";
-        } else if (trimmed.includes("bo'g'im") || trimmed.includes('suyak') || trimmed.includes("og'riy")) {
-            reply = "Bo'g'im va suyak og'riqlari artrit, tomir muammolari yoki jarohat belgisi bo'lishi mumkin. Rentgen yoki MRI tavsiya etiladi.";
-        } else if (trimmed.includes('salom') || trimmed.includes('assalomu')) {
-            reply = 'Assalomu alaykum! Men MedSmart AI yordamchisiman. Qanday simptom yoki savol bilan murojaat qilyapsiz?';
-        } else {
-            reply = `Simptomlaringizni tushundim: "${message.trim()}". Aniqroq tashxis qo'yish uchun shifokor ko'rigidan o'tishni maslahat beraman. Agar belgilar kuchaysa, zudlik bilan tibbiy yordam oling. Men sizga faqat dastlabki ma'lumot bera olaman — shifokor o'rnini bosa olmayman.`;
-        }
-
-        logger.info('[AI Ask] Mock reply generated');
-        return res.json({ reply });
-
-    } catch (error) {
-        logger.error('[AI Controller] Ask endpoint error', { error: error.message });
-        return res.status(500).json({ reply: "Serverda xatolik yuz berdi. Iltimos, qayta urinib ko'ring." });
-    }
-};
-
 // ─── POST /api/ai/chat ────────────────────────────────────────────────────────
-
-/**
- * Forwards user message to the Python AI service /ai/chat endpoint.
- * Accepts:  { message: string, patientId?: string }
- * Returns:  { reply: string }
- *
- * - patientId is optional context for the AI service
- * - Saves result to AIPrediction with predictionType: 'chat'
- * - Returns 503 if AI service is offline
- * - 10-second timeout
- */
 exports.chatAI = async (req, res, next) => {
+    const startTime = Date.now();
     try {
         const { message, patientId } = req.body;
 
@@ -423,58 +278,142 @@ exports.chatAI = async (req, res, next) => {
             return res.status(400).json({ reply: 'Iltimos, savol yoki simptomlaringizni kiriting.' });
         }
 
-        const payload = { message: message.trim() };
-        if (patientId) payload.patientId = patientId;
+        // ── 1. Optionally build patient context ───────────────────────────────
+        let patientContext = null;
+        if (patientId) {
+            try {
+                patientContext = await buildPatientDataForAI(patientId);
+            } catch (_) { /* context is optional */ }
+        }
 
+        // ── 2. Build payload ──────────────────────────────────────────────────
+        const payload = {
+            message: message.trim(),
+            patient_context: patientContext ? {
+                name:               patientContext.patient.name,
+                age:                patientContext.patient.age,
+                chronic_conditions: patientContext.chronicConditions || [],
+                current_conditions: patientContext.currentConditions.map(c => c.disease),
+                allergies:          patientContext.allergies || [],
+                risk_level:         patientContext.currentRiskScore?.overall || null
+            } : null
+        };
+
+        // ── 3. Call AI service ────────────────────────────────────────────────
         let aiResult;
         try {
             const aiResponse = await aiPostWithRetry('/ai/chat', payload);
             aiResult = aiResponse.data;
         } catch (aiError) {
-            const isTimeout = aiError.code === 'ECONNABORTED' || aiError.message.includes('timeout');
-            const isOffline = !aiError.response;
-            
-            logger.error('[AI Service] Chat endpoint failed', { error: aiError.message });
+            const responseTimeMs = Date.now() - startTime;
 
             if (patientId) {
-                await AIPrediction.create({
-                    patientId,
-                    predictionType: 'chat',
-                    inputData: payload,
-                    resultData: { error: aiError.message },
-                    riskLevel: 'Unknown',
-                    aiServiceStatus: 'error'
-                }).catch(() => {});
+                await logAI({ patientId, endpoint: '/ai/chat', requestData: payload, responseData: { error: aiError.message }, responseTimeMs, status: 'error', errorMessage: aiError.message });
+                await AIPrediction.create({ patientId, predictionType: 'chat', inputData: payload, resultData: { error: aiError.message }, riskLevel: 'Unknown', aiServiceStatus: 'error' }).catch(() => {});
             }
 
+            const isTimeout = aiError.code === 'ECONNABORTED' || aiError.message.includes('timeout');
             return res.status(503).json({
-                message: isTimeout 
-                    ? 'AI xizmati hozircha band yoxud uxlab qolgan (Kutish vaqti tugadi). Iltimos, 1-2 daqiqadan so\'ng qayta urinib ko\'ring.' 
-                    : isOffline
-                        ? 'AI xizmati vaqtincha o\'chiq holatda.'
-                        : 'AI xizmatidan xatolik qaytdi.',
-                reply: 'Texnik tanaffus. AI Xizmati hozircha tarmoqqa qayta ulanmoqda...',
+                message: isTimeout ? 'AI xizmati band. Birozdan so\'ng urinib ko\'ring.' : 'AI xizmati o\'chiq.',
+                reply: 'Texnik tanaffus. AI xizmati qayta ulanmoqda...',
                 detail: aiError.response ? aiError.response.data : aiError.message
             });
         }
 
-        // Optionally persist chat result for patients
+        const responseTimeMs = Date.now() - startTime;
+
+        // ── 4. Log and persist ────────────────────────────────────────────────
         if (patientId) {
-            await AIPrediction.create({
-                patientId,
-                predictionType: 'chat',
-                inputData: payload,
-                resultData: aiResult,
-                riskLevel: 'Unknown',
-                aiServiceStatus: 'success'
-            }).catch(err => logger.warn('Failed to persist chat result', { error: err.message }));
+            await logAI({ patientId, endpoint: '/ai/chat', requestData: payload, responseData: aiResult, responseTimeMs, status: 'success' });
+            await AIPrediction.create({ patientId, predictionType: 'chat', inputData: payload, resultData: aiResult, riskLevel: 'Unknown', aiServiceStatus: 'success' }).catch(e => logger.warn('Chat persist failed', { error: e.message }));
         }
 
-        logger.info('[AI Chat] Message forwarded to AI service', { patientId: patientId || 'anonymous' });
-        return res.json(aiResult);
+        logger.info('[AI Chat] Forwarded to AI service', { patientId: patientId || 'anonymous', responseTimeMs });
+        return res.json({ ...aiResult, _meta: { responseTimeMs } });
 
     } catch (error) {
         logger.error('[AI Controller] Chat endpoint error', { error: error.message });
         next(error);
+    }
+};
+
+// ─── GET /api/ai/predictions/:patientId ───────────────────────────────────────
+exports.getPatientPredictions = async (req, res, next) => {
+    try {
+        const { patientId } = req.params;
+        const patient = await Patient.findByPk(patientId, { attributes: ['id', 'name'] });
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+        const predictions = await AIPrediction.findAll({
+            where: { patientId },
+            attributes: ['id', 'predictionType', 'riskLevel', 'aiServiceStatus', 'resultData', 'inputData', 'createdAt'],
+            order: [['createdAt', 'DESC']]
+        });
+
+        res.json({ patientId, patientName: patient.name, totalPredictions: predictions.length, predictions });
+    } catch (error) {
+        logger.error('[AI Controller] Get predictions error', { error: error.message });
+        next(error);
+    }
+};
+
+// ─── POST /api/ai/triage ─────────────────────────────────────────────────────
+/**
+ * Forwards triage request to Python AI service /ai/triage.
+ * Public endpoint — no auth required.
+ * Accepts: { symptoms, age, duration_days, severity }
+ */
+exports.triageAI = async (req, res, next) => {
+    const startTime = Date.now();
+    try {
+        const { symptoms, age, duration_days, severity } = req.body;
+        if (!symptoms || !age || duration_days === undefined || !severity) {
+            return res.status(400).json({ message: 'symptoms, age, duration_days, and severity are required' });
+        }
+
+        const payload = { symptoms, age, duration_days, severity };
+        let aiResult;
+        try {
+            const aiResponse = await aiPostWithRetry('/ai/triage', payload);
+            aiResult = aiResponse.data;
+        } catch (aiError) {
+            const isTimeout = aiError.code === 'ECONNABORTED' || aiError.message.includes('timeout');
+            return res.status(503).json({
+                message: isTimeout ? 'AI xizmati band (timeout).' : 'AI xizmati o\'chiq.',
+                detail: aiError.response ? aiError.response.data : aiError.message
+            });
+        }
+
+        const responseTimeMs = Date.now() - startTime;
+        logger.info('[AI Triage] Triage completed', { responseTimeMs, level: aiResult?.triage_level });
+        return res.json({ ...aiResult, _meta: { responseTimeMs } });
+    } catch (error) {
+        logger.error('[AI Controller] Triage error', { error: error.message });
+        next(error);
+    }
+};
+
+exports.askAI = async (req, res) => {
+    try {
+        const { message } = req.body;
+        if (!message || typeof message !== 'string' || message.trim() === '') {
+            return res.status(400).json({ reply: 'Iltimos, savol yoki simptomlaringizni kiriting.' });
+        }
+        const t = message.trim().toLowerCase();
+        let reply;
+        if (t.includes('bosh') || t.includes("bosh og'riq"))
+            reply = "Bosh og'riq ko'p sababli: stress, uyqu yetishmasligi, qon bosimi. Uzoq davom etsa, shifokorga murojaat qiling.";
+        else if (t.includes('harorat') || t.includes('isitma'))
+            reply = "38°C dan yuqori harorat — infeksion kasallik belgisi. Ko'p suv iching va shifokorga boring.";
+        else if (t.includes("yo'tal") || t.includes('nafas'))
+            reply = "Nafas qiyinligi — zudlik bilan tibbiy yordam oling.";
+        else if (t.includes('salom') || t.includes('assalomu'))
+            reply = 'Assalomu alaykum! MedSmart AI yordamchisiman. Qanday savol?';
+        else
+            reply = `Simptomlaringizni tushundim: "${message.trim()}". Aniqroq tashxis uchun shifokorga murojaat qiling.`;
+
+        return res.json({ reply });
+    } catch (error) {
+        return res.status(500).json({ reply: "Serverda xatolik yuz berdi." });
     }
 };
