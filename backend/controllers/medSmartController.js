@@ -174,9 +174,9 @@ const getAllAppointments = async (req, res, next) => {
     try {
         const appointments = await Appointment.findAll({
             include: [
-                { model: Doctor, as: 'Doctor', attributes: ['id', 'name', 'specialization'] },
-                { model: Patient, as: 'Patient', attributes: ['id', 'name'] },
-                { model: Service, as: 'Service', attributes: ['id', 'name', 'price'] }
+                { model: Doctor, as: 'doctor', attributes: ['id', 'name', 'specialization'] },
+                { model: Patient, as: 'patient', attributes: ['id', 'name'] },
+                { model: Service, as: 'service', attributes: ['id', 'name', 'price'] }
             ]
         });
         res.json(appointments);
@@ -189,9 +189,9 @@ const getAppointmentById = async (req, res, next) => {
     try {
         const appointment = await Appointment.findByPk(req.params.id, {
             include: [
-                { model: Doctor, as: 'Doctor', attributes: ['id', 'name', 'specialization'] },
-                { model: Patient, as: 'Patient', attributes: ['id', 'name'] },
-                { model: Service, as: 'Service', attributes: ['id', 'name', 'price'] }
+                { model: Doctor, as: 'doctor', attributes: ['id', 'name', 'specialization'] },
+                { model: Patient, as: 'patient', attributes: ['id', 'name'] },
+                { model: Service, as: 'service', attributes: ['id', 'name', 'price'] }
             ]
         });
         if (!appointment) return res.status(404).json({ message: 'Appointment not found' });

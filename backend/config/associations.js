@@ -75,8 +75,8 @@ const setupAssociations = () => {
     RiskScore.belongsTo(Patient,      { foreignKey: 'patientId', as: 'patient' });
 
     // ── User → RefreshToken ────────────────────────────────────────────────────
-    User.hasMany(RefreshToken,        { foreignKey: 'userId', as: 'refreshTokens', onDelete: 'CASCADE' });
-    RefreshToken.belongsTo(User,      { foreignKey: 'userId', as: 'user' });
+    // User.hasMany(RefreshToken,        { foreignKey: 'userId', as: 'refreshTokens', onDelete: 'CASCADE' });
+    // RefreshToken.belongsTo(User,      { foreignKey: 'userId', as: 'user' });
 };
 
 module.exports = {

@@ -99,23 +99,24 @@ const register = async (req, res, next) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const patient = await Patient.create({
+        const user = await User.create({
             name,
             email,
             password,
+            role: 'patient',
             phone: phone || null
         });
 
-        const accessToken  = generateAccessToken(patient.id, 'bemor');
-        const refreshToken = await generateRefreshToken(patient.id, 'bemor');
+        const accessToken  = generateAccessToken(user.id, 'patient');
+        const refreshToken = await generateRefreshToken(user.id, 'patient');
 
-        logger.info('New patient registered', { userId: patient.id });
+        logger.info('New user registered', { userId: user.id });
 
         return res.status(201).json({
-            id: patient.id,
-            name: patient.name,
-            email: patient.email,
-            role: 'bemor',
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: 'patient',
             token: accessToken,
             accessToken,
             refreshToken

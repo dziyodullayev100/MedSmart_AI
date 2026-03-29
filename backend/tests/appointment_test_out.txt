@@ -1,0 +1,9 @@
+﻿--- API TEST: Appointments CRUD ---
+1. Registering new patient (patient_1774800966545@test.com)...
+   [PASS] Patient registered. Token received.
+
+2. Creating an appointment...
+   [WARN] Could not create appointment (Status: 400). Reason: Validation error
+   (Make sure a Doctor with ID 1 exists in the database. Continuing test...)
+
+3. Fetching appointments list...
