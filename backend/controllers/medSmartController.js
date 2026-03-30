@@ -205,7 +205,7 @@ const createAppointment = async (req, res, next) => {
     try {
         const { patientId, doctorId, date, time, notes, serviceId } = req.body;
         const appointment = await Appointment.create({
-            patientId, doctorId, date, time, notes, serviceId
+            patientId, doctorId, appointmentDate: date, appointmentTime: time, notes, serviceId
         });
         res.status(201).json(appointment);
     } catch (error) {
@@ -220,8 +220,8 @@ const updateAppointment = async (req, res, next) => {
         if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
         if (patientId) appointment.patientId = patientId;
         if (doctorId) appointment.doctorId = doctorId;
-        if (date) appointment.date = date;
-        if (time) appointment.time = time;
+        if (date) appointment.appointmentDate = date;
+        if (time) appointment.appointmentTime = time;
         if (notes !== undefined) appointment.notes = notes;
         if (serviceId) appointment.serviceId = serviceId;
         await appointment.save();

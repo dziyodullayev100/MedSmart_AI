@@ -46,7 +46,6 @@ async function runAppointmentApiTest() {
         const createRes = await axios.post(`${BASE_URL}/appointments`, {
             patientId: patientId,
             doctorId: doctorId,
-            serviceId: null,
             date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
             time: '10:00',
             notes: 'Routine Checkup'
@@ -57,8 +56,8 @@ async function runAppointmentApiTest() {
             console.log('   [PASS] Appointment created successfully.');
             appointmentId = createRes.data.id || createRes.data.appointment?.id;
         } else {
-            console.log(`   [WARN] Could not create appointment (Status: ${createRes.status}). Reason: ${createRes.data.message || 'Unknown'}`);
-            console.log('   (Make sure a Doctor with ID 1 exists in the database. Continuing test...)');
+            console.log(`   [WARN] Could not create appointment (Status: ${createRes.status}). Data:`, createRes.data);
+            console.log('   (Continuing test...)');
         }
 
         // 3. Get Appointments

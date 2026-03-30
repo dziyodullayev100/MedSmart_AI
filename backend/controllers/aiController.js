@@ -18,6 +18,7 @@ const RiskScore    = require('../models/RiskScore');
 const Notification = require('../models/Notification');
 const logger       = require('../utils/logger');
 const { buildPatientDataForAI } = require('../utils/aiDataBuilder');
+const { askGemini } = require('../utils/geminiClient');
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
@@ -268,72 +269,50 @@ exports.getDiseaseProgression = async (req, res, next) => {
     }
 };
 
-// ─── POST /api/ai/chat ────────────────────────────────────────────────────────
-exports.chatAI = async (req, res, next) => {
+// ─── POST /api/ai/chat (Gemini Backend Integration) ────────────────────────
+const chatSessions = new Map();
+
+exports.chatWithGemini = async (req, res, next) => {
     const startTime = Date.now();
     try {
-        const { message, patientId } = req.body;
+        const { message, session_id, patientId } = req.body;
 
         if (!message || typeof message !== 'string' || message.trim() === '') {
-            return res.status(400).json({ reply: 'Iltimos, savol yoki simptomlaringizni kiriting.' });
+            return res.status(400).json({ reply: 'Iltimos, savol yoki matn kiriting.' });
         }
 
-        // ── 1. Optionally build patient context ───────────────────────────────
-        let patientContext = null;
-        if (patientId) {
-            try {
-                patientContext = await buildPatientDataForAI(patientId);
-            } catch (_) { /* context is optional */ }
+        const sid = session_id || 'default_session';
+        if (!chatSessions.has(sid)) {
+            chatSessions.set(sid, []);
         }
+        
+        const history = chatSessions.get(sid);
 
-        // ── 2. Build payload ──────────────────────────────────────────────────
-        const payload = {
-            message: message.trim(),
-            patient_context: patientContext ? {
-                name:               patientContext.patient.name,
-                age:                patientContext.patient.age,
-                chronic_conditions: patientContext.chronicConditions || [],
-                current_conditions: patientContext.currentConditions.map(c => c.disease),
-                allergies:          patientContext.allergies || [],
-                risk_level:         patientContext.currentRiskScore?.overall || null
-            } : null
-        };
+        // Call Gemini Native Integration
+        const result = await askGemini(message, history);
 
-        // ── 3. Call AI service ────────────────────────────────────────────────
-        let aiResult;
-        try {
-            const aiResponse = await aiPostWithRetry('/ai/chat', payload);
-            aiResult = aiResponse.data;
-        } catch (aiError) {
-            const responseTimeMs = Date.now() - startTime;
-
-            if (patientId) {
-                await logAI({ patientId, endpoint: '/ai/chat', requestData: payload, responseData: { error: aiError.message }, responseTimeMs, status: 'error', errorMessage: aiError.message });
-                await AIPrediction.create({ patientId, predictionType: 'chat', inputData: payload, resultData: { error: aiError.message }, riskLevel: 'Unknown', aiServiceStatus: 'error' }).catch(() => {});
-            }
-
-            const isTimeout = aiError.code === 'ECONNABORTED' || aiError.message.includes('timeout');
-            return res.status(503).json({
-                message: isTimeout ? 'AI xizmati band. Birozdan so\'ng urinib ko\'ring.' : 'AI xizmati o\'chiq.',
-                reply: 'Texnik tanaffus. AI xizmati qayta ulanmoqda...',
-                detail: aiError.response ? aiError.response.data : aiError.message
-            });
+        // Update session tracking logic: Keep Max 10 messages
+        history.push({ role: 'user', parts: [{ text: message }] });
+        history.push({ role: 'model', parts: [{ text: result.reply }] });
+        
+        if (history.length > 10) {
+            history.splice(0, history.length - 10);
         }
 
         const responseTimeMs = Date.now() - startTime;
 
-        // ── 4. Log and persist ────────────────────────────────────────────────
+        // Optionally Log to DB if patient logged in
         if (patientId) {
-            await logAI({ patientId, endpoint: '/ai/chat', requestData: payload, responseData: aiResult, responseTimeMs, status: 'success' });
-            await AIPrediction.create({ patientId, predictionType: 'chat', inputData: payload, resultData: aiResult, riskLevel: 'Unknown', aiServiceStatus: 'success' }).catch(e => logger.warn('Chat persist failed', { error: e.message }));
+            await logAI({ patientId, endpoint: '/api/ai/chat', requestData: { message, session_id }, responseData: result, responseTimeMs, status: 'success' });
+            await AIPrediction.create({ patientId, predictionType: 'chat', inputData: { message }, resultData: result, riskLevel: 'Unknown', aiServiceStatus: 'success' }).catch(e => logger.warn('Chat persist failed', { error: e.message }));
         }
 
-        logger.info('[AI Chat] Forwarded to AI service', { patientId: patientId || 'anonymous', responseTimeMs });
-        return res.json({ ...aiResult, _meta: { responseTimeMs } });
+        logger.info('[AI Chat] Response from Gemini', { session_id, responseTimeMs });
+        return res.json({ ...result, _meta: { responseTimeMs } });
 
     } catch (error) {
-        logger.error('[AI Controller] Chat endpoint error', { error: error.message });
-        next(error);
+        logger.error('[AI chatWithGemini] Error', { error: error.message });
+        res.status(500).json({ reply: "Kechirasiz, AI xizmati vaqtincha ishlamayapti. Qayta urinib ko'ring." });
     }
 };
 
