@@ -1,13 +1,13 @@
 const axios = require('axios');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 const SYSTEM_PROMPT = `Sen MedSmart tibbiy yordamchi sun'iy intellektisan.
 Quyidagi qoidalarga amal qil:
 1. Har doim O'zbek tilida javob ber
 2. Tibbiy maslahat ber, lekin shifokorga borishni tavsiya qil
-3. Agar bemor ko'krak og'rig'i, nafas qisishi, hushidan ketdi, insult kabi so'zlar yozsa DARHOL tez yordam chaqirishni ayt
+ ketdi, insult kabi so'zlar yozsa DARHOL tez yordam chaqirishni ayt3. Agar bemor ko'krak og'rig'i, nafas qisishi, hushidan
 4. Javoblar qisqa va tushunarli bo'lsin (max 3-4 jumla)
 5. Har javob oxirida: Shifokorga murojaat qilishni tavsiya etamiz`;
 
@@ -24,8 +24,12 @@ async function askGemini(message, history = []) {
       headers: { 'Content-Type': 'application/json' }
     });
 
+    if (!response.data || !response.data.candidates || !response.data.candidates[0]) {
+      throw new Error('Gemini dan noto\'g\'ri javob keldi.');
+    }
+
     const reply = response.data.candidates[0].content.parts[0].text;
-    
+
     // Detect emergency from reply
     const lowerReply = reply.toLowerCase();
     let emergency = false;
@@ -56,7 +60,14 @@ async function askGemini(message, history = []) {
       metadata: { intent, symptoms_detected, emergency }
     };
   } catch (error) {
-    console.error('[Gemini Client] API Error:', error.response ? error.response.data : error.message);
+    const errorData = error.response ? error.response.data : error.message;
+    console.error('[Gemini Client] API Error Details:', JSON.stringify(errorData, null, 2));
+
+    // Specific error messages for the UI
+    if (error.response && error.response.status === 429) {
+      throw new Error('Limit to\'ldi. Iltimos, bir ozdan so\'ng qayta urinib ko\'ring.');
+    }
+
     throw new Error('AI xizmati vaqtincha ishlamayapti');
   }
 }

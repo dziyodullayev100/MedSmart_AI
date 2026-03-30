@@ -16,8 +16,8 @@ router.get('/predictions/:patientId', protect, aiController.getPatientPrediction
 // POST /api/ai/ask — Conversational AI diagnostics (mock, public)
 router.post('/ask', validateRequest(schemas.aiChat), aiController.askAI);
 
-// POST /api/ai/chat — Conversational AI forwarded to Gemini API (public)
-router.post('/chat', validateRequest(schemas.aiChat), aiController.chatWithGemini);
+// POST /api/ai/chat — Conversational AI forwarded to OpenRouter API (public)
+router.post('/chat', validateRequest(schemas.aiChat), aiController.chatWithAI);
 
 // POST /api/ai/triage — Quick medical triage assessment (public)
 router.post('/triage', aiController.triageAI);

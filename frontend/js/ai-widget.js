@@ -309,29 +309,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const baseUrl = window.API_BASE_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${baseUrl}/ai/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-        },
-        body: JSON.stringify({
-          message: text,
-          session_id: sessionId
-        })
-      });
-
-      const data = await response.json();
+      const res = await fetch(
+        `${baseUrl}/ai/chat`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+          },
+          body: JSON.stringify({
+            message: text,
+            session_id: sessionId
+          })
+        }
+      );
+      const data = await res.json();
       removeTypingIndicator();
 
-      if (!response.ok) {
+      if (!res.ok) {
         throw new Error(data.reply || 'API Error');
       }
-
-      const replyText = data.reply || 'Xatolik yuz berdi.';
+      const reply = data.reply || 'Xatolik yuz berdi.';
       const metadata = data.metadata || null;
-
-      appendBotResponse(replyText, metadata);
+      appendBotResponse(reply, metadata);
 
     } catch (err) {
       removeTypingIndicator();

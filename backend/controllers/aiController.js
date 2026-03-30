@@ -18,7 +18,7 @@ const RiskScore    = require('../models/RiskScore');
 const Notification = require('../models/Notification');
 const logger       = require('../utils/logger');
 const { buildPatientDataForAI } = require('../utils/aiDataBuilder');
-const { askGemini } = require('../utils/geminiClient');
+const { askAI } = require('../utils/huggingfaceClient');
 
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:8000';
 
@@ -269,10 +269,10 @@ exports.getDiseaseProgression = async (req, res, next) => {
     }
 };
 
-// ─── POST /api/ai/chat (Gemini Backend Integration) ────────────────────────
+// ─── POST /api/ai/chat (HuggingFace Backend Integration) ────────────────────────
 const chatSessions = new Map();
 
-exports.chatWithGemini = async (req, res, next) => {
+exports.chatWithAI = async (req, res, next) => {
     const startTime = Date.now();
     try {
         const { message, session_id, patientId } = req.body;
@@ -288,12 +288,12 @@ exports.chatWithGemini = async (req, res, next) => {
         
         const history = chatSessions.get(sid);
 
-        // Call Gemini Native Integration
-        const result = await askGemini(message, history);
+        // Call HuggingFace Native Integration
+        const result = await askAI(message, history);
 
         // Update session tracking logic: Keep Max 10 messages
-        history.push({ role: 'user', parts: [{ text: message }] });
-        history.push({ role: 'model', parts: [{ text: result.reply }] });
+        history.push({ role: 'user', content: message });
+        history.push({ role: 'assistant', content: result.reply });
         
         if (history.length > 10) {
             history.splice(0, history.length - 10);
@@ -307,11 +307,12 @@ exports.chatWithGemini = async (req, res, next) => {
             await AIPrediction.create({ patientId, predictionType: 'chat', inputData: { message }, resultData: result, riskLevel: 'Unknown', aiServiceStatus: 'success' }).catch(e => logger.warn('Chat persist failed', { error: e.message }));
         }
 
-        logger.info('[AI Chat] Response from Gemini', { session_id, responseTimeMs });
+        logger.info('[AI Chat] Response from HuggingFace', { session_id, responseTimeMs });
         return res.json({ ...result, _meta: { responseTimeMs } });
 
     } catch (error) {
-        logger.error('[AI chatWithGemini] Error', { error: error.message });
+        console.error('[AI chatWithAI] FULL ERROR:', error);
+        logger.error('[AI chatWithAI] Error', { error: error.message });
         res.status(500).json({ reply: "Kechirasiz, AI xizmati vaqtincha ishlamayapti. Qayta urinib ko'ring." });
     }
 };
