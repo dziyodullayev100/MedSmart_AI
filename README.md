@@ -5,7 +5,7 @@ MedSmart — bu zamonaviy tibbiyot muassasalari uchun mo'ljallangan, sun'iy inte
 
 ---
 
-## 🚀 Ishga Tushirish Yo'riqnomasi (Quick Start)
+## 🚀 Ishga Tushirish Yo'riqnomasi (Quick Start / Installation)
 
 Loyihaning to'liq ishlashi uchun **ikkita terminal** oynasi kerak bo'ladi.
 
