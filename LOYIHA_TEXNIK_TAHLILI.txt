@@ -1,0 +1,62 @@
+=========================================================
+🏥 MEDSMART AI - LOYIHA TEXNIK TAHLILI (RUHSATNOMA)
+=========================================================
+
+Ushbu hujjat loyihaning texnologik qatlamlarini (Tech Stack) 
+hay'at a'zolari va domlalarga tushuntirib berish uchun mo'ljallangan.
+
+---------------------------------------------------------
+1. LOYIHA STRUKTURASI (4 ta asosiy papka)
+---------------------------------------------------------
+
+📂 frontend (Web Interfeys)
+   - Tillar: HTML5, CSS3, JavaScript (ES6+).
+   - Vazifasi: Foydalanuvchi ko'rib turgan barcha interfeyslar, 
+     interaktiv grafiklar (ApexCharts) va chat oynasi.
+
+📂 backend (Server Logikasi)
+   - Tili: JavaScript (Node.js platformasida).
+   - Vazifasi: Ma'lumotlar bazasi bilan muloqot, foydalanuvchilar 
+     login-parolini tekshirish (Auth) va AI servislar bilan bog'lanish.
+
+📂 ai_service (Sun'iy Intellekt "Yuragi")
+   - Tili: Python.
+   - Vazifasi: Mashinali o'qitish (Random Forest) va zanjir tahlili 
+     (Apriori) algoritmlari. FastAPI orqali backend bilan bog'lanadi.
+
+📂 database (Ma'lumotlar bazasi)
+   - Tili: SQL (PostgreSQL tizimi).
+   - Vazifasi: Barcha bemorlar, shifokorlar va tibbiy tarixni 
+     xavfsiz hamda tartibli saqlash.
+
+---------------------------------------------------------
+2. TEXNIK TERMINLARNI TUSHUNTIRISH (Sodda tilda)
+---------------------------------------------------------
+
+✅ Node.js nima?
+   - Bu JavaScript tilini brauzerdan tashqarida, ya'ni kompyuterning 
+     o'zida (serverda) ishlashiga imkon beruvchi muhit (runtime environment).
+   - O'xshatish: JavaScript - "baliq", Node.js esa uni "quruqlikda"
+     yura olishiga imkon beradigan maxsus kiyim.
+
+✅ Express.js nima?
+   - Bu Node.js ustiga qurilgan tayyor asboblar to'plami (Framework).
+   - O'xshatish: Node.js - "g'isht va sement", Express.js esa tayyor 
+     "beton bloklar". Uy qurishni ancha tezlashtiradi.
+
+✅ Nima uchun aynan Python?
+   - Python dunyoda Sun'iy Intellekt va Data Science bo'yicha 1-o'rindagi 
+     til. Uning kutubxonalari (Scikit-learn, FastAPI) juda tez va aniq ishlaydi.
+
+---------------------------------------------------------
+3. DOMLALAR UCHUN QISQA XULOSA (Yodlab oling):
+---------------------------------------------------------
+
+"Domla, loyihamiz Full-stack JavaScript va Python tillari 
+kombinatsiyasidan iborat. Backend Node.js va Express.js orqali, 
+AI-modullar esa Python FastAPI yordamida bir-biriga bog'langan. 
+Ma'lumotlar bazasi sifatida PostgreSQL tanlangan."
+
+=========================================================
+Tayyorlagan: MedSmart Development Team
+=========================================================

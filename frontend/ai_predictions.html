@@ -68,7 +68,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1400px;
             margin: 20px auto;
             padding: 15px;
         }
@@ -97,11 +97,16 @@
 
         .card {
             background: white;
-            padding: 20px;
-            border-radius: 16px;
+            padding: 25px;
+            border-radius: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
             border-top: 6px solid var(--emerald);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
         }
 
         .card h2 {
@@ -158,16 +163,16 @@
         }
 
         .chat-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-height: 400px;
+            height: 200px;
             overflow-y: auto;
-            padding: 10px;
-            background: #f9fafb;
+            padding: 15px;
+            background: #f8fafc;
             border-radius: 12px;
             margin-bottom: 15px;
             border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .chat-message {
@@ -266,7 +271,40 @@
                 margin: 15px;
             }
         }
+        .chart-wrapper {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+            margin-top: 15px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            align-items: stretch;
+        }
+
+        .dashboard-grid > .card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0; /* Grid gap handles this */
+        }
+
+        .dashboard-grid > .card > div:last-child {
+            flex-grow: 1; /* Push content to fill space if needed */
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 
 <body>
@@ -284,49 +322,51 @@
             <p>Eng ilg'or sun'iy intellekt tahlili yordamida shakllantirilgan.</p>
         </section>
 
-        <!-- YANTA SUN'IY INTELLEKT CHAT KARTASI -->
-        <div id="ai-chat-card" class="card" style="border-top-color: #3b82f6;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="color: #1d4ed8; margin: 0;">🤖 AI Diagnostika (Konsultatsiya)</h2>
-                <button id="ai-clear-btn" class="chat-btn-clear">Xabarlarni tozalash</button>
-            </div>
+        <div class="dashboard-grid">
+            <!-- YANTA SUN'IY INTELLEKT CHAT KARTASI -->
+            <div id="ai-chat-card" class="card" style="border-top-color: #3b82f6;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="color: #1d4ed8; margin: 0; font-size: 1rem;">🤖 AI Konsultatsiya</h2>
+                    <button id="ai-clear-btn" class="chat-btn-clear">Tozalash</button>
+                </div>
 
-            <div id="ai-chat-container" class="chat-container">
-                <div class="chat-message ai">
-                    Assalomu alaykum! Men MedSmart sun'iy intellekt tizimiman. Sizni nima bezovta qilyapti?
-                    Belgilaringiz haqida batafsil yozing.
+                <div id="ai-chat-container" class="chat-container">
+                    <div class="chat-message ai">
+                        Assalomu alaykum! Men MedSmart sun'iy intellekt tizimiman. Sizni nima bezovta qilyapti?
+                        Belgilaringiz haqida batafsil yozing.
+                    </div>
+                </div>
+
+                <form id="ai-chat-form" class="chat-input-wrapper">
+                    <input type="text" id="ai-chat-input" class="chat-input" placeholder="Simptomlaringizni kiriting..."
+                        required autocomplete="off">
+                    <button type="submit" id="ai-submit-btn" class="chat-btn">
+                        Yuborish
+                    </button>
+                </form>
+                <div style="font-size: 0.75rem; color: #6b7280; margin-top: 8px; text-align: center;">
+                    * Eslatma: AI maslahatlari shifokor ko'rigini o'rnini bosa olmaydi.
                 </div>
             </div>
 
-            <form id="ai-chat-form" class="chat-input-wrapper">
-                <input type="text" id="ai-chat-input" class="chat-input" placeholder="Simptomlaringizni kiriting..."
-                    required autocomplete="off">
-                <button type="submit" id="ai-submit-btn" class="chat-btn">
-                    Yuborish
-                </button>
-            </form>
-            <div style="font-size: 0.8rem; color: #6b7280; margin-top: 8px; text-align: center;">
-                * Eslatma: AI maslahatlari shifokor ko'rigini o'rnini bosa olmaydi. Kelajakda bu tizim bevosita FastAPI
-                AI servisi bilan ishlaydi.
+            <div id="seasonal-card" class="card">
+                <h2>📅 Mavsumiy Kasalliklar Bashorati</h2>
+                <div id="seasonal-content">
+                    <div class="alert-login">Yuklanmoqda...</div>
+                </div>
             </div>
-        </div>
 
-        <div id="seasonal-card" class="card">
-            <h2>📅 Mavsumiy Kasalliklar Bashorati</h2>
-            <div id="seasonal-content">
-                <div class="alert-login">Yuklanmoqda...</div>
-            </div>
-        </div>
-
-        <div id="progression-card" class="card" style="border-top-color: #059669;">
-            <h2>📈 Kasallik Rivojlanish Tahlili</h2>
-            <div id="progression-content">
-                <div class="alert-login">Yuklanmoqda...</div>
+            <div id="progression-card" class="card" style="border-top-color: #059669;">
+                <h2>📈 Kasallik Rivojlanish Tahlili</h2>
+                <div id="progression-content">
+                    <div class="alert-login">Yuklanmoqda...</div>
+                </div>
             </div>
         </div>
     </main>
 
     <script src="js/config.js"></script>
+    <script src="js/xavfsizlik.js"></script>
     <script src="js/sync.js"></script>
     <script src="js/apiClient.js"></script>
     <script>
@@ -334,18 +374,22 @@
         async function loadAI() {
             // Login ma'lumotlarini olish
             const userData = JSON.parse(localStorage.getItem('medsmart_user') || '{}');
-            const patientId = userData.id || '1'; // Agar login qilmagan bo'lsa default '1'
-            const token = localStorage.getItem('medsmart_token') || localStorage.getItem('token') || '';
-            const headers = { 'Authorization': `Bearer ${token}` };
+            const patientId = userData.id;
+
+            if (!patientId) {
+                document.getElementById('seasonal-content').innerHTML = '<div class="alert-login">Iltimos, avval tizimga kiring.</div>';
+                document.getElementById('progression-content').innerHTML = '<div class="alert-login">Iltimos, avval tizimga kiring.</div>';
+                return;
+            }
 
             try {
                 // Seasonal API replaced using apiClient
-                const sData = await apiClient.post('/ai/seasonal-prediction', { patientId }, headers, true);
+                const sData = await window.apiClient.post('/ai/seasonal-prediction', { patientId }, {}, true);
                 if (sData) renderSeasonal(sData);
                 else renderSeasonal({ message: true, error: "Xatolik" });
 
                 // Progression API replaced using apiClient
-                const pData = await apiClient.post('/ai/disease-progression', { patientId }, headers, true);
+                const pData = await window.apiClient.post('/ai/disease-progression', { patientId }, {}, true);
                 if (pData) renderProgression(pData);
                 else renderProgression({ message: true, error: "Xatolik" });
             } catch (err) {
@@ -444,49 +488,135 @@
 
         function renderSeasonal(data) {
             const container = document.getElementById('seasonal-content');
-            if (data.message) { container.innerHTML = '<div class="alert-login">Iltimos, avval tizimga kiring.</div>'; return; }
+            if (!data || data.message || !data["Patient Forecast"]) { 
+                container.innerHTML = '<div class="alert-login">Bashorat ma\'lumotlari hozircha mavjud emas.</div>'; 
+                return; 
+            }
 
             const forecast = data["Patient Forecast"];
-            let html = `<div class="history-badge">Hozirgi mavsum: ${forecast.Season}</div>`;
-
-            forecast["Top Risks"].forEach(r => {
-                html += `
-                    <div class="risk-item">
-                        <span>${r.disease}</span>
-                        <span style="color: #059669;">${r.risk}%</span>
-                    </div>
-                    <div class="risk-bar-container">
-                        <div class="risk-bar" style="width: ${r.risk}%"></div>
-                    </div>
-                `;
-            });
+            let html = `<div class="history-badge">Hozirgi mavsum: ${forecast.Season || 'Noma\'lum'}</div>`;
+            html += `<div class="chart-wrapper"><div id="seasonal-chart"></div></div>`;
             container.innerHTML = html;
+
+            const topRisks = forecast["Top Risks"] || [];
+            if (topRisks.length === 0) {
+                container.innerHTML += "<p style='color: #6b7280; text-align: center;'>Hech qanday xavf aniqlanmadi.</p>";
+                return;
+            }
+
+            const diseases = topRisks.map(r => r.disease);
+            const risks = topRisks.map(r => r.risk);
+            const colors = risks.map(r => r > 60 ? '#ef4444' : r > 30 ? '#f59e0b' : '#10b981'); // Qizil, Sariq, Yashil
+
+            const options = {
+                series: [{ name: 'Xavf darajasi (%)', data: risks }],
+                chart: { type: 'bar', height: 210, toolbar: { show: false }, fontFamily: 'Outfit, sans-serif' },
+                plotOptions: { bar: { borderRadius: 6, horizontal: false, distributed: true, columnWidth: '45%' } },
+                colors: colors,
+                dataLabels: { enabled: true, formatter: function (val) { return val + "%" } },
+                xaxis: { categories: diseases },
+                yaxis: { max: 100 },
+                tooltip: { theme: 'light', y: { formatter: function (val) { return val + "%" } } }
+            };
+
+            const chart = new ApexCharts(document.querySelector("#seasonal-chart"), options);
+            chart.render();
         }
 
         function renderProgression(data) {
             const container = document.getElementById('progression-content');
-            if (data.message) { container.innerHTML = '<div class="alert-login">Iltimos, avval tizimga kiring.</div>'; return; }
+            if (!data || data.message || !data["Patient Risk Analysis"]) { 
+                container.innerHTML = '<div class="alert-login">Rivojlanish ma\'lumotlari hozircha mavjud emas.</div>'; 
+                return; 
+            }
 
             const analysis = data["Patient Risk Analysis"];
-            let text = analysis["History Found"].join(', ') || "Ma'lumot topilmadi";
-            let html = `<div class="history-badge" style="background: #f0fdf4;">${text} aniqlangan</div>`;
+            const historyFound = analysis["History Found"] || [];
+            let text = historyFound.join(', ') || "Ma'lumot topilmadi";
+            let html = `<div class="history-badge" style="background: #f0fdf4;">Asos: ${text}</div>`;
 
-            if (analysis["Future Risks"].length === 0) {
-                html += "<p style='color: #6b7280; text-align: center;'>Hozircha qo'shimcha risklar aniqlanmadi.</p>";
+            const futureRisks = analysis["Future Risks"] || [];
+            if (futureRisks.length === 0) {
+                html += `<div class="chart-wrapper" style="border-color: #10b98133; padding: 10px;"><div id="progression-empty-chart"></div></div>`;
+                html += `
+                    <div style="margin-top: 15px; padding: 12px; background: #f0fdf4; border-radius: 12px; border-left: 4px solid #10b981;">
+                        <h4 style="margin: 0 0 5px 0; font-size: 0.85rem; color: #1e293b;">🤖 AI Xulosasi</h4>
+                        <p style="margin: 0; font-size: 0.8rem; color: #475569; line-height: 1.4;">
+                            Yaqin orada yuzaga kelishi mumkin bo'lgan jiddiy xavf-hatarlar aniqlanmadi. Holatingiz xavfsiz zonada.
+                        </p>
+                    </div>
+                `;
+                container.innerHTML = html;
+                
+                const options = {
+                    series: [95],
+                    chart: { type: 'radialBar', height: 210, fontFamily: 'Outfit, sans-serif' },
+                    plotOptions: {
+                        radialBar: {
+                            startAngle: -135,
+                            endAngle: 135,
+                            hollow: { size: '60%' },
+                            dataLabels: {
+                                name: { fontSize: '14px', color: '#6b7280', offsetY: 60 },
+                                value: { 
+                                    fontSize: '22px', fontWeight: 700, color: '#10b981', offsetY: -10,
+                                    formatter: () => "Barqaror" 
+                                }
+                            }
+                        }
+                    },
+                    fill: { type: 'gradient', gradient: { shade: 'dark', type: 'horizontal', colorStops: [ { offset: 0, color: '#10b981' }, { offset: 100, color: '#059669' } ] } },
+                    stroke: { lineCap: 'round' },
+                    labels: ['Sog\'liq darajasi'],
+                };
+                const chart = new ApexCharts(document.querySelector("#progression-empty-chart"), options);
+                chart.render();
             } else {
-                analysis["Future Risks"].forEach(r => {
-                    html += `
-                        <div class="risk-item">
-                            <span>Kutilmoqda: ${r.disease}</span>
-                            <span style="color: #059669;">${r.probability}</span>
-                        </div>
-                        <div class="risk-bar-container">
-                            <div class="risk-bar" style="width: ${r.probability}; background: #059669;"></div>
-                        </div>
-                    `;
-                });
+                html += `<div class="chart-wrapper" style="padding: 10px;"><div id="progression-chart"></div></div>`;
+                
+                // Add AI Summary section
+                html += `
+                    <div style="margin-top: 15px; padding: 12px; background: #f8fafc; border-radius: 12px; border-left: 4px solid #3b82f6;">
+                        <h4 style="margin: 0 0 5px 0; font-size: 0.85rem; color: #1e293b;">🤖 AI Xulosasi</h4>
+                        <p style="margin: 0; font-size: 0.8rem; color: #475569; line-height: 1.4;">
+                            Tibbiy tarix asosida kelajakda <b>${futureRisks[0].disease}</b> ehtimoli yuqori.
+                        </p>
+                    </div>
+                `;
+                container.innerHTML = html;
+
+                const diseases = futureRisks.map(r => r.disease);
+                const probs = futureRisks.map(r => parseFloat(r.probability.replace('%', '')));
+
+                const options = {
+                    series: probs,
+                    labels: diseases,
+                    chart: { type: 'donut', height: 210, fontFamily: 'Outfit, sans-serif' },
+                    stroke: { show: false },
+                    plotOptions: {
+                        pie: {
+                            donut: {
+                                size: '70%',
+                                labels: {
+                                    show: true,
+                                    total: {
+                                        show: true,
+                                        label: 'Umumiy xavf',
+                                        formatter: () => 'Yuqori'
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    legend: { position: 'bottom', horizontalAlign: 'center' },
+                    dataLabels: { enabled: true, formatter: (val) => val.toFixed(1) + "%" },
+                    tooltip: { theme: 'light', y: { formatter: (val) => val + "% ehtimollik" } },
+                    theme: { palette: 'palette1' }
+                };
+
+                const chart = new ApexCharts(document.querySelector("#progression-chart"), options);
+                chart.render();
             }
-            container.innerHTML = html;
         }
 
         // ── CHAT: Bind event listeners after DOM is ready ──────────────────

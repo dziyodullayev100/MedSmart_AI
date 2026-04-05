@@ -1,128 +1,83 @@
 # MedSmart — AI-Powered Medical Management System
 
-## Overview
-MedSmart is a comprehensive healthcare management and AI-diagnostic platform designed for clinical efficiency. By fusing a robust Node.js foundation with an advanced Python FastAPI Machine Learning backend, the system seamlessly handles everything from patient scheduling and financial tracking to predictive disease progression and automated seasonal triage.
+## 🌟 Umumiy Ma'lumot (Overview)
+MedSmart — bu zamonaviy tibbiyot muassasalari uchun mo'ljallangan, sun'iy intellekt (AI) tahlillariga asoslangan kompleks boshqaruv platformasi. Tizim Node.js (Backend) va Python FastAPI (AI Service) integratsiyasi orqali bemorlarni ro'yxatga olishdan tortib, ularning salomatligini bashorat qilishgacha bo'lgan jarayonlarni qamrab oladi.
 
-Built entirely as a scalable 3-tier Layered Architecture, it bridges traditional clinic operations with cutting-edge analytics—identifying latent risk factors before they develop into critical conditions. The frontend orchestrates a reactive app state supported by offline tolerance and priority queueing, ensuring practitioners never lose data even during network failures.
+---
 
-## Features
-- ✅ **Centralized Patient Profiles:** Complete history, vitals tracking, and chronological records.
-- ✅ **Role Based Access Control (RBAC):** Military-grade token refresh systems separating Admins, Doctors, and Patients.
-- ✅ **AI Diagnostic Engine:** Detects Seasonal probabilities and Progression associations via Random Forest and Apriori ML.
-- ✅ **Medical Chatbot:** Real-time NLP-driven symptom intent extraction and conversational history tracking.
-- ✅ **Automated Triage System:** Instant severity analytics with emergency alerts utilizing cross-referenced symptoms.
-- ✅ **Priority Offline Syncing:** High-latency durable local caches for remote field operations.
-- ✅ **Monitoring & Alerting Daemon:** Self-healing health-checks, ring-buffering CPU/Memory constraints per minute.
-- ✅ **Automated DB Snapshotting:** In-memory SQLite backups on rotational CRON lifecycles.
+## 🚀 Ishga Tushirish Yo'riqnomasi (Quick Start)
 
-## Architecture
-```
-[ Frontend: Vanilla JS Reactive App ]
-           │    │    │
-           │    ▼    │
-           │ JWT/API │
-           │         ▼
-[ Backend: Node.js / Express Core ] ◄──► [ SQLite Data / PostgreSQL ]
-           │            
-           │ Internal Proxy
-           ▼             
-[ AI Service: Python FastAPI Server ]
-     (ML Models, Random Forest, Scikit)
-```
+Loyihaning to'liq ishlashi uchun **ikkita terminal** oynasi kerak bo'ladi.
 
-## Quick Start
+### 1-QADAM: AI Xizmatini ishga tushirish (Miyani yoqish)
+AI qismi **8000-portda** ishlashi shart.
+1. VS Code'da yangi terminal oching.
+2. Quyidagi buyruqlarni yozing:
+   ```bash
+   cd ai_service
+   python run.py
+   ```
 
-### Prerequisites
-- Node.js `v20+`
-- Python `3.11+`
-- Git
+### 2-QADAM: Backend (Server) ni ishga tushirish (Yurakni yoqish)
+Backend qismi **5000-portda** ishlashi shart.
+1. VS Code'da ikkinchi terminalni oching.
+2. Quyidagi buyruqlarni yozing:
+   ```bash
+   cd backend
+   node server.js
+   ```
 
-### Installation
-```bash
-# 1. Clone & install Backend dependencies
-git clone https://github.com/your-username/medsmart.git
-cd medsmart/backend
-npm install
+### 3-QADAM: Frontendni ochish (Yuzni ko'rish)
+1. `frontend` papkasidagi **`index.html`** faylini brauzerda oching (yoki Live Server yordamida).
 
-# 2. Install AI Service dependencies
-cd ../ai_service
-pip install -r requirements.txt
+---
 
-# 3. Secure Variables
-cp .env.example .env
-```
+## 🛠 Texnologiyalar (Tech Stack)
+- **Frontend:** Vanilla JavaScript (ES6+), HTML5, CSS3, ApexCharts.
+- **Backend:** Node.js, Express.js, Sequelize ORM.
+- **AI Service:** Python, FastAPI, Scikit-learn (Machine Learning).
+- **Database:** PostgreSQL (Production) / SQLite (Development).
 
-### Running with Docker
-A production optimized orchestrator is included out of the box.
-```bash
-docker-compose up --build -d
-```
-> The Frontend will act as static assets served by the Node cluster, or deployed standalone automatically.
+---
 
-### Running manually
-```bash
-# Terminal 1 - Backend
-cd backend && npm start
+## 🧠 AI Modullari
+- **Seasonal Prediction (Random Forest):** Faslga qarab kasallik xavfini bashorat qilish.
+- **Disease Progression (Apriori):** Bemor tarixi asosida kelajakdagi xavflarni zanjir tahlili orqali topish.
+- **Medical Chatbot:** NLP asosidagi o'zbek tilidagi virtual yordamchi.
+- **Automated Triage:** Xavf darajasini (High/Medium/Low) avtomat aniqlash.
 
-# Terminal 2 - AI Models Server
-cd ai_service && python run.py
-```
+---
 
-## API Documentation
+## 📊 Ma'lumotlar Bazasi (Database Guide)
+DBeaver yoki boshqa vositalar orqali bazani kuzatishingiz mumkin:
+- **Patients:** Bemorlar shaxsiy ma'lumotlari.
+- **PatientHistories:** AI tahlili uchun asosiy tibbiy tarix.
+- **RiskScores & AIPredictions:** AI hisoblagan natijalar.
+- **Vitals:** Bemorning hayotiy ko'rsatkichlari (Qon bosimi, Puls, BMI).
 
-| Method | Path | Description | Authentication |
-|---|---|---|---|
-| `POST` | `/api/users/login` | Obtains secure JWT + Refresh Token | None |
-| `GET`  | `/api/medsmart/patients` | Retrieve all registered patients | Protected |
-| `POST` | `/api/ai/seasonal-prediction` | Calculate top-3 disease risks | Protected |
-| `POST` | `/api/ai/chat` | Send NLP symptom extraction queries | Protected |
-| `GET`  | `/api/health/full` | Advanced telemetry & system status | None |
-| `POST` | `/api/demo/seed` | Trigger automated realistic seeders | Admin |
+---
 
-## AI Features
-- **Seasonal Prediction (Random Forest):** Predicts patient susceptibility across 4 seasons tracking localized historical data.
-- **Disease Progression (Apriori Algorithm):** Looks at patient history + vitals to map conditional likelihood of evolving latent diseases via calculated *Lift and Confidence* maps.
-- **Triage Assessment:** Swift pattern matching returning HIGH/MEDIUM/LOW priority handling based on severity and durations.
-- **NLP Chat Engine:** Live extraction capturing user inputs and resolving true hidden intent mappings without structured forms.
+## 🧪 Testlash (Testing)
+Tizim 3 darajali testdan o'tgan:
+1. **Unit Testlar:** Alohida funksiyalarni tekshirish.
+2. **Integral Testlar:** Backend va AI Servisining o'zaro aloqasini tekshirish.
+3. **Sistem Testlar:** Bemorning tizimga kirishidan tortib bashorat olishigacha bo'lgan to'liq zanjir.
 
-## Environment Variables
+---
 
-| Variable | Description | Example |
-|---|---|---|
-| `NODE_ENV` | Application lifecycle context | `production` |
-| `PORT` | Bound internal networking port | `5000` |
-| `JWT_SECRET` | 64-char crypto signature key | `d2a938...` |
-| `AI_SERVICE_URL` | Fast API routing tunnel | `http://localhost:8000` |
-| `DEMO_MODE` | Expose orchestrated seeders | `true` |
-| `BACKUP_ENABLED` | Scheduled SQLite dumps | `true` |
+## 🖥 Terminal Komandalari (Cheat Sheet)
+- `cd ..` - Yuqori papkaga chiqish.
+- `ls / dir` - Fayllarni ko'rish.
+- `npm install` - Kutubxonalarni o'rnatish (Backend).
+- `pip install -r requirements.txt` - AI kutubxonalarini o'rnatish.
+- `Ctrl + C` - Ishlayotgan serverni to'xtatish.
 
-## Demo Mode
-To prepare the system for prospective clients or investors:
-1. Initialize the backend: `npm run seed:demo`
-2. Navigate to the login route with the query string configured:  
-   `http://localhost:5000/?demo=true`
-3. The visual navigator will securely inject `admin@medsmart.uz` credentials and orchestrate an automated UI tour.
+---
 
-## Deployment
-This repository is pre-configured via `.github/workflows`:
-1. **Render.com (Backend & AI):** Push to `main` auto-triggers deep static analysis, unit tests, and seamless multi-node deployment.
-2. **Netlify (Frontend):** Bind your static `frontend/` directory to track the repository directly. Production API bases can be overridden dynamically.
+### Tayyor Akkauntlar:
+- **Admin:** `admin@medsmart.uz` / Parol: `Demo1234!`
+- **Shifokor:** `dr.karimov@medsmart.uz` / Parol: `Demo1234!`
+- **Bemor:** `patient1@medsmart.uz` / Parol: `Demo1234!`
 
-## Project Structure
-```
-medsmart/
-├── frontend/             # Root vanilla UI, reactive DOM managers
-├── backend/
-│   ├── config/           # DB connectors, production headers
-│   ├── controllers/      # Route logic, RBAC checks
-│   ├── utils/            # Backup crons, Monitors, Alarms
-│   └── seed_demo.js      # Realistic demographic seeder
-├── ai_service/
-│   ├── api.py            # FastAPI entry
-│   ├── models/           # Scikit .pkl files
-│   └── utils/            # Chat engines, symptom extractors
-└── docker-compose.yml    # Production container definitions
-```
-
-## License
-MIT License. Created by the MED SMART Team.
+---
+**MedSmart Team © 2026**
