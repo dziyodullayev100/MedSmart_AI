@@ -87,8 +87,8 @@
   <div class="login-wrapper">
     <div class="login-card">
       <div class="brand-icon"><i class="fas fa-heartbeat"></i></div>
-      <h2>Admin Ko'prigi</h2>
-      <p>Boshqaruv paneliga xush kelibsiz</p>
+      <h2>Tizimga Kirish</h2>
+      <p>Admin va Shifokorlar uchun ko'prik</p>
       
       <form id="adminForm">
         <div class="input-group">
@@ -157,7 +157,7 @@
           id: loginResult.user.id || 'admin_master',
           email: email,
           role: loginResult.user.role || 'admin',
-          fullName: loginResult.user.name || 'Asosiy Administrator',
+          fullName: loginResult.user.name || (loginResult.user.role === 'admin' ? 'Asosiy Administrator' : 'Shifokor'),
           loginTime: new Date().toISOString(),
           permissions: ['all']
         };
@@ -168,7 +168,11 @@
         SyncManager.updatePatient(adminData.id, { lastLogin: new Date().toISOString() });
         
         // Muvaffaqiyatli o'tish
-        window.location.href = "./admin_dashboard.html";
+        if (adminData.role === 'doctor') {
+            window.location.href = "./shifokor_dashboard.html";
+        } else {
+            window.location.href = "./admin_dashboard.html";
+        }
       }
     } catch (error) {
       // Xatolik holatida urinishni kuzatish

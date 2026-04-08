@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <script>
+        const user = JSON.parse(localStorage.getItem('medsmart_user'));
+        if (!user || user.role !== 'doctor') { window.location.href = 'admin_login.html'; }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shifokor paneli - MedSmart AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --secondary: #334155;
+            --accent: #3b82f6;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-dark: #0f172a;
+            --text-gray: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.05);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ====== PREMIUM SIDEBAR ====== */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: var(--secondary);
+            color: white;
+            position: fixed;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 50px;
+            padding: 0 10px;
+        }
+
+        .brand-icon {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, var(--success), #34d399); /* Doctor uses green */
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: white;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .sidebar-brand h3 { font-size: 1.4rem; font-weight: 800; }
+
+        .nav-menu { list-style: none; padding: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 14px 20px; color: #94a3b8;
+            text-decoration: none; border-radius: 12px;
+            font-weight: 500; font-size: 0.95rem; transition: 0.3s;
+        }
+
+        .nav-item i { width: 22px; text-align: center; font-size: 1.1rem; }
+
+        .nav-item:hover { color: white; background: rgba(255,255,255,0.08); }
+        .nav-item.active {
+            background: linear-gradient(90deg, var(--success), #34d399);
+            color: white; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .logout-btn {
+            display: flex; align-items: center; gap: 15px;
+            padding: 14px 20px; color: #ef4444;
+            text-decoration: none; border-radius: 12px;
+            font-weight: 600; transition: 0.3s;
+            margin-top: auto;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.1); }
+
+        /* ====== MAIN CONTENT ====== */
+        .main-content {
+            margin-left: 280px;
+            padding: 40px;
+            width: calc(100% - 280px);
+        }
+
+        /* TOP BAR */
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; padding: 15px 25px; border-radius: 20px;
+            box-shadow: var(--shadow-md); margin-bottom: 35px;
+        }
+
+        .top-bar-left h2 { font-size: 1.5rem; font-weight: 800; color: var(--text-dark); }
+        .top-bar-left p { color: var(--text-gray); font-size: 0.9rem; margin-top: 2px; }
+
+        .admin-info { display: flex; align-items: center; gap: 12px; }
+        .admin-info img { width: 45px; height: 45px; border-radius: 12px; border: 2px solid #e2e8f0; }
+        .admin-info-text { text-align: right; }
+        .admin-info-text strong { display: block; font-size: 0.95rem; }
+        .admin-info-text small { color: var(--text-gray); }
+
+        /* STATS CARDS */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid #f1f5f9;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 35px -5px rgba(0,0,0,0.08); }
+
+        .stat-card .icon-circle {
+            width: 50px; height: 50px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 18px; color: white; font-size: 1.3rem;
+        }
+
+        .stat-card h3 { font-size: 2rem; font-weight: 800; color: var(--text-dark); margin-bottom: 5px; }
+        .stat-card span { color: var(--text-gray); font-size: 0.9rem; font-weight: 500; }
+
+        /* QUICK ACTIONS */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .quick-btn {
+            background: white; border: 1px solid #e2e8f0;
+            border-radius: 16px; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            text-decoration: none; color: var(--text-dark); transition: 0.3s;
+            font-weight: 600; font-size: 0.9rem; text-align: center;
+        }
+        .quick-btn:hover { border-color: var(--success); background: #f0fdf4; color: var(--success); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .quick-btn i { font-size: 1.5rem; }
+
+        /* RECENT TABLE */
+        .recent-table {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid #f1f5f9;
+        }
+
+        .recent-table-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .recent-table-header h5 { font-size: 1.2rem; font-weight: 700; }
+
+        .recent-table table { width: 100%; border-collapse: collapse; }
+        .recent-table th {
+            text-align: left; color: var(--text-gray);
+            font-size: 0.8rem; font-weight: 600; padding: 12px 15px;
+            background: #f8fafc; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .recent-table th:first-child { border-radius: 10px 0 0 10px; }
+        .recent-table th:last-child { border-radius: 0 10px 10px 0; }
+        .recent-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; font-weight: 500; vertical-align: middle; }
+        .recent-table tr:last-child td { border-bottom: none; }
+        .recent-table tbody tr:hover { background: #fafafa; }
+
+        .status-pill { padding: 5px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; }
+        .status-success { background: #dcfce7; color: #166534; }
+        .status-warn { background: #fef9c3; color: #854d0e; }
+        .status-info { background: #dbeafe; color: #1d4ed8; }
+
+        .btn-batafsil {
+            border: none; background: #eff6ff; color: var(--accent);
+            padding: 7px 14px; border-radius: 8px; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; transition: 0.2s;
+            font-family: 'Outfit';
+        }
+        .btn-batafsil:hover { background: #dbeafe; }
+
+        @media (max-width: 1200px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .quick-actions { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .sidebar span, .sidebar-brand h3 { display: none; }
+            .main-content { margin-left: 70px; width: calc(100% - 70px); }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="fas fa-stethoscope"></i></div>
+            <h3>MedSmart</h3>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">
+                <i class="fas fa-th-large"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="bemorlar/bemorlar_royxati.html" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Mening Bemorlarim</span>
+            </a>
+            <a href="navbatlar/navbatlar.html" class="nav-item">
+                <i class="fas fa-calendar-check"></i>
+                <span>Qabullar Jadvali</span>
+            </a>
+            <a href="navbatlar/taqvim.html" class="nav-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Taqvim</span>
+            </a>
+            <a href="../../ai_predictions.html" class="nav-item">
+                <i class="fas fa-brain"></i>
+                <span>AI Tahlillar</span>
+            </a>
+        </nav>
+
+        <a href="javascript:chiqish()" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Tizimdan chiqish</span>
+        </a>
+    </aside>
+
+    <main class="main-content">
+
+        <!-- TOP BAR -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <h2>Shifokor paneli</h2>
+                <p id="currentDate">Yuklanmoqda...</p>
+            </div>
+            
+            <div class="admin-info">
+                <div class="admin-info-text">
+                    <strong id="doctorName">Dr. Shifokor</strong>
+                    <small>Mutaxassis</small>
+                </div>
+                <img src="https://cdn-icons-png.flaticon.com/512/3774/3774299.png" alt="Doctor">
+            </div>
+        </header>
+
+        <!-- QUICK ACTIONS -->
+        <div class="quick-actions">
+            <a href="bemorlar/bemor_qoshish.html" class="quick-btn">
+                <i class="fas fa-user-plus" style="color:#10b981;"></i>
+                Yangi Bemor Qo'shish
+            </a>
+            <a href="navbatlar/navbat_yozish.html" class="quick-btn">
+                <i class="fas fa-calendar-plus" style="color:#3b82f6;"></i>
+                Qabulga Yozish
+            </a>
+            <a href="../../ai_predictions.html" class="quick-btn">
+                <i class="fas fa-laptop-medical" style="color:#f59e0b;"></i>
+                AI Bilan Tashxislash
+            </a>
+            <a href="navbatlar/navbatlar.html" class="quick-btn">
+                <i class="fas fa-clipboard-list" style="color:#6366f1;"></i>
+                Mening Navbatlarim
+            </a>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats-row">
+            <div class="stat-card" onclick="location.href='navbatlar/navbatlar.html'">
+                <div class="icon-circle" style="background: linear-gradient(135deg,#3b82f6,#60a5fa)"><i class="fas fa-calendar-day"></i></div>
+                <h3 id="statTodayAppts">—</h3>
+                <span>Bugungi Qabullar</span>
+            </div>
+            <div class="stat-card" onclick="location.href='bemorlar/bemorlar_royxati.html'">
+                <div class="icon-circle" style="background: linear-gradient(135deg,#10b981,#34d399)"><i class="fas fa-users-medical"></i></div>
+                <h3 id="statTotalPatients">—</h3>
+                <span>Mening Bemorlarim</span>
+            </div>
+            <div class="stat-card">
+                <div class="icon-circle" style="background: linear-gradient(135deg,#f59e0b,#fbbf24)"><i class="fas fa-check-circle"></i></div>
+                <h3 id="statCompleted">0</h3>
+                <span>Yakunlangan Qabullar (Oy)</span>
+            </div>
+            <div class="stat-card" onclick="location.href='../../ai_predictions.html'">
+                <div class="icon-circle" style="background: linear-gradient(135deg,#ef4444,#f87171)"><i class="fas fa-exclamation-triangle"></i></div>
+                <h3 id="statHighRisk">0</h3>
+                <span>AI: Yuqori Xavfli Bemorlar</span>
+            </div>
+        </div>
+
+        <!-- RECENT TABLE -->
+        <div class="recent-table">
+            <div class="recent-table-header">
+                <h5>Bugungi Mijozlar Ro'yxati</h5>
+                <a href="navbatlar/navbatlar.html" style="color:var(--success);font-weight:600;font-size:0.9rem;text-decoration:none;">
+                    Barchasini ko'rish <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>VAQT</th>
+                        <th>BEMOR ISMI</th>
+                        <th>TELEFON / ALOQA</th>
+                        <th>HOLAT</th>
+                        <th>TIBBIY BAZA</th>
+                    </tr>
+                </thead>
+                <tbody id="doctorAptList">
+                    <!-- JS orqali yuklanaadi -->
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDoctorInfo();
+            setCurrentDate();
+            updateStats();
+            renderTodayAppointments();
+        });
+
+        function loadDoctorInfo() {
+            const user = JSON.parse(localStorage.getItem('medsmart_user') || '{}');
+            if (user.fullName) {
+                document.getElementById('doctorName').textContent = user.fullName;
+            }
+        }
+
+        function setCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('uz-UZ', options);
+        }
+
+        function updateStats() {
+            // Real tizimdan data olsa shunday bo'ladi
+            const navbatlar = JSON.parse(localStorage.getItem('navbatlar') || '[]');
+            const bemorlar = JSON.parse(localStorage.getItem('bemorlar') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+
+            document.getElementById('statTodayAppts').textContent = navbatlar.filter(a => a.sana === today).length || 8;
+            document.getElementById('statTotalPatients').textContent = bemorlar.length || 154;
+            document.getElementById('statCompleted').textContent = 42; // Demo qiymat
+            document.getElementById('statHighRisk').textContent = 3; // Demo qiymat
+        }
+
+        function renderTodayAppointments() {
+            const navbatlar = JSON.parse(localStorage.getItem('navbatlar') || '[]');
+            const tbody = document.getElementById('doctorAptList');
+
+            const demoData = [
+                { id: 1, vaqt: '14:30', bemor_fio: 'Azizov Bekzod', telefon: '+998 90 123 45 67', holati: 'kutilmoqda' },
+                { id: 2, vaqt: '15:15', bemor_fio: 'Tursunova Malika', telefon: '+998 93 456 78 90', holati: 'kutilmoqda' },
+                { id: 3, vaqt: '16:00', bemor_fio: 'Raxmanov Jasur', telefon: '+998 91 234 56 78', holati: 'yakunlandi' },
+            ];
+
+            const combined = [...navbatlar.slice(-2).reverse(), ...demoData].slice(0, 5);
+
+            tbody.innerHTML = combined.map(item => `
+                <tr>
+                    <td style="font-weight: 700;">${item.vaqt || ''}</td>
+                    <td>
+                        <strong>${item.bemor_fio || item.bemor}</strong>
+                    </td>
+                    <td style="color:#64748b;">${item.telefon || '+998 90 --- -- --'}</td>
+                    <td>
+                        <span class="status-pill ${getStatusClass(item.holati)}">
+                            ${getStatusLabel(item.holati)}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-batafsil" onclick="location.href='bemorlar/bemorlar_royxati.html'">
+                            <i class="fas fa-notes-medical me-1"></i> Tarixni ko'rish
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusClass(status) {
+            const lowerStatus = (status || '').toLowerCase();
+            if (lowerStatus === 'completed' || lowerStatus === 'yakunlandi') return 'status-success';
+            if (lowerStatus === 'upcoming' || lowerStatus === 'kutilmoqda') return 'status-warn';
+            return 'status-info';
+        }
+
+        function getStatusLabel(status) {
+            const lowerStatus = (status || '').toLowerCase();
+            if (lowerStatus === 'completed' || lowerStatus === 'yakunlandi') return 'Yakunlandi';
+            if (lowerStatus === 'upcoming' || lowerStatus === 'kutilmoqda') return 'Kutilmoqda';
+            return 'Jarayonda';
+        }
+
+        // ===== LOGOUT =====
+        function chiqish() {
+            if (confirm("Tizimdan chiqmoqchimisiz?")) {
+                localStorage.removeItem('medsmart_user');
+                localStorage.removeItem('foydalanuvchi');
+                window.location.href = 'admin_login.html';
+            }
+        }
+    </script>
+</body>
+</html>
