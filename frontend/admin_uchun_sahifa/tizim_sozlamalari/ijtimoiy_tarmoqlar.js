@@ -12,7 +12,7 @@ function loadSocialModule(container) {
   const links = JSON.parse(localStorage.getItem("socialLinks")) || {};
 
   container.innerHTML = `
-    <h4 class="banner">🌐 Ijtimoiy Tarmoqlar</h4>
+    <h4 class="banner">🌐 Ijtimoiy tarmoqlar</h4>
     <div class="social-form">
       ${renderInput("facebook", "Facebook", links.facebook)}
       ${renderInput("instagram", "Instagram", links.instagram)}

@@ -5,19 +5,19 @@ function toggleModule(card) {
   details.style.display = 'block';
 
   switch (title) {
-    case 'Lokatsiya Sozlamalari':
+    case 'Lokatsiya sozlamalari':
       if (typeof loadLokatsiya === "function") {
         loadLokatsiya(details);
       }
       break;
 
-    case 'Ijtimoiy Tarmoqlar':
+    case 'Ijtimoiy tarmoqlar':
       if (typeof loadSocialModule === "function") {
         loadSocialModule(details);
       }
       break;
 
-    case 'Ish Vaqti':
+    case 'Ish vaqti':
       if (typeof loadWorkingHoursModule === "function") {
         loadWorkingHoursModule(details);
       }

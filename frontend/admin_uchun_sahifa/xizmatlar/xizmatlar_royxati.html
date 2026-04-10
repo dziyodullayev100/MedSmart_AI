@@ -7,7 +7,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MedSmart Admin - Xizmatlar Boshqaruvi</title>
+    <title>MedSmart Admin - Xizmatlar boshqaruvi</title>
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -34,7 +34,7 @@
             min-height: 100vh;
         }
 
-        /* PREMIUM SIDEBAR (Global Loyiha stili) */
+        /* PREMIUM SIDEBAR (Global loyiha stili) */
         .sidebar {
             width: 280px;
             background: var(--secondary);
@@ -131,7 +131,7 @@
 </head>
 <body>
 
-    <!-- PREMIUM SIDEBAR (Global Loyiha stili) -->
+    <!-- PREMIUM SIDEBAR (Global loyiha stili) -->
     <aside class="sidebar">
         <div class="sidebar-brand">
             <div class="brand-icon"><i class="fas fa-heartbeat"></i></div>
@@ -139,12 +139,12 @@
         </div>
         <nav class="nav-menu">
             <a href="../admin_dashboard.html" class="nav-item"><i class="fas fa-grid-2"></i><span>Dashbord</span></a>
-            <a href="../bemorlar/bemorlar_royxati.html" class="nav-item"><i class="fas fa-users"></i><span>Bemorlar Boshqaruvi</span></a>
+            <a href="../bemorlar/bemorlar_royxati.html" class="nav-item"><i class="fas fa-users"></i><span>Bemorlar boshqaruvi</span></a>
             <a href="../shifokorlar/shifokorlar_royxati.html" class="nav-item"><i class="fas fa-user-md"></i><span>Shifokorlar</span></a>
             <a href="../navbatlar/navbatlar.html" class="nav-item"><i class="fas fa-calendar-check"></i><span>Navbatlar</span></a>
-            <a href="#" class="nav-item active"><i class="fas fa-hand-holding-medical"></i><span>Klinika Xizmatlari</span></a>
+            <a href="#" class="nav-item active"><i class="fas fa-hand-holding-medical"></i><span>Klinika xizmatlari</span></a>
             <a href="../tolovlar/tolovlar.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i><span>Moliya & To'lovlar</span></a>
-            <a href="../tizim_sozlamalari/tizim_sozlamalari.html" class="nav-item"><i class="fas fa-sliders-h"></i><span>Tizim Sozlamalari</span></a>
+            <a href="../tizim_sozlamalari/tizim_sozlamalari.html" class="nav-item"><i class="fas fa-sliders-h"></i><span>Tizim sozlamalari</span></a>
         </nav>
         <a href="javascript:chiqish()" class="nav-item" style="color: #ef4444; margin-top: auto;">
             <i class="fas fa-sign-out-alt"></i><span>Tizimdan chiqish</span>
@@ -158,14 +158,14 @@
                 <h2>Xizmatlar va Narxlar</h2>
                 <p class="text-muted">Klinika koshidgi barcha tibbiy xizmatlar boshqaruvi</p>
             </div>
-            <a href="xizmat_qoshish.html" class="btn btn-add"><i class="fas fa-plus me-2"></i> Yangi Xizmat</a>
+            <a href="xizmat_qoshish.html" class="btn btn-add"><i class="fas fa-plus me-2"></i> Yangi xizmat</a>
         </header>
 
         <!-- STATS -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon" style="background:#ecfdf5; color:#10b981;"><i class="fas fa-briefcase-medical"></i></div>
-                <div class="stat-info"><h3 id="totalXizmat">0</h3><p>Jami Xizmatlar</p></div>
+                <div class="stat-info"><h3 id="totalXizmat">0</h3><p>Jami xizmatlar</p></div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon" style="background:#eff6ff; color:#3b82f6;"><i class="fas fa-check-circle"></i></div>
@@ -173,11 +173,11 @@
             </div>
             <div class="stat-card">
                 <div class="stat-icon" style="background:#fff7ed; color:#f97316;"><i class="fas fa-hand-holding-usd"></i></div>
-                <div class="stat-info"><h3 id="avgPrice">0</h3><p>O'rtacha Narx</p></div>
+                <div class="stat-info"><h3 id="avgPrice">0</h3><p>O'rtacha narx</p></div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon" style="background:#fdf2f8; color:#db2777;"><i class="fas fa-chart-pie"></i></div>
-                <div class="stat-info"><h3 id="totalValue">0</h3><p>Jami Qiymat</p></div>
+                <div class="stat-info"><h3 id="totalValue">0</h3><p>Jami qiymat</p></div>
             </div>
         </div>
 
@@ -344,14 +344,14 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius:20px;border:none;box-shadow:0 25px 50px rgba(0,0,0,0.15);">
                 <div class="modal-header" style="border-bottom:1px solid #f1f5f9;padding:20px 25px;">
-                    <h5 class="modal-title fw-bold" style="font-family:'Outfit';"><i class="fas fa-edit me-2 text-warning"></i>Xizmatni Tahrirlash</h5>
+                    <h5 class="modal-title fw-bold" style="font-family:'Outfit';"><i class="fas fa-edit me-2 text-warning"></i>Xizmatni tahrirlash</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
                     <input type="hidden" id="editXizmatId">
                     <div class="row g-3">
                         <div class="col-12">
-                            <label class="form-label fw-semibold text-muted" style="font-size:0.85rem;">Xizmat Nomi</label>
+                            <label class="form-label fw-semibold text-muted" style="font-size:0.85rem;">Xizmat nomi</label>
                             <input type="text" id="editXizmatNom" class="form-control" style="border-radius:10px;font-family:'Outfit';">
                         </div>
                         <div class="col-md-6">

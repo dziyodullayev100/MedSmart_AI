@@ -803,12 +803,12 @@ def _run_retraining_in_background():
             sys.path.insert(0, training_path)
 
         # Seasonal modelni qayta o'qitish
-        import seasonal_train
+        from training import seasonal_train
         importlib.reload(seasonal_train)
         logger.info("[Retrain] seasonal_model.pkl yangilandi.")
 
         # Progression modelni qayta o'qitish
-        import progression_train
+        from training import progression_train
         importlib.reload(progression_train)
         logger.info("[Retrain] progression_rules.pkl yangilandi.")
 
